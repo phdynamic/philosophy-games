@@ -620,7 +620,7 @@ const STAGES = [
     img: 'athens',
     startConcepts: ['becoming', 'measure', 'recognition', 'ethical_life'],
     target: 'absolute',
-    intro: 'Everything you have forged returns. The products of earlier stages become raw material for the final movement. This is <em>Aufhebung</em> &#8212; each moment preserved, transcended, and lifted into something higher.'
+    intro: 'Everything you have forged returns. Combine them step by step &#8212; each synthesis brings new material for the next &#8212; until the final unity emerges. This is <em>Aufhebung</em>: each moment preserved, transcended, and lifted into something higher.'
   }
 ];
 
@@ -996,6 +996,9 @@ function showCommentary(synth) {
 
   if (isTarget) {
     html += '<div style="margin-top:32px;"><button class="btn" id="next-stage-btn">Continue</button></div>';
+  } else {
+    html += '<p class="hegel-line" style="margin-top:20px;color:var(--amber);font-style:normal;">There are more concepts to forge. Look above.</p>';
+    html += '<div style="margin-top:20px;"><button class="btn" id="keep-forging-btn">Continue Forging</button></div>';
   }
 
   html += '</div>';
@@ -1010,6 +1013,13 @@ function showCommentary(synth) {
       state.stageShuffled = false;
       state.screen = 'game';
       render();
+    });
+  } else {
+    document.getElementById('keep-forging-btn').addEventListener('click', function() {
+      var tileContainer = document.getElementById('tile-container');
+      if (tileContainer) {
+        tileContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     });
   }
 }
