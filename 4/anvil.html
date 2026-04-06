@@ -1052,16 +1052,10 @@ function renderFinalEnding(synth) {
   scrollTop();
   setLeftPanel();
 
-  // Keep the scene header in place, remove everything else below it
+  // Wipe the stage content entirely
   var sceneEl = content.querySelector('.scene');
   if (sceneEl) {
-    var header = sceneEl.querySelector('.scene-header');
-    var children = Array.prototype.slice.call(sceneEl.children);
-    for (var k = 0; k < children.length; k++) {
-      if (children[k] !== header) {
-        sceneEl.removeChild(children[k]);
-      }
-    }
+    sceneEl.innerHTML = '';
   }
 
   var rc = CONCEPTS[synth.result];
