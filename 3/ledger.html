@@ -403,7 +403,6 @@ html, body {
   display: block;
   text-align: center;
   margin: 0 0 28px;
-  contain: layout style;
 }
 .dialogue-portrait-wrap img {
   display: inline-block;
@@ -421,14 +420,6 @@ html, body {
 @media (max-width: 760px) {
   .dialogue-portrait-wrap img {
     width: 140px;
-  }
-  .dialogue-portrait-wrap {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background: var(--bg);
-    padding: 12px 0 8px;
-    margin: 0 0 16px;
   }
 }
 
@@ -467,12 +458,14 @@ html, body {
     <!-- LEFT: DIALOGUE / CLOSING -->
     <div id="dialogue-panel" onclick="handlePanelClick(event)" aria-live="polite">
 
+      <!-- Portrait (outside dialogue-view so it never reflows) -->
+      <div class="dialogue-portrait-wrap">
+        <img id="portrait-dialogue" alt="David Hume, by Allan Ramsay (1754)">
+        <div class="dialogue-portrait-attr">Allan Ramsay, 1754</div>
+      </div>
+
       <!-- Dialogue view -->
       <div id="dialogue-view">
-        <div class="dialogue-portrait-wrap">
-          <img id="portrait-dialogue" alt="David Hume, by Allan Ramsay (1754)">
-          <div class="dialogue-portrait-attr">Allan Ramsay, 1754</div>
-        </div>
         <div class="speaker-label">HUME</div>
         <div id="dialogue-text"></div>
         <div id="choices-area"></div>
@@ -756,9 +749,10 @@ function playAgain() {
   // Reset ledger
   document.getElementById('ledger-lines').innerHTML = '';
 
-  // Show dialogue view, hide closing
+  // Show dialogue view, hide closing, restore portrait
   document.getElementById('dialogue-view').classList.remove('hidden');
   document.getElementById('closing-view').classList.add('hidden');
+  document.querySelector('.dialogue-portrait-wrap').style.display = '';
 
   navigate('start');
 }
@@ -1041,6 +1035,7 @@ function showFinalEntry(onDone) {
 // ═══════════════════════════════════════════════════════
 function showClosing() {
   document.getElementById('dialogue-view').classList.add('hidden');
+  document.querySelector('.dialogue-portrait-wrap').style.display = 'none';
   document.getElementById('closing-view').classList.remove('hidden');
 }
 </script>
