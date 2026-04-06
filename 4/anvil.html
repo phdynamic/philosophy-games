@@ -472,12 +472,11 @@ html, body {
 }
 
 @keyframes endingFadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .ending-body {
-  animation: endingFadeIn 1.4s ease-out both;
-  animation-delay: 0.5s;
+  animation: endingFadeIn 0.8s ease-out both;
 }
 </style>
 </head>
@@ -873,18 +872,20 @@ function attemptSynthesis(a, b) {
   // Hide synth button
   document.getElementById('synth-area').innerHTML = '';
 
-  // For the final synthesis: fade entire scene and render ending after fade
+  // For the final synthesis: fade entire scene + left panel, then render ending
   if (willBeTarget && isFinalStage) {
     var sceneEl = content.querySelector('.scene');
     if (sceneEl) {
-      // Remove the fade-in animation — its fill-mode overrides inline opacity
       sceneEl.classList.remove('fade-in');
       sceneEl.style.opacity = '1';
       sceneEl.style.transition = 'opacity 0.8s ease-out';
       sceneEl.offsetHeight;
       sceneEl.style.opacity = '0';
     }
-    // Add chain entry now, then render ending after fade completes
+    // Fade left panel (School of Athens) at the same time
+    leftPanel.style.transition = 'opacity 0.8s ease-out';
+    leftPanel.style.opacity = '0';
+
     var nameA = CONCEPTS[a].name;
     var nameB = CONCEPTS[b].name;
     var nameR = CONCEPTS[synth.result].name;
@@ -1048,6 +1049,7 @@ function showCommentary(synth) {
 
 function renderFinalEnding(synth) {
   scrollTop();
+  leftPanel.style.transition = '';
   setLeftPanel();
 
   // Wipe the stage content entirely
