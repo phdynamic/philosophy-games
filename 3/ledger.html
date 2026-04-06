@@ -765,6 +765,10 @@ function ledgerTimeout(fn, delay) {
   ledgerTyping.timers.push(t);
   return t;
 }
+function clearLedgerTimers() {
+  ledgerTyping.timers.forEach(clearTimeout);
+  ledgerTyping.timers = [];
+}
 
 // ═══════════════════════════════════════════════════════
 // INIT
@@ -779,8 +783,7 @@ function beginGame() {
 function playAgain() {
   // Clear all timers
   clearAnimTimers();
-  ledgerTyping.timers.forEach(clearTimeout);
-  ledgerTyping.timers = [];
+  clearLedgerTimers();
   anim.active = false;
   anim.skipFn = null;
 
@@ -804,6 +807,9 @@ function navigate(nodeId) {
 
   const node = NODES[nodeId];
   if (!node) { showClosing(); return; }
+
+  // Clear pending ledger typewriter timers
+  clearLedgerTimers();
 
   // Clear UI
   document.getElementById('dialogue-text').innerHTML = '';
@@ -1024,20 +1030,20 @@ function triggerReduction(onDone) {
 
   if (prefersReduced) {
     entries.forEach(e => { e.style.opacity = '0'; e.style.maxHeight = '0'; e.style.padding = '0'; e.style.borderWidth = '0'; });
-    setTimeout(() => showFinalEntry(onDone), 300);
+    ledgerTimeout(() => showFinalEntry(onDone), 300);
     return;
   }
 
   // Collapse entries last-to-first
   [...entries].reverse().forEach((entry, i) => {
-    setTimeout(() => {
+    ledgerTimeout(() => {
       entry.classList.add('entry-collapsing');
     }, i * INTERVAL);
   });
 
   // After all collapsed, clear and show final
   const totalDelay = entries.length * INTERVAL + 900;
-  setTimeout(() => {
+  ledgerTimeout(() => {
     document.getElementById('ledger-lines').innerHTML = '';
     showFinalEntry(onDone);
   }, totalDelay);
@@ -1061,12 +1067,12 @@ function showFinalEntry(onDone) {
     if (i <= finalText.length) {
       span.textContent = finalText.slice(0, i);
       i++;
-      setTimeout(typeChar, 48);
+      ledgerTimeout(typeChar, 48);
     } else {
-      setTimeout(onDone, 900);
+      ledgerTimeout(onDone, 900);
     }
   }
-  setTimeout(typeChar, 700);
+  ledgerTimeout(typeChar, 700);
 }
 
 // ═══════════════════════════════════════════════════════

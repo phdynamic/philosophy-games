@@ -835,16 +835,20 @@ const state = {
 
 const content = document.getElementById('content');
 
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
 function imgTag(src, alt, extraClass) {
   const cls = extraClass ? `painting ${extraClass}` : 'painting';
-  return `<img class="${cls}" src="${src}" alt="${alt}" onerror="this.style.display='none'" loading="lazy">`;
+  return `<img class="${cls}" src="${src}" alt="${alt}" loading="lazy">`;
 }
 
 function setLeftPanel(src, alt, attr) {
   const panel = document.getElementById('left-panel');
   if (!panel) return;
   panel.innerHTML = src
-    ? `<img src="${src}" alt="${alt}" onerror="this.style.display='none'" loading="lazy"><p class="left-attr">${attr}</p>`
+    ? `<img src="${src}" alt="${alt}" loading="lazy"><p class="left-attr">${attr}</p>`
     : '';
 }
 
@@ -1094,24 +1098,18 @@ function propRow(p, certain, locked) {
 function attachPropListeners(sceneEl, scene) {
   if (state.committed) return;
   const list = sceneEl.querySelector('#prop-list');
-  list.querySelectorAll('.prop').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.dataset.id;
-      state.certain.has(id) ? state.certain.delete(id) : state.certain.add(id);
-      refreshPropList(list, scene);
-    });
+  list.addEventListener('click', (e) => {
+    if (state.committed) return;
+    const prop = e.target.closest('.prop');
+    if (!prop) return;
+    const id = prop.dataset.id;
+    state.certain.has(id) ? state.certain.delete(id) : state.certain.add(id);
+    refreshPropList(list, scene);
   });
 }
 
 function refreshPropList(list, scene) {
   list.innerHTML = state.shuffledProps.map(p => propRow(p, state.certain.has(p.id), false)).join('');
-  list.querySelectorAll('.prop').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.dataset.id;
-      state.certain.has(id) ? state.certain.delete(id) : state.certain.add(id);
-      refreshPropList(list, scene);
-    });
-  });
 }
 
 // ─── Utility ────────────────────────────────────────────────────────────────

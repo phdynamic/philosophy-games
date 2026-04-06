@@ -730,13 +730,17 @@ var state = {
 var content = document.getElementById('content');
 var leftPanel = document.getElementById('left-panel');
 
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
 function setLeftPanel(show) {
   if (!show) {
     leftPanel.innerHTML = '';
     leftPanel.style.opacity = '0';
     return;
   }
-  leftPanel.innerHTML = '<img src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"><p class="left-attr">' + MARX_IMG.attr + '</p>';
+  leftPanel.innerHTML = '<img src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" loading="lazy"><p class="left-attr">' + MARX_IMG.attr + '</p>';
   leftPanel.style.opacity = '1';
 }
 
@@ -795,7 +799,7 @@ function renderTitle() {
     <div id="title-screen">\
       <h1>Marxist Jeopardy!</h1>\
       <div class="title-subtitle">a game of base and superstructure</div>\
-      <img class="title-portrait" src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy">\
+      <img class="title-portrait" src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" loading="lazy">\
       <p class="title-portrait-attr">' + MARX_IMG.attr + '</p>\
       <p class="epigraph">&#8220;The philosophers have only interpreted the world in various ways; the point, however, is to change it. But first &#8212; a game show.&#8221;</p>\
       <p class="epigraph-attr">&#8212; loosely after <em>Theses on Feuerbach</em>, 1845</p>\
@@ -864,8 +868,8 @@ function renderGame() {
 
   var scoreHtml = '<div class="scoreboard">\
     <div class="score-col"><div class="score-name">You</div><div class="score-val">' + state.scores.player + '</div><img class="score-portrait" src="' + PLAYER_IMG.src + '" alt="' + PLAYER_IMG.alt + '"></div>\
-    <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + state.scores.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
-    <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + state.scores.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+    <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + state.scores.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" loading="lazy"></div>\
+    <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + state.scores.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" loading="lazy"></div>\
   </div>';
 
   var el = div('fade-in', '\
@@ -1126,8 +1130,8 @@ function renderEnding() {
         <p class="final-winner">Winner: ' + winner + '</p>\
         <div class="scoreboard">\
           <div class="score-col"><div class="score-name">You</div><div class="score-val">' + s.player + '</div><img class="score-portrait" src="' + PLAYER_IMG.src + '" alt="' + PLAYER_IMG.alt + '"></div>\
-          <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + s.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
-          <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + s.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+          <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + s.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" loading="lazy"></div>\
+          <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + s.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" loading="lazy"></div>\
         </div>\
       </div>\
       <div class="marx-wrap" style="margin-top:8px;">\

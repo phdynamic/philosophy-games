@@ -616,13 +616,17 @@ function scrollTop() {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
 function setLeftPanel(show) {
   if (!show) {
     leftPanel.innerHTML = '';
     leftPanel.style.opacity = '0';
     return;
   }
-  leftPanel.innerHTML = '<img src="' + SARTRE_IMG.src + '" alt="' + SARTRE_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"><p class="left-attr">' + SARTRE_IMG.attr + '</p>';
+  leftPanel.innerHTML = '<img src="' + SARTRE_IMG.src + '" alt="' + SARTRE_IMG.alt + '" loading="lazy"><p class="left-attr">' + SARTRE_IMG.attr + '</p>';
   leftPanel.style.opacity = '1';
 }
 
@@ -677,7 +681,7 @@ function renderTitle() {
     <div id="title-screen">\
       <h1>The Good, the Bad, and the Authentic</h1>\
       <div class="title-subtitle">a game of radical freedom</div>\
-      <img class="title-portrait" src="' + SARTRE_IMG.src + '" alt="' + SARTRE_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy">\
+      <img class="title-portrait" src="' + SARTRE_IMG.src + '" alt="' + SARTRE_IMG.alt + '" loading="lazy">\
       <p class="title-portrait-attr">' + SARTRE_IMG.attr + '</p>\
       <p class="epigraph">&#8220;Man is condemned to be free; because once thrown into the world, he is responsible for everything he does.&#8221;</p>\
       <p class="epigraph-attr">&#8212; Sartre, <em>Existentialism Is a Humanism</em>, 1946</p>\

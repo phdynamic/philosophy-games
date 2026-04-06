@@ -662,6 +662,10 @@ function scrollTop() {
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
 
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
 function makeKey(a, b) {
   return [a, b].sort().join('+');
 }
@@ -677,7 +681,7 @@ function shuffle(arr) {
 
 function imgTag(src, alt, extraClass) {
   const cls = extraClass ? 'painting ' + extraClass : 'painting';
-  return '<img class="' + cls + '" src="' + src + '" alt="' + alt + '" onerror="this.style.display=\'none\'" loading="lazy">';
+  return '<img class="' + cls + '" src="' + src + '" alt="' + alt + '" loading="lazy">';
 }
 
 function setLeftPanel(imgKey) {
@@ -687,7 +691,7 @@ function setLeftPanel(imgKey) {
     return;
   }
   const img = IMAGES[imgKey];
-  leftPanel.innerHTML = '<img src="' + img.src + '" alt="' + img.alt + '" onerror="this.style.display=\'none\'" loading="lazy"><p class="left-attr">' + img.attr + '</p>';
+  leftPanel.innerHTML = '<img src="' + img.src + '" alt="' + img.alt + '" loading="lazy"><p class="left-attr">' + img.attr + '</p>';
   leftPanel.style.opacity = '1';
 }
 
@@ -702,7 +706,7 @@ function renderTitle() {
     <div id="title-screen">\
       <h1>The Anvil</h1>\
       <div class="title-subtitle">a game of dialectics</div>\
-      <img class="title-portrait" src="' + hegel.src + '" alt="' + hegel.alt + '" onerror="this.style.display=\'none\'" loading="lazy">\
+      <img class="title-portrait" src="' + hegel.src + '" alt="' + hegel.alt + '" loading="lazy">\
       <p class="title-portrait-attr">' + hegel.attr + '</p>\
       <p class="epigraph">&#8220;The bud disappears when the blossom breaks through, and we might say that the former is refuted by the latter; in the same way when the fruit comes, the blossom may be explained to be a false form of the plant&#8217;s existence, for the fruit appears as its true nature in place of the blossom.&#8221;</p>\
       <p class="epigraph-attr">&#8212; Hegel, <em>Phenomenology of Spirit</em>, 1807</p>\
