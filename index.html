@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+/* Header */
+#header {
+  border-bottom: 1px solid var(--dim);
+  padding-bottom: 16px;
+  margin-bottom: 48px;
+}
+
+#site-title {
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: var(--bright);
+  text-transform: uppercase;
+}
+
+#tagline {
+  color: var(--dim);
+  font-size: 13px;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* Intro */
+#intro {
+  margin-bottom: 56px;
+  max-width: 620px;
+}
+
+#intro p {
+  color: var(--amber);
+  margin-bottom: 12px;
+}
+
+#intro p.dim {
+  color: var(--dim);
+  font-size: 13px;
+}
+
+/* Games grid */
+#games-label {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 20px;
+}
+
+#games {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2px;
+}
+
+.game-card {
+  display: block;
+  padding: 24px;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, color 0.2s ease;
+  background: var(--bg);
+}
+
+.game-card:hover {
+  border-color: var(--bright);
+  color: var(--bright);
+}
+
+.game-card::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  background: linear-gradient(
+    108deg,
+    transparent 30%,
+    rgba(255, 255, 250, 0.55) 50%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  pointer-events: none;
+  transition: none;
+}
+
+.game-card:hover::after {
+  animation: cardGleam 0.6s ease-out forwards;
+}
+
+@keyframes cardGleam {
+  from { transform: translateX(-110%); }
+  to   { transform: translateX(160%); }
+}
+
+.game-number {
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+
+.game-title {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  color: var(--bright);
+}
+
+.game-desc {
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.game-arrow {
+  font-size: 13px;
+  color: var(--dim);
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+}
+
+.game-card:hover .game-arrow {
+  color: var(--bright);
+  transform: translateX(4px);
+}
+
+/* Coming soon card */
+.game-card.locked {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.game-card.locked:hover {
+  border-color: var(--dim);
+  color: var(--amber);
+}
+
+.game-card.locked:hover::after {
+  animation: none;
+}
+
+.game-card.locked .game-arrow {
+  display: none;
+}
+
+/* Footer */
+#footer {
+  margin-top: 64px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dim);
+  font-size: 12px;
+  color: var(--dim);
+  letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+<div id="container">
+
+  <div id="header">
+    <div id="site-title">Philosophy Games</div>
+    <div id="tagline">games for examined living</div>
+  </div>
+
+  <div id="intro">
+    <p>Each game puts a philosophical problem in your hands. Some are dialogues. Some are puzzles. Some are something else.</p>
+    <p class="dim">Based on primary texts. No prior philosophy required.</p>
+  </div>
+
+  <div id="games-label">Available now</div>
+  <div id="games">
+
+    <a class="game-card" href="1/socrates.html">
+      <div class="game-number">GAME 01</div>
+      <div class="game-title">The Examined Life: Euthyphro</div>
+      <div class="game-desc">Socrates meets a man who claims to know exactly what piety is. Do you?</div>
+      <div class="game-arrow">&#x2192; play</div>
+    </a>
+
+    <a class="game-card" href="2/demon.html">
+      <div class="game-number">GAME 02</div>
+      <div class="game-title">The Evil Demon</div>
+      <div class="game-desc">Descartes suspects something is deceiving him. Mark what you can be certain of — if anything.</div>
+      <div class="game-arrow">&#x2192; play</div>
+    </a>
+
+    <a class="game-card" href="3/ledger.html">
+      <div class="game-number">GAME 03</div>
+      <div class="game-title">The Ledger</div>
+      <div class="game-desc">Hume has a small problem with the entire basis of human knowledge. Sit with him and keep the record.</div>
+      <div class="game-arrow">&#x2192; play</div>
+    </a>
+
+  </div>
+
+  <div id="footer">
+    &copy; Philosophy Games
+  </div>
+
+</div>
+</body>
+</html>
