@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Good, the Bad, and the Authentic — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html { overflow-y: scroll; }
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dim);
+  font-size: 12px;
+}
+
+#header a {
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#header a:hover { color: var(--amber); }
+
+#header .game-label {
+  color: var(--bright);
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.9s ease-out both; }
+
+/* Title screen */
+#title-screen {
+  padding: 80px 0 60px;
+  text-align: center;
+}
+
+#title-screen h1 {
+  font-size: 22px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.title-subtitle {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 40px;
+}
+
+.title-portrait {
+  width: 220px;
+  max-width: 60%;
+  display: block;
+  margin: 0 auto 32px;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+.title-portrait-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 40px;
+}
+
+.epigraph {
+  color: var(--dim);
+  font-size: 13px;
+  font-style: italic;
+  max-width: 460px;
+  margin: 0 auto 10px;
+  line-height: 1.8;
+}
+
+.epigraph-attr {
+  color: var(--dim);
+  font-size: 12px;
+  margin-bottom: 56px;
+}
+
+.btn {
+  display: inline-block;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+
+.btn-secondary {
+  border-color: transparent;
+  color: var(--dim);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 8px 0;
+}
+.btn-secondary:hover { border-color: transparent; color: var(--amber); }
+
+/* Instructions screen */
+#instructions-screen {
+  padding: 60px 0 40px;
+}
+
+#instructions-screen h2 {
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  margin-bottom: 32px;
+}
+
+#instructions-screen p {
+  color: var(--amber);
+  margin-bottom: 14px;
+  max-width: 560px;
+}
+
+#instructions-screen p.dim {
+  color: var(--dim);
+  font-size: 13px;
+}
+
+/* Scenario header */
+.scenario-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.scenario-num {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  text-transform: uppercase;
+}
+
+.scenario-title {
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--bright);
+  text-transform: uppercase;
+}
+
+/* Scenario text */
+.scenario-text {
+  margin-bottom: 32px;
+}
+
+.scenario-text p {
+  margin-bottom: 14px;
+  color: var(--amber);
+}
+
+/* Choice buttons */
+.choices-area {
+  margin-bottom: 32px;
+}
+
+.choices-label {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 14px;
+}
+
+.choice-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.55;
+  padding: 14px 18px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.choice-btn:hover { border-color: var(--bright); color: var(--bright); }
+
+/* Result verdict */
+.result-verdict {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.result-verdict.authentic { color: var(--bright); }
+.result-verdict.bad-faith { color: var(--dim); }
+
+/* Sartre commentary */
+.sartre-wrap {
+  margin: 28px 0 0;
+  padding-left: 20px;
+  border-left: 2px solid var(--dim);
+  animation: sartreFadeIn 1.2s ease-out both;
+}
+
+@keyframes sartreFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sartre-line {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--dim);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.sartre-line:last-child { margin-bottom: 0; }
+
+.sartre-source {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 12px;
+  letter-spacing: 1px;
+}
+
+/* Stick figure */
+.figure-area {
+  text-align: center;
+  margin: 24px 0;
+}
+
+.figure-svg {
+  width: 140px;
+  height: 190px;
+}
+
+.figure-svg.large {
+  width: 180px;
+  height: 240px;
+}
+
+.figure-drawn {
+  stroke: var(--amber);
+  stroke-width: 3;
+  stroke-linecap: round;
+  fill: none;
+  transition: opacity 0.8s ease-in;
+}
+
+.figure-ghost {
+  stroke: var(--dim);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.15;
+}
+
+/* Progress dots */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--dim);
+}
+
+.dot.authentic { background: var(--amber); border-color: var(--amber); }
+.dot.bad-faith { background: transparent; border-color: var(--dim); position: relative; }
+.dot.bad-faith::after {
+  content: '\00d7';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  font-size: 12px;
+  color: var(--dim);
+}
+.dot.pending { background: transparent; border-color: var(--dim); opacity: 0.3; }
+
+/* Ending */
+.ending-text p { margin-bottom: 14px; color: var(--amber); }
+
+.ending-title {
+  font-size: 15px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bright);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.ending-close {
+  margin-top: 56px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Left panel */
+#left-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(50vw - 340px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#left-panel img {
+  max-width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+#left-panel .left-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 879px) {
+  #left-panel { display: none; }
+}
+
+/* Demo figure in instructions */
+.demo-figure {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.demo-caption {
+  font-size: 13px;
+  color: var(--dim);
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<div id="left-panel"></div>
+<div id="app">
+  <div id="header">
+    <a href="../index.html">&#x2190; Philosophy Games</a>
+    <span class="game-label">The Good, the Bad, and the Authentic</span>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ─── Image ─────────────────────────────────────────────────────────────────
+
+var SARTRE_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Jean-Paul_Sartre_FP.jpg?width=900',
+  alt: 'Photograph of Jean-Paul Sartre',
+  attr: 'Unknown photographer, <em>Jean-Paul Sartre</em>, c.&#8201;1950.'
+};
+
+// ─── Scenarios 1-2 ─────────────────────────────────────────────────────────
+
+var SCENARIOS = [
+  {
+    id: 1, title: 'The Student',
+    text: 'It is 1942. France is occupied. Your older brother was killed in the German offensive of 1940. Your mother lives alone and you are her only remaining consolation. You have the chance to cross into Spain and join the Free French Forces. If you go, your mother may not survive the grief. If you stay, you choose private devotion over a cause that may liberate millions.',
+    choices: [
+      {
+        text: 'Stay with your mother. She needs you, and that need is real and immediate.',
+        authentic: true,
+        sartre: ['You chose the concrete over the abstract. The living face over the distant cause. There is nothing cowardly in this &#8212; provided you understand what you have done.', 'You have not discovered that family is more important than country. You have <em>decided</em> it. No moral formula told you this. No scripture. No commanding officer. You weighed two incommensurable values and put your thumb on the scale yourself.', 'That is freedom. It does not feel like freedom. It feels like anguish. That is how you know it is real.'],
+        source: 'Existentialism Is a Humanism, 1946'
+      },
+      {
+        text: 'Leave to join the Resistance. The fight for liberation demands sacrifice.',
+        authentic: true,
+        sartre: ['You chose the abstract over the concrete. The distant millions over the living face. There is nothing callous in this &#8212; provided you understand what you have done.', 'You have not discovered that duty to country outweighs duty to family. You have <em>decided</em> it. You could have chosen otherwise. You knew you could. That knowledge &#8212; that it was you who chose, not history, not destiny, not France &#8212; is the weight you will carry.', 'Anguish is not the fear that you chose wrong. Anguish is the knowledge that you chose at all.'],
+        source: 'Existentialism Is a Humanism, 1946'
+      },
+      {
+        text: 'Ask your priest what God would want you to do.',
+        authentic: false,
+        sartre: ['And what did you expect the priest to say? You already knew which priest you would ask. A priest of the Resistance would tell you to fight. A priest of compassion would tell you to stay. By choosing your adviser, you had already made your choice &#8212; you simply refused to own it.', 'This is what I call bad faith. Not the asking &#8212; anyone may seek counsel. The bad faith is the pretense that someone else&#8217;s answer can relieve you of your freedom. It cannot. You chose the priest. You chose to obey. Every link in the chain was yours.', 'You are trying to be a thing &#8212; a thing that receives instructions &#8212; when you are in fact a freedom that gives them.'],
+        source: 'Existentialism Is a Humanism, 1946'
+      }
+    ]
+  },
+  {
+    id: 2, title: 'The Waiter',
+    text: 'You have worked the same job for three years. Your manager has given you a script &#8212; exact phrases, an exact manner. You have watched yourself become very good at this role. Your movements are precise. Your smile arrives on cue. Colleagues say you were made for this. Lately, you are not sure where the role ends and you begin.',
+    choices: [
+      {
+        text: 'Perform the role perfectly. This is who you are now &#8212; why fight it?',
+        authentic: false,
+        sartre: ['You have identified yourself completely with your function. The waiter who believes he <em>is</em> a waiter the way an inkwell is an inkwell &#8212; solid, defined, complete. But you are not an inkwell. An inkwell cannot choose to be something else. You can.', 'This is bad faith of the most common kind: the flight into facticity. You treat yourself as a finished object because the alternative &#8212; that you are free, that you could walk out, that nothing pins you here but your own repeated choice to stay &#8212; is unbearable.', 'The role is comfortable precisely because it tells you what to do next. Freedom never tells you what to do next.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      },
+      {
+        text: 'Refuse the script. Tell your manager you will not perform a character.',
+        authentic: false,
+        sartre: ['The rebel. The one who defines himself entirely in opposition. But notice: you have let the script determine your behavior just as surely as if you had followed it. You are the negation of the role &#8212; which means the role still defines you.', 'This is bad faith of a subtler kind: the flight into transcendence. You pretend you are pure freedom, above all roles. But you are not above your situation. You have a body that needs wages. Denying your facticity is as dishonest as denying your freedom.', 'Authenticity is not rebellion. It is clarity.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      },
+      {
+        text: 'Follow the script, but hold in your mind that you are playing a part &#8212; that you are not this role.',
+        authentic: true,
+        sartre: ['Now you have it. You play the waiter. The emphasis is on <em>play</em>. You carry the tray, you say the words, you bend forward at precisely the right angle &#8212; and all the while you know that this is a performance, not an identity.', 'This is what I observed in the caf&#233;. The waiter whose movements were a little too precise, a little too eager &#8212; he was <em>playing at</em> being a waiter. And that play is not dishonesty. It is the only honest relationship a free being can have with a role.', 'You are never your role. You are the one who plays it. The distance between those two &#8212; that sliver of daylight &#8212; is where your freedom lives.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      }
+    ]
+  },
+  {
+    id: 3, title: 'The First Date',
+    text: 'You are sitting across from someone. The conversation has been careful &#8212; interesting, but careful. Then they ask you directly: &#8220;What do you actually want from this?&#8221; You feel the question land. You know your honest answer. You also know it might end the evening.',
+    choices: [
+      {
+        text: 'Deflect with a joke. "What does anyone want? World peace and good coffee."',
+        authentic: false,
+        sartre: ['Charming. And empty. You treated the question as if it were not really a question &#8212; as if the moment were not really a moment. You turned yourself into a social object: the witty one, the one who keeps things light.', 'This is what I described with the woman who leaves her hand on the table. She allows it to rest there as if it were a thing &#8212; a hand, merely &#8212; divorced from her will. You have done the same with your voice. You spoke as if the words chose themselves.', 'But you chose them. You chose deflection over honesty because honesty would have required you to exist &#8212; fully, vulnerably, as a freedom exposed to another freedom. You preferred to be a performance.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      },
+      {
+        text: 'Answer honestly, even though you are not sure how it will be received.',
+        authentic: true,
+        sartre: ['You spoke. Not the version of you that manages impressions, not the diplomat, not the performer &#8212; you. Whatever you said, you said it knowing it might cost you the evening, the good opinion, the comfortable ambiguity.', 'This is what authenticity demands. Not that you say the right thing, but that you say <em>your</em> thing &#8212; and accept that the other person is a freedom too, free to receive it however they will.', 'You cannot control the other&#8217;s gaze. You can only refuse to hide from it. That refusal is the entire content of honesty between two freedoms.'],
+        source: 'Being and Nothingness, Part III, Ch. 1'
+      },
+      {
+        text: 'Say what you think they want to hear. Match their energy.',
+        authentic: false,
+        sartre: ['You studied the other person the way a mirror studies a face &#8212; and then you became what you saw reflected back. This is being-for-others in its most collapsed form. You did not offer yourself; you offered a replica shaped by their expectations.', 'The irony is that they asked precisely because they wanted to encounter <em>you</em> &#8212; not their own preferences echoed back in a different voice. You gave them a forgery and called it connection.', 'Bad faith does not always look like cowardice. Sometimes it looks like agreeableness. Sometimes it looks like the exact right answer. That is what makes it so difficult to see in yourself.'],
+        source: 'Being and Nothingness, Part III, Ch. 1'
+      }
+    ]
+  },
+  {
+    id: 4, title: 'The Witness',
+    text: 'You are on a crowded train. A man is loudly berating a younger passenger &#8212; the language is cruel, the tone escalating. Other passengers stare at their phones. You feel the familiar tightening: the impulse to speak and the impulse to stay safe. You know you could intervene. The cost would be moderate but real.',
+    choices: [
+      {
+        text: 'Stay silent. It is not your business, and getting involved would only make things worse.',
+        authentic: false,
+        sartre: ['Not your business. An interesting phrase. You have declared a boundary that does not exist in the world &#8212; only in your narration of it. The train is a shared space. The cruelty is audible to everyone. You are already involved by the fact of being present and conscious.', 'What you have done is deny your freedom by disguising your choice as a fact about the situation. &#8220;It is not my business&#8221; sounds like a description. It is actually a decision &#8212; your decision to define yourself as someone for whom this is not their business.', 'The coward is not born a coward. He makes himself a coward through acts exactly like this one &#8212; and then tells himself he had no choice. That telling is the deepest act of bad faith.'],
+        source: 'Existentialism Is a Humanism, 1946'
+      },
+      {
+        text: 'Speak up. Address the man directly.',
+        authentic: true,
+        sartre: ['You spoke into a silence that twenty other people were maintaining. Not because you are brave by nature &#8212; there is no such thing as brave by nature. You are brave because, in this moment, you chose to act as a brave person acts.', 'You could have remained silent. You knew you could. That knowledge &#8212; that the silence was available and you refused it &#8212; is what gives the speaking its weight. Courage without the possibility of cowardice is not courage. It is just mechanics.', 'You have made yourself, for this moment, someone who speaks. Tomorrow you may make yourself someone different. That is the terrible privilege of being human.'],
+        source: 'Existentialism Is a Humanism, 1946'
+      },
+      {
+        text: 'Stay silent, but acknowledge to yourself that you are choosing silence out of fear.',
+        authentic: true,
+        sartre: ['You did not speak. And you did not lie to yourself about why. This is a peculiar form of authenticity &#8212; not the heroic kind, but the honest kind.', 'You said: I am afraid, and I am choosing fear, and this choice is mine. No excuses about the situation being someone else&#8217;s problem. No fiction about how intervention would make things worse. Just the bare fact: I could act and I am not acting and I know this about myself.', 'A coward who knows he is a coward has, in that knowing, already begun to be something else. He has not yet acted differently &#8212; but he has stopped lying about what he is doing. And that is where change begins.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      }
+    ]
+  },
+  {
+    id: 5, title: 'The Gaze',
+    text: 'A choice you made in private &#8212; a decision about your life that you considered deeply personal &#8212; has become public. People you know have formed opinions. You see yourself discussed as if you were a character in someone else&#8217;s story. The version of you in their conversations is recognizable but simplified &#8212; flattened into a single decision.',
+    choices: [
+      {
+        text: 'Adjust your behavior to better match what people expect of you.',
+        authentic: false,
+        sartre: ['You have given the Other the power to define you. Their gaze has landed and you have accepted its verdict &#8212; not because it is accurate, but because being seen is so unbearable that you would rather become what they see than endure the friction of being misunderstood.', 'This is the Look in its most corrosive form. When I described being caught at the keyhole, the shame that floods you is not about the act &#8212; it is about the sudden awareness that you exist as an object in someone else&#8217;s world. You have a nature now. They have given it to you.', 'But their version of you is not you. It is an object &#8212; a being-in-itself &#8212; solid, fixed, finished. You are none of those things. You are a being-for-itself: always in motion, always ahead of yourself, always more than any snapshot.'],
+        source: 'Being and Nothingness, Part III, Ch. 1'
+      },
+      {
+        text: 'Own the choice publicly. Explain your reasoning if asked, but do not apologize for it.',
+        authentic: true,
+        sartre: ['You refused to let the Other&#8217;s gaze rewrite you. Not by ignoring it &#8212; you cannot ignore it; we are always being-for-others, always seen, always interpreted. But you refused to collapse into their interpretation.', 'This is the authentic response to the Look: to acknowledge that others see you, that their view is real in its own way, but to insist on the gap between what they see and what you are. That gap is your freedom.', 'It takes a particular kind of nerve to stand in someone else&#8217;s gaze and not flinch. Not the nerve of indifference &#8212; indifference is its own kind of flight. The nerve of presence. Of saying: yes, this is what I did, and I did it freely.'],
+        source: 'Being and Nothingness, Part III, Ch. 1'
+      },
+      {
+        text: 'Deny you ever made the choice. Distance yourself from it entirely.',
+        authentic: false,
+        sartre: ['You have attempted the impossible: to un-choose a choice. To stand before your own past and say, that was not me. But it was you. The choice was made in your freedom, and no amount of revision can unmake it.', 'This is bad faith directed at your own history. You are treating your past self as a stranger &#8212; someone who happened to occupy your body and make decisions you would never have made. But there is no such stranger. There is only you, stretched across time, responsible for every moment.', 'The desire to disown your choices is the desire to be a thing without a past &#8212; fresh each morning, unburdened. But you are not a thing. You are a history. And it is yours.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      }
+    ]
+  },
+  {
+    id: 6, title: 'The Final Project',
+    text: 'The doctor&#8217;s words were measured, clinical, kind. You are not dying tomorrow. But the horizon, which you had always treated as infinite, has contracted. You can see the edge now. There is time &#8212; but not for everything. You sit in your car in the parking lot and the question arrives without ceremony: what now?',
+    choices: [
+      {
+        text: 'Do everything. Start every project. Call everyone. Compress a lifetime into whatever remains.',
+        authentic: false,
+        sartre: ['The frantic response. The attempt to defeat finitude by sheer velocity &#8212; as if living faster could make the boundary recede. But you are not fighting time. You are fleeing from a choice.', 'By trying to do everything, you choose nothing. Each project cancels the last. You have turned your remaining freedom into noise &#8212; and noise, however loud, is not meaning.', 'This is bad faith disguised as vitality. The underlying refusal is the refusal to accept that you are finite &#8212; that every yes requires a no, that choosing one path means the others go unwalked.'],
+        source: 'Being and Nothingness, Part IV, Ch. 1'
+      },
+      {
+        text: 'Accept that you cannot do everything. Choose what matters most and give yourself to it.',
+        authentic: true,
+        sartre: ['You have understood something that most people spend their entire lives avoiding: that freedom is not the absence of limits but the act of choosing within them. The boundary did not destroy your freedom. It clarified it.', 'Before today, you could pretend the choice did not matter &#8212; there was always tomorrow, always the luxury of delay. That luxury was itself a form of bad faith. Now the pretense is gone and you are, perhaps for the first time, genuinely free.', 'Death is not your possibility. It is the end of your possibilities. All you can do is choose what you will be when it arrives. And you have chosen. That is enough. It was always enough.'],
+        source: 'Being and Nothingness, Part IV, Ch. 1'
+      },
+      {
+        text: 'Continue as before. Nothing has really changed. There is no point in being dramatic.',
+        authentic: false,
+        sartre: ['Nothing has changed. A remarkable claim, given that everything has changed. But I recognize the maneuver: if you refuse to acknowledge the new situation, you do not have to respond to it.', 'This is the most human form of bad faith &#8212; the denial of facticity. You cannot change the fact by ignoring it. And by pretending it does not exist, you have chosen the one relationship that guarantees your remaining time will be spent in avoidance.', 'The person who denies their finitude is not calm. They are asleep. And they will wake up eventually &#8212; but with less time, and less of themselves, than they had today.'],
+        source: 'Being and Nothingness, Part I, Ch. 2'
+      }
+    ]
+  }
+];
+
+// ─── Endings ───────────────────────────────────────────────────────────────
+
+var ENDINGS = [
+  {
+    min: 6, max: 6, title: 'Fully Drawn',
+    text: ['You drew yourself &#8212; every limb, every line. Not because you were told to. Not because it was expected. Because you chose. And you owned every choice.', 'This is what I meant. Existence precedes essence. There was no template, no blueprint, no human nature waiting to be fulfilled. There was only a series of moments in which a freedom confronted a situation and refused to look away.', 'You are your choices, and you chose freely &#8212; which is to say, you chose in anguish, knowing you could have chosen otherwise and that no one would absolve you if you were wrong. That is the only &#8220;well&#8221; that matters.', 'The figure is complete. But do not mistake completeness for finality. You will face new situations tomorrow that today&#8217;s choices cannot answer. The figure is never finished while you breathe. It is only, for now, recognizably yours.']
+  },
+  {
+    min: 4, max: 5, title: 'Almost Whole',
+    text: ['Most of your lines are your own. A few were borrowed &#8212; from the crowd, from comfort, from the easy refusal to see that you were choosing.', 'But you caught yourself. That is more than most manage. The bad faith was there &#8212; I saw it, the flinch, the moment you reached for someone else&#8217;s answer &#8212; but it did not hold. You came back to yourself.', 'The figure is not complete. It never is while you are alive. But what is drawn is drawn by your hand, and the gaps are honest gaps &#8212; you know they are there, and you know why.', 'That knowing is itself a kind of freedom. The person who sees their own bad faith clearly has already begun to overcome it.']
+  },
+  {
+    min: 2, max: 3, title: 'Half-Drawn',
+    text: ['Half a person. Half drawn by freedom, half left blank by the refusal to choose &#8212; or rather, by the choice to pretend you were not choosing.', 'I do not judge you for this. I only point out that it was yours. The flinch was yours. The deflection was yours. The priest, the role, the comfortable lie &#8212; you reached for them, and reaching for them was itself an act of freedom. Even bad faith is chosen.', 'You wanted to be authentic. I could see it in the moments where you hesitated, where the easy answer almost won and you pulled back. But wanting is not enough. Authenticity is not a feeling. It is a practice &#8212; a relentless, exhausting practice of refusing to lie to yourself.', 'The figure is half-drawn. The other half is not lost. It is waiting for the next moment in which you refuse to hide.']
+  },
+  {
+    min: 0, max: 1, title: 'The Blank',
+    text: ['You let others draw you &#8212; or rather, you let them leave you blank. Every time freedom knocked, you pretended not to be home. The priest&#8217;s answer, the comfortable role, the crowd&#8217;s opinion, the easy denial &#8212; you reached for them the way a drowning person reaches for anything solid.', 'But hear me: even this was a choice. Every deflection was a decision. Every act of bad faith was an act &#8212; which means it was free. You chose to hide from your freedom, and that hiding was itself an exercise of the very freedom you were hiding from.', 'This is what I meant when I said you are condemned to be free. Not that freedom is a gift. Not that freedom is pleasant. That freedom is inescapable. You cannot not-choose. Silence is a choice. Obedience is a choice. Even surrender is a choice.', 'The figure is nearly blank. But the blankness is not nothing. It is the record of a freedom that refused itself &#8212; which means it can stop refusing at any moment. You are not your past choices. You are the freedom that made them. And that freedom is still here.']
+  }
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────
+
+var state = {
+  screen: 'title',
+  scenarioIndex: 0,
+  authenticCount: 0,
+  choices: [],
+  currentChoice: null
+};
+
+var content = document.getElementById('content');
+var leftPanel = document.getElementById('left-panel');
+
+// ─── Utility ───────────────────────────────────────────────────────────────
+
+function div(cls, html) {
+  var el = document.createElement('div');
+  if (cls) el.className = cls;
+  el.innerHTML = html;
+  return el;
+}
+
+function scrollTop() {
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function setLeftPanel(show) {
+  if (!show) {
+    leftPanel.innerHTML = '';
+    leftPanel.style.opacity = '0';
+    return;
+  }
+  leftPanel.innerHTML = '<img src="' + SARTRE_IMG.src + '" alt="' + SARTRE_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"><p class="left-attr">' + SARTRE_IMG.attr + '</p>';
+  leftPanel.style.opacity = '1';
+}
+
+var ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
+
+// ─── SVG Figure ────────────────────────────────────────────────────────────
+
+function buildFigureSvg(partsDrawn, large) {
+  var cls = large ? 'figure-svg large' : 'figure-svg';
+  var parts = [
+    '<circle cx="60" cy="36" r="20" />',
+    '<line x1="60" y1="56" x2="60" y2="120" />',
+    '<line x1="60" y1="76" x2="28" y2="100" />',
+    '<line x1="60" y1="76" x2="92" y2="100" />',
+    '<line x1="60" y1="120" x2="32" y2="170" />',
+    '<line x1="60" y1="120" x2="88" y2="170" />'
+  ];
+  var svg = '<svg class="' + cls + '" viewBox="0 0 120 200" xmlns="http://www.w3.org/2000/svg">';
+  for (var i = 0; i < 6; i++) {
+    if (i < partsDrawn) {
+      svg += '<g class="figure-drawn">' + parts[i] + '</g>';
+    } else {
+      svg += '<g class="figure-ghost">' + parts[i] + '</g>';
+    }
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+// ─── Progress Dots ─────────────────────────────────────────────────────────
+
+function buildProgressDots() {
+  var html = '<div class="progress-dots">';
+  for (var i = 0; i < 6; i++) {
+    if (i < state.choices.length) {
+      html += '<div class="dot ' + (state.choices[i].authentic ? 'authentic' : 'bad-faith') + '"></div>';
+    } else {
+      html += '<div class="dot pending"></div>';
+    }
+  }
+  html += '</div>';
+  return html;
+}
+
+// ─── Render: Title ─────────────────────────────────────────────────────────
+
+function renderTitle() {
+  scrollTop();
+  setLeftPanel(false);
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="title-screen">\
+      <h1>The Good, the Bad, and the Authentic</h1>\
+      <div class="title-subtitle">a game of radical freedom</div>\
+      <img class="title-portrait" src="' + SARTRE_IMG.src + '" alt="' + SARTRE_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy">\
+      <p class="title-portrait-attr">' + SARTRE_IMG.attr + '</p>\
+      <p class="epigraph">&#8220;Man is condemned to be free; because once thrown into the world, he is responsible for everything he does.&#8221;</p>\
+      <p class="epigraph-attr">&#8212; Sartre, <em>Existentialism Is a Humanism</em>, 1946</p>\
+      <button class="btn" id="begin-btn">Begin</button>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#begin-btn').addEventListener('click', function() {
+    state.screen = 'instructions';
+    render();
+  });
+}
+
+// ─── Render: Instructions ──────────────────────────────────────────────────
+
+function renderInstructions() {
+  scrollTop();
+  setLeftPanel(false);
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="instructions-screen">\
+      <h2>How This Works</h2>\
+      <p>You are about to live a life &#8212; or at least six moments of one. Each presents a choice. There are no correct answers. There are no instructions.</p>\
+      <p>But some choices are made in freedom, and some are made in what Sartre called <em>bad faith</em> &#8212; the refusal to acknowledge that you are free, the pretense that you had no choice, that the role chose you, that someone else decided.</p>\
+      <p>You will not know which is which until after you have chosen. This, too, is the point.</p>\
+      <p>Each authentic choice draws a part of the figure. Each act of bad faith leaves it blank. At the end, the figure is who you became.</p>\
+      <div class="demo-figure">' + buildFigureSvg(3, false) + '<p class="demo-caption">Three choices made &#8212; three yet to come</p></div>\
+      <p class="dim">There are six scenarios. The game takes about five minutes.</p>\
+      <div style="margin-top: 40px;">\
+        <button class="btn" id="start-btn">Begin</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#start-btn').addEventListener('click', function() {
+    state.scenarioIndex = 0;
+    state.authenticCount = 0;
+    state.choices = [];
+    state.screen = 'scenario';
+    render();
+  });
+}
+
+// ─── Render: Scenario ──────────────────────────────────────────────────────
+
+function renderScenario() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var scenario = SCENARIOS[state.scenarioIndex];
+  var choicesHtml = '';
+  for (var i = 0; i < scenario.choices.length; i++) {
+    choicesHtml += '<button class="choice-btn" data-idx="' + i + '">' + scenario.choices[i].text + '</button>';
+  }
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="scenario-header">\
+        <span class="scenario-num">' + ROMAN[state.scenarioIndex] + '</span>\
+        <span class="scenario-title">' + scenario.title + '</span>\
+      </div>\
+      <div class="figure-area">' + buildFigureSvg(state.authenticCount, false) + '</div>\
+      ' + buildProgressDots() + '\
+      <div class="scenario-text"><p>' + scenario.text + '</p></div>\
+      <div class="choices-area">\
+        <p class="choices-label">What do you do?</p>\
+        ' + choicesHtml + '\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+  el.querySelectorAll('.choice-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var idx = parseInt(btn.dataset.idx);
+      handleChoice(idx);
+    });
+  });
+}
+
+function handleChoice(choiceIndex) {
+  var scenario = SCENARIOS[state.scenarioIndex];
+  var choice = scenario.choices[choiceIndex];
+  if (choice.authentic) {
+    state.authenticCount++;
+  }
+  state.choices.push({ scenarioId: scenario.id, choiceIndex: choiceIndex, authentic: choice.authentic });
+  state.currentChoice = choiceIndex;
+  state.screen = 'result';
+  render();
+}
+
+// ─── Render: Result ────────────────────────────────────────────────────────
+
+function renderResult() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var scenario = SCENARIOS[state.scenarioIndex];
+  var choice = scenario.choices[state.currentChoice];
+  var verdictCls = choice.authentic ? 'authentic' : 'bad-faith';
+  var verdictText = choice.authentic ? 'Authentic' : 'Bad Faith';
+
+  var commentaryHtml = '';
+  for (var i = 0; i < choice.sartre.length; i++) {
+    commentaryHtml += '<p class="sartre-line">' + choice.sartre[i] + '</p>';
+  }
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="scenario-header">\
+        <span class="scenario-num">' + ROMAN[state.scenarioIndex] + '</span>\
+        <span class="scenario-title">' + scenario.title + '</span>\
+      </div>\
+      <div class="figure-area">' + buildFigureSvg(state.authenticCount, false) + '</div>\
+      ' + buildProgressDots() + '\
+      <p class="result-verdict ' + verdictCls + '">' + verdictText + '</p>\
+      <div class="sartre-wrap">\
+        ' + commentaryHtml + '\
+        <p class="sartre-source">&#8212; ' + choice.source + '</p>\
+      </div>\
+      <div style="margin-top:32px;text-align:center;">\
+        <button class="btn" id="continue-btn">Continue</button>\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+  el.querySelector('#continue-btn').addEventListener('click', function() {
+    if (state.scenarioIndex < SCENARIOS.length - 1) {
+      state.scenarioIndex++;
+      state.screen = 'scenario';
+    } else {
+      state.screen = 'ending';
+    }
+    render();
+  });
+}
+
+// ─── Render: Ending ────────────────────────────────────────────────────────
+
+function renderEnding() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var ending = null;
+  for (var i = 0; i < ENDINGS.length; i++) {
+    if (state.authenticCount >= ENDINGS[i].min && state.authenticCount <= ENDINGS[i].max) {
+      ending = ENDINGS[i];
+      break;
+    }
+  }
+
+  var monologueHtml = '';
+  for (var j = 0; j < ending.text.length; j++) {
+    monologueHtml += '<p class="sartre-line">' + ending.text[j] + '</p>';
+  }
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="figure-area">' + buildFigureSvg(state.authenticCount, true) + '</div>\
+      <p class="ending-title">' + ending.title + '</p>\
+      <p style="text-align:center;color:var(--dim);font-size:13px;margin-bottom:32px;">' + state.authenticCount + ' of 6 choices were authentic</p>\
+      <div class="sartre-wrap" style="margin-top:0;">\
+        ' + monologueHtml + '\
+      </div>\
+      <div class="ending-text" style="margin-top:36px;">\
+        <p>Jean-Paul Sartre published <em>Being and Nothingness</em> in 1943, during the German occupation of Paris. He was offered the Nobel Prize for Literature in 1964 and refused it, saying he did not wish to be &#8220;institutionalised.&#8221; He died in 1980. Fifty thousand people attended his funeral.</p>\
+        <p>His insistence that we are radically free &#8212; that no God, no nature, no social role can determine who we are &#8212; remains one of the most challenging and liberating ideas in the history of philosophy.</p>\
+        <p style="color:var(--dim);font-style:italic;margin-top:20px;">&#8220;Existence precedes essence.&#8221;</p>\
+        <p style="color:var(--dim);font-size:12px;">&#8212; <em>Being and Nothingness</em>, 1943</p>\
+      </div>\
+      <div class="ending-close">\
+        <button class="btn" id="home-btn">Return to Philosophy Games</button>\
+        <button class="btn btn-secondary" id="restart-btn">Play Again</button>\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+  el.querySelector('#home-btn').addEventListener('click', function() {
+    window.location.href = '../index.html';
+  });
+  el.querySelector('#restart-btn').addEventListener('click', function() {
+    state.screen = 'title';
+    state.scenarioIndex = 0;
+    state.authenticCount = 0;
+    state.choices = [];
+    render();
+  });
+}
+
+// ─── Router ────────────────────────────────────────────────────────────────
+
+function render() {
+  if      (state.screen === 'title')        renderTitle();
+  else if (state.screen === 'instructions') renderInstructions();
+  else if (state.screen === 'scenario')     renderScenario();
+  else if (state.screen === 'result')       renderResult();
+  else if (state.screen === 'ending')       renderEnding();
+}
+
+render();
+</script>
+</body>
+</html>
