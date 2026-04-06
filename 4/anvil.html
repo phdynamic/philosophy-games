@@ -223,6 +223,10 @@ html, body {
   .inline-painting, .inline-attribution { display: none; }
 }
 
+/* Scene text */
+.scene-text { margin-bottom: 36px; }
+.scene-text p { margin-bottom: 14px; color: var(--amber); }
+
 /* Concept tiles */
 .workspace {
   margin: 24px 0;
@@ -648,6 +652,15 @@ function makeKey(a, b) {
   return [a, b].sort().join('+');
 }
 
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
 function imgTag(src, alt, extraClass) {
   const cls = extraClass ? 'painting ' + extraClass : 'painting';
   return '<img class="' + cls + '" src="' + src + '" alt="' + alt + '" onerror="this.style.display=\'none\'" loading="lazy">';
@@ -719,7 +732,7 @@ function renderInstructions() {
   el.querySelector('#start-btn').addEventListener('click', function() {
     state.screen = 'game';
     state.stageIndex = 0;
-    state.available = STAGES[0].startConcepts.slice();
+    state.available = shuffle(STAGES[0].startConcepts);
     state.selected = [];
     state.chainEntries = [];
     render();
@@ -965,7 +978,7 @@ function showCommentary(synth) {
     document.getElementById('next-stage-btn').addEventListener('click', function() {
       state.stageIndex++;
       var nextStage = STAGES[state.stageIndex];
-      state.available = nextStage.startConcepts.slice();
+      state.available = shuffle(nextStage.startConcepts);
       state.selected = [];
       state.screen = 'game';
       render();
