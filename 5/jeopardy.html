@@ -1069,7 +1069,7 @@ function renderAiTurn() {
       <div class="ai-turn">\
         <p class="ai-name">' + turn.name + '\'s Turn</p>\
         <p class="ai-clue-info">' + turn.clueData.category + ' for ' + turn.clueData.value + '</p>\
-        <p class="clue-text" style="font-size:14px;margin:16px auto;">' + turn.clueData.clue + '</p>\
+        <p style="font-size:14px;color:var(--amber);line-height:1.7;margin:16px 0;">' + turn.clueData.clue + '</p>\
         <p class="result-answer">Answer: <strong>What is ' + aiCorrectAnswer + '?</strong></p>\
         <p class="ai-result-label ' + (turn.correct ? 'correct' : 'wrong') + '">' + (turn.correct ? 'Correct &#8212; +' + turn.clueData.value : 'Incorrect') + '</p>\
       </div>\
