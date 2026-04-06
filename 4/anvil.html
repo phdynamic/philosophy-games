@@ -503,7 +503,15 @@ const CONCEPTS = {
   ethical_life: { name: 'Ethical Life',       desc: 'Freedom actualized in family, society, and state' },
   nature:       { name: 'Nature',             desc: 'The Idea in its external, self-alienated form' },
   spirit:       { name: 'Spirit',             desc: 'A community that knows itself through its members' },
-  absolute:     { name: 'Absolute Knowing',   desc: 'Spirit comprehending itself as the whole process' }
+  absolute:     { name: 'Absolute Knowing',   desc: 'Spirit comprehending itself as the whole process' },
+  existence:    { name: 'Existence',          desc: 'Determinate being &#8212; Being with a specific character' },
+  finitude:     { name: 'Finitude',           desc: 'The limit inherent in every determinate thing' },
+  infinity:     { name: 'Infinity',           desc: 'The self-relating negation of the finite' },
+  limit:        { name: 'Limit',              desc: 'The boundary where a thing ceases to be itself' },
+  desire:       { name: 'Desire',             desc: 'Self-consciousness seeking itself in the consumption of objects' },
+  stoicism:     { name: 'Stoicism',           desc: 'Freedom attained through withdrawal into pure thought' },
+  conscience:   { name: 'Conscience',         desc: 'The inner voice that judges right from wrong' },
+  property:     { name: 'Property',           desc: 'The external embodiment of a person&#8217;s will' }
 };
 
 // ─── Syntheses ─────────────────────────────────────────────────────────────
@@ -521,13 +529,13 @@ const SYNTHESES = {
     source: 'Science of Logic, 1812',
     teaching: 'Quality is what makes a thing <em>this</em> thing and not another. Quantity is its magnitude, apparently indifferent to its nature. But they are not truly independent: heat a thing enough and it changes what it is. Water at 100 degrees becomes steam. Measure is the insight that quantity always has a qualitative threshold &#8212; that &#8220;how much&#8221; secretly determines &#8220;what kind.&#8221;'
   },
-  'lordship+bondage': {
+  'bondage+lordship': {
     result: 'recognition',
     quote: 'Self-consciousness exists in and for itself when, and by the fact that, it so exists for another; that is, it exists only in being acknowledged.',
     source: 'Phenomenology of Spirit, 1807',
     teaching: 'The famous master-slave dialectic. The lord who dominates another consciousness finds his recognition hollow: it comes from someone he has reduced to a thing. The bondsman, forced to work and reshape the world, discovers in labour a self that the lord never achieves. Neither position is stable alone. True self-consciousness requires <em>mutual</em> recognition &#8212; each self confirmed by a free other.'
   },
-  'right+morality': {
+  'morality+right': {
     result: 'ethical_life',
     quote: 'The right of individuals to their subjective determination to freedom is fulfilled when they belong to an ethical actuality; for their certainty of their freedom has its truth in such objectivity.',
     source: 'Philosophy of Right, 1820',
@@ -539,7 +547,7 @@ const SYNTHESES = {
     source: 'Philosophy of Nature, 1830',
     teaching: 'Logic made concrete. Becoming is the abstract principle of passage; Measure is its determination. Together they give us Nature &#8212; the realm where the Idea exists outside itself, governed by measure and transformation. Every natural process is a becoming bounded by measure: seeds grow into trees, not infinitely, but to the limit of their kind.'
   },
-  'recognition+ethical_life': {
+  'ethical_life+recognition': {
     result: 'spirit',
     quote: 'Spirit is the ethical life of a nation in so far as it is the immediate truth &#8212; the individual that is a world.',
     source: 'Phenomenology of Spirit, 1807',
@@ -560,33 +568,33 @@ const STAGES = [
     num: 'I',
     title: 'Being',
     img: 'monk',
-    startConcepts: ['being', 'nothing'],
+    startConcepts: ['being', 'nothing', 'existence', 'finitude'],
     target: 'becoming',
-    intro: 'Hegel begins with the most abstract thought possible. Think pure Being &#8212; with no qualities, no determination, no content. What is left?'
+    intro: 'Hegel begins with the most abstract thought possible. Think pure Being &#8212; with no qualities, no determination, no content. Which of these concepts truly oppose each other at the deepest level?'
   },
   {
     num: 'II',
     title: 'Quality',
     img: 'light',
-    startConcepts: ['quality', 'quantity'],
+    startConcepts: ['quality', 'quantity', 'infinity', 'limit'],
     target: 'measure',
-    intro: 'A thing has qualities that make it what it is, and quantities that seem indifferent to its nature. But are they truly separate?'
+    intro: 'A thing has properties that define it and magnitudes that seem indifferent to its nature. Which pair conceals a hidden unity?'
   },
   {
     num: 'III',
     title: 'Self-Consciousness',
     img: 'pollice',
-    startConcepts: ['lordship', 'bondage'],
+    startConcepts: ['lordship', 'bondage', 'desire', 'stoicism'],
     target: 'recognition',
-    intro: 'Two self-consciousnesses meet. Each demands recognition from the other. One dominates; one submits. But the story does not end there.'
+    intro: 'Self-consciousness encounters another self-consciousness. Desire, dominance, submission, withdrawal &#8212; all are strategies. Which pair forms the dialectic that resolves into something higher?'
   },
   {
     num: 'IV',
     title: 'Right and Morality',
     img: 'liberty',
-    startConcepts: ['right', 'morality'],
+    startConcepts: ['right', 'morality', 'conscience', 'property'],
     target: 'ethical_life',
-    intro: 'Freedom can be secured through external law, or cultivated as inner conscience. Each without the other is incomplete.'
+    intro: 'Freedom takes many forms &#8212; law, conscience, ownership, moral conviction. But only one pair represents the fundamental opposition whose resolution is Ethical Life.'
   },
   {
     num: 'V',
