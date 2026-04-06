@@ -244,7 +244,12 @@ html, body {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  margin-top: 8px;
   margin-bottom: 24px;
+}
+
+.tiles.stage-complete {
+  margin-top: 24px;
 }
 
 .tile {
@@ -629,7 +634,8 @@ const state = {
   selected: [],
   chainEntries: [],
   animating: false,
-  rejectionIndex: 0
+  rejectionIndex: 0,
+  stageShuffled: false
 };
 
 const content = document.getElementById('content');
@@ -732,9 +738,10 @@ function renderInstructions() {
   el.querySelector('#start-btn').addEventListener('click', function() {
     state.screen = 'game';
     state.stageIndex = 0;
-    state.available = shuffle(STAGES[0].startConcepts);
+    state.available = STAGES[0].startConcepts.slice();
     state.selected = [];
     state.chainEntries = [];
+    state.stageShuffled = false;
     render();
   });
 }
@@ -743,19 +750,22 @@ function renderInstructions() {
 
 function renderGame() {
   scrollTop();
-  const stage = STAGES[state.stageIndex];
-  const img = IMAGES[stage.img];
+  var stage = STAGES[state.stageIndex];
+  var img = IMAGES[stage.img];
   setLeftPanel(stage.img);
   content.innerHTML = '';
+
+  // Shuffle tile order on first render of each stage
+  if (!state.stageShuffled) {
+    state.available = shuffle(state.available);
+    state.stageShuffled = true;
+  }
 
   var tilesHtml = '';
   for (var i = 0; i < state.available.length; i++) {
     var cid = state.available[i];
     var c = CONCEPTS[cid];
     var isSel = state.selected.indexOf(cid) !== -1;
-    var isSynth = state.startConcepts && stage.startConcepts.indexOf(cid) === -1;
-    var cls = 'tile';
-    if (isSel) cls += ' selected';
     tilesHtml += '<div class="tile' + (isSel ? ' selected' : '') + '" data-id="' + cid + '">\
       <div class="tile-name">' + c.name + '</div>\
       <div class="tile-desc">' + c.desc + '</div>\
@@ -880,9 +890,12 @@ function attemptSynthesis(a, b) {
     // Re-render tiles area
     var container = document.getElementById('tile-container');
     var workspaceLabel = document.querySelector('.workspace-label');
+    var sceneText = document.querySelector('.scene-text');
     if (targetReached) {
-      // Stage complete: show only the synthesized result, hide selection prompt
+      // Stage complete: hide selection prompt, hide intro text, show only result
       if (workspaceLabel) workspaceLabel.style.display = 'none';
+      if (sceneText) sceneText.style.display = 'none';
+      container.classList.add('stage-complete');
       var rc = CONCEPTS[synth.result];
       container.innerHTML = '<div class="tile appearing synthesized" data-id="' + synth.result + '">\
         <div class="tile-name">' + rc.name + '</div>\
@@ -978,8 +991,9 @@ function showCommentary(synth) {
     document.getElementById('next-stage-btn').addEventListener('click', function() {
       state.stageIndex++;
       var nextStage = STAGES[state.stageIndex];
-      state.available = shuffle(nextStage.startConcepts);
+      state.available = nextStage.startConcepts.slice();
       state.selected = [];
+      state.stageShuffled = false;
       state.screen = 'game';
       render();
     });
@@ -1036,6 +1050,7 @@ function renderEnding() {
     state.selected = [];
     state.chainEntries = [];
     state.rejectionIndex = 0;
+    state.stageShuffled = false;
     render();
   });
 }
