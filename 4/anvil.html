@@ -1043,7 +1043,7 @@ function showCommentary(synth) {
 
 function renderFinalEnding(synth) {
   scrollTop();
-  setLeftPanel('athens');
+  setLeftPanel();
 
   // Wipe the entire content area and rebuild from scratch
   content.innerHTML = '';
@@ -1059,8 +1059,6 @@ function renderFinalEnding(synth) {
       <span class="scene-num">V</span>\
       <span class="scene-title">The Absolute</span>\
     </div>\
-    ' + imgTag(IMAGES.athens.src, IMAGES.athens.alt, 'inline-painting') + '\
-    <p class="attribution inline-attribution">' + IMAGES.athens.attr + '</p>\
     <div class="tiles stage-complete" style="margin-top:24px;">\
       <div class="tile synthesized">\
         <div class="tile-name">' + rc.name + '</div>\
