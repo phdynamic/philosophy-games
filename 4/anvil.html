@@ -849,6 +849,12 @@ function attemptSynthesis(a, b) {
     // Remove consumed concepts, add result
     state.available = state.available.filter(function(c) { return c !== a && c !== b; });
     state.available.push(synth.result);
+
+    // If target reached, clear leftover decoys so only the result remains
+    var stage = STAGES[state.stageIndex];
+    if (synth.result === stage.target) {
+      state.available = [synth.result];
+    }
     state.selected = [];
 
     // Add chain entry
