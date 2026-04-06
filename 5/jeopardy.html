@@ -409,10 +409,56 @@ html, body {
   .clue-area { padding: 20px 16px; }
   .scoreboard { flex-wrap: wrap; gap: 16px; }
 }
+
+/* Left panel (Marx portrait on wide screens) */
+#left-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(50vw - 390px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#left-panel img {
+  max-width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+#left-panel .left-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 879px) {
+  #left-panel { display: none; }
+}
+
+/* Score portraits */
+.score-portrait {
+  width: 60px;
+  display: block;
+  margin: 8px auto 0;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
 </style>
 </head>
 <body>
 
+<div id="left-panel"></div>
 <div id="app">
   <div id="header">
     <a href="../index.html">&#x2190; Philosophy Games</a>
@@ -429,6 +475,18 @@ var MARX_IMG = {
   alt: 'Photograph of Karl Marx',
   attr: 'John Jabez Edwin Mayall, <em>Karl Marx</em>, 1875.'
 };
+
+var ENGELS_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Friedrich_Engels_portrait_(cropped).jpg?width=200',
+  alt: 'Portrait of Friedrich Engels'
+};
+
+var BAKUNIN_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Bakunin.png?width=200',
+  alt: 'Photograph of Mikhail Bakunin'
+};
+
+var CAT_KEYS = { 'Law': 'law', 'Religion': 'religion', 'Art': 'art', 'Ideology': 'ideology', 'The State': 'state' };
 
 // ─── Categories ────────────────────────────────────────────────────────────
 
@@ -488,8 +546,8 @@ var CLUES = {
   },
   religion_300: {
     category: 'Religion', value: 300,
-    clue: 'Marx borrowed this term from Ludwig Feuerbach to describe how humans create God in their own image, then submit to their own creation as if it were alien and supreme.',
-    answers: ['alienation', 'religious alienation', 'estrangement'],
+    clue: 'Marx borrowed this concept from Ludwig Feuerbach to describe how humans create God in their own image, then bow before their own creation as if it were an independent, alien power.',
+    answers: ['projection', 'religious projection', 'religious alienation'],
     marx: 'Feuerbach saw it in religion; I see it everywhere. The worker creates wealth and stands impoverished before it. The citizen creates the state and kneels before its authority. The pattern is always the same: human powers projected outward and returned as domination.',
     source: 'Economic and Philosophic Manuscripts, 1844'
   },
@@ -510,7 +568,7 @@ var CLUES = {
   art_100: {
     category: 'Art', value: 100,
     clue: 'Marx argued that the dominant artistic values of any era reflect the interests of this group.',
-    answers: ['ruling class', 'bourgeoisie', 'capitalist class', 'the bourgeoisie', 'the ruling class'],
+    answers: ['ruling class', 'the ruling class', 'capitalist class', 'the capitalist class'],
     marx: 'The ideas of the ruling class are in every epoch the ruling ideas. The class which has the means of material production at its disposal controls the means of mental production. Raphael painted madonnas because the Church paid for madonnas. The brush follows the purse.',
     source: 'The German Ideology, 1846'
   },
@@ -531,7 +589,7 @@ var CLUES = {
   art_400: {
     category: 'Art', value: 400,
     clue: 'Marx used this term for the process by which a worker\'s creative capacity is reduced to repetitive mechanical motion, making labour the opposite of free artistic expression.',
-    answers: ['alienated labour', 'alienation of labour', 'estranged labour', 'alienated labor', 'alienation'],
+    answers: ['alienated labour', 'alienation of labour', 'estranged labour', 'alienated labor'],
     marx: 'Under capitalism the worker does not affirm himself in his work but denies himself. He does not develop freely his physical and mental energy but mortifies his body and ruins his mind. Art is what labour could be. Alienated labour is what art must not become.',
     source: 'Economic and Philosophic Manuscripts, 1844'
   },
@@ -559,7 +617,7 @@ var CLUES = {
   ideology_300: {
     category: 'Ideology', value: 300,
     clue: 'Marx described this as the condition in which workers are &#8220;a class against capital but not yet a class for itself&#8221; &#8212; aware of shared misery but not yet of shared interest.',
-    answers: ['class in itself', 'a class in itself', 'class consciousness', 'false consciousness'],
+    answers: ['class in itself', 'a class in itself'],
     marx: 'The separate individuals form a class only insofar as they have to carry on a common battle against another class. A sack of potatoes does not make a political force. The transition from class-in-itself to class-for-itself &#8212; that is the entire problem of revolutionary organisation.',
     source: 'The Poverty of Philosophy, 1847'
   },
@@ -665,6 +723,17 @@ var state = {
 };
 
 var content = document.getElementById('content');
+var leftPanel = document.getElementById('left-panel');
+
+function setLeftPanel(show) {
+  if (!show) {
+    leftPanel.innerHTML = '';
+    leftPanel.style.opacity = '0';
+    return;
+  }
+  leftPanel.innerHTML = '<img src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"><p class="left-attr">' + MARX_IMG.attr + '</p>';
+  leftPanel.style.opacity = '1';
+}
 
 // ─── Utility ───────────────────────────────────────────────────────────────
 
@@ -715,6 +784,7 @@ function checkAnswer(input, clue) {
 
 function renderTitle() {
   scrollTop();
+  setLeftPanel(false);
   content.innerHTML = '';
   var el = div('fade-in', '\
     <div id="title-screen">\
@@ -738,6 +808,7 @@ function renderTitle() {
 
 function renderInstructions() {
   scrollTop();
+  setLeftPanel(false);
   content.innerHTML = '';
   var el = div('fade-in', '\
     <div id="instructions-screen">\
@@ -766,6 +837,7 @@ function renderInstructions() {
 
 function renderGame() {
   scrollTop();
+  setLeftPanel(true);
   content.innerHTML = '';
 
   var boardHtml = '<div class="board">';
@@ -777,7 +849,7 @@ function renderGame() {
   var values = [100, 200, 300, 400, 500];
   for (var v = 0; v < values.length; v++) {
     for (var ci = 0; ci < CATEGORIES.length; ci++) {
-      var cat = CATEGORIES[ci].toLowerCase().replace(' ', '_');
+      var cat = CAT_KEYS[CATEGORIES[ci]];
       var clueId = cat + '_' + values[v];
       var available = state.board[clueId];
       boardHtml += '<div class="board-cell' + (available ? '' : ' taken') + '" data-id="' + clueId + '">' + (available ? values[v] : '&#8212;') + '</div>';
@@ -787,8 +859,8 @@ function renderGame() {
 
   var scoreHtml = '<div class="scoreboard">\
     <div class="score-col"><div class="score-name">You</div><div class="score-val">' + state.scores.player + '</div></div>\
-    <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + state.scores.engels + '</div></div>\
-    <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + state.scores.bakunin + '</div></div>\
+    <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + state.scores.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+    <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + state.scores.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
   </div>';
 
   var el = div('fade-in', '\
@@ -816,6 +888,7 @@ function renderGame() {
 
 function renderClue() {
   scrollTop();
+  setLeftPanel(true);
   var clue = CLUES[state.currentClue];
   content.innerHTML = '';
 
@@ -862,6 +935,7 @@ function renderClue() {
 
 function renderResult() {
   scrollTop();
+  setLeftPanel(true);
   var r = state.currentResult;
   content.innerHTML = '';
 
@@ -962,6 +1036,7 @@ function doAiTurns() {
 
 function renderAiTurn() {
   scrollTop();
+  setLeftPanel(true);
   content.innerHTML = '';
 
   if (state.aiQueue.length === 0) {
@@ -1018,6 +1093,7 @@ function renderAiTurn() {
 
 function renderEnding() {
   scrollTop();
+  setLeftPanel(true);
   content.innerHTML = '';
 
   var s = state.scores;
@@ -1039,8 +1115,8 @@ function renderEnding() {
         <p class="final-winner">Winner: ' + winner + '</p>\
         <div class="scoreboard">\
           <div class="score-col"><div class="score-name">You</div><div class="score-val">' + s.player + '</div></div>\
-          <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + s.engels + '</div></div>\
-          <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + s.bakunin + '</div></div>\
+          <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + s.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+          <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + s.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
         </div>\
       </div>\
       <div class="marx-wrap" style="margin-top:8px;">\
