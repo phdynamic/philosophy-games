@@ -877,7 +877,9 @@ function attemptSynthesis(a, b) {
   if (willBeTarget && isFinalStage) {
     var sceneEl = content.querySelector('.scene');
     if (sceneEl) {
-      sceneEl.style.transition = 'opacity 0.6s ease-out';
+      sceneEl.style.transition = 'opacity 0.8s ease-out';
+      // Force the browser to register the transition before changing opacity
+      sceneEl.offsetHeight;
       sceneEl.style.opacity = '0';
     }
     // Add chain entry now, then render ending after fade completes
@@ -890,7 +892,7 @@ function attemptSynthesis(a, b) {
     setTimeout(function() {
       renderFinalEnding(synth);
       state.animating = false;
-    }, 650);
+    }, 900);
     return;
   }
 
