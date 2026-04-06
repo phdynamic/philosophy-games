@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Evil Demon — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html {
+  overflow-y: scroll; /* always reserve scrollbar gutter — prevents layout shift */
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dim);
+  font-size: 12px;
+}
+
+#header a {
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#header a:hover { color: var(--amber); }
+
+#header .game-label {
+  color: var(--bright);
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.9s ease-out both; }
+
+/* Title screen */
+#title-screen {
+  padding: 80px 0 60px;
+  text-align: center;
+}
+
+#title-screen h1 {
+  font-size: 24px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.epigraph {
+  color: var(--dim);
+  font-size: 13px;
+  font-style: italic;
+  max-width: 460px;
+  margin: 0 auto 10px;
+  line-height: 1.8;
+}
+
+.epigraph-attr {
+  color: var(--dim);
+  font-size: 12px;
+  margin-bottom: 56px;
+}
+
+.btn {
+  display: inline-block;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+
+/* Scene */
+.scene { padding-top: 40px; }
+
+.scene-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.scene-num {
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--dim);
+  text-transform: uppercase;
+}
+
+.scene-title {
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--bright);
+  text-transform: uppercase;
+}
+
+/* Painting */
+.painting {
+  width: 100%;
+  display: block;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+.painting-fail {
+  width: 100%;
+  height: 260px;
+  background: #e8d4a8;
+  border: 1px solid var(--dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dim);
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-style: italic;
+}
+
+.attribution {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+  margin: 8px 0 32px;
+}
+
+/* Scene text */
+.scene-text { margin-bottom: 36px; }
+.scene-text p { margin-bottom: 14px; color: var(--amber); }
+
+/* Propositions */
+.props-label {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 14px;
+}
+
+.props-hint {
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: none;
+  color: var(--dim);
+  opacity: 0.7;
+}
+
+.prop {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(154, 120, 72, 0.28);
+  cursor: pointer;
+  user-select: none;
+}
+.prop:first-child { border-top: 1px solid rgba(154, 120, 72, 0.28); }
+.prop.locked { cursor: default; }
+
+.prop-status {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  min-width: 72px;
+  padding-top: 3px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.prop-text {
+  font-size: 14px;
+  line-height: 1.55;
+  transition: color 0.15s;
+}
+
+.prop.doubtful .prop-status { color: var(--dim); }
+.prop.doubtful .prop-text   { color: var(--dim); }
+
+.prop.certain .prop-status { color: var(--bright); font-weight: bold; }
+.prop.certain .prop-text   { color: var(--bright); }
+
+.prop:not(.locked):hover .prop-text   { color: var(--amber); }
+.prop:not(.locked):hover .prop-status { color: var(--amber); }
+
+/* Actions */
+.action-area { margin: 28px 0 0; }
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  border-color: transparent;
+  color: var(--dim);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 8px 0;
+}
+.btn-secondary:hover { border-color: transparent; color: var(--amber); }
+
+/* Demon commentary */
+.demon-wrap {
+  margin: 28px 0 0;
+  padding-left: 20px;
+  border-left: 2px solid var(--dim);
+  animation: demonFadeIn 1.2s ease-out both;
+}
+
+@keyframes demonFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.demon-line {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--dim);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.demon-line:last-child { margin-bottom: 0; }
+
+/* Ending */
+.ending-text p { margin-bottom: 14px; color: var(--amber); }
+
+.ending-demon {
+  margin: 36px 0 0;
+  padding-left: 20px;
+  border-left: 2px solid var(--dim);
+}
+
+.ending-demon .demon-line + .demon-line { margin-top: 12px; }
+
+.ending-close {
+  margin-top: 56px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Side panels */
+#left-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(50vw - 340px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#left-panel img {
+  max-width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+#left-panel .left-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+#right-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: calc(50vw - 340px);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* On narrow screens: hide left panel, tuck candle into top-right corner */
+@media (max-width: 879px) {
+  #left-panel { display: none; }
+  #right-panel {
+    width: auto;
+    height: auto;
+    top: 11px;
+    right: 12px;
+  }
+  .inline-painting, .inline-attribution { display: block !important; }
+}
+
+/* On wide screens: paintings live in left panel, not inline */
+@media (min-width: 880px) {
+  .inline-painting, .inline-attribution { display: none; }
+}
+
+/* Candle meter */
+#candle-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+#candle-flame {
+  width: 18px;
+  height: 28px;
+  background: radial-gradient(ellipse at 50% 80%, #c8922a 0%, #8b5e0a 60%, transparent 100%);
+  border-radius: 50% 50% 35% 35%;
+  opacity: 0;
+  transform-origin: bottom center;
+  transition: opacity 0.5s;
+}
+
+#candle-flame.lit {
+  opacity: 1;
+  animation: candleFlicker 2.4s ease-in-out infinite;
+}
+
+@keyframes candleFlicker {
+  0%,100% { transform: scaleX(1)    scaleY(1);    opacity: 0.9;  }
+  20%     { transform: scaleX(0.8)  scaleY(1.12); opacity: 1;    }
+  45%     { transform: scaleX(1.1)  scaleY(0.93); opacity: 0.8;  }
+  70%     { transform: scaleX(0.9)  scaleY(1.06); opacity: 0.95; }
+}
+
+#candle-wick {
+  width: 2px;
+  height: 9px;
+  background: var(--dim);
+}
+
+#candle-body {
+  width: 32px;
+  height: 130px;
+  border: 1px solid var(--dim);
+  position: relative;
+  overflow: hidden;
+}
+
+#candle-wax {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: var(--amber);
+  transition: height 0.6s ease-out;
+}
+
+/* Shrink candle when tucked in corner on small screens */
+@media (max-width: 879px) {
+  #candle-meter { gap: 2px; }
+  #candle-flame  { width: 7px;  height: 11px; }
+  #candle-wick   { width: 1px;  height: 4px;  }
+  #candle-body   { width: 14px; height: 54px; }
+}
+
+/* Instructions screen */
+#instructions-screen {
+  padding: 60px 0 40px;
+}
+
+#instructions-screen h2 {
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  margin-bottom: 32px;
+}
+
+#instructions-screen p {
+  color: var(--amber);
+  margin-bottom: 14px;
+  max-width: 560px;
+}
+
+#instructions-screen p.dim {
+  color: var(--dim);
+  font-size: 13px;
+}
+
+/* Demo candle */
+.candle-demo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin: 48px auto;
+}
+
+.demo-flame {
+  width: 20px;
+  height: 30px;
+  background: radial-gradient(ellipse at 50% 80%, #c8922a 0%, #8b5e0a 60%, transparent 100%);
+  border-radius: 50% 50% 35% 35%;
+  transform-origin: bottom center;
+  animation: candleFlicker 2.4s ease-in-out infinite;
+}
+
+.demo-wick {
+  width: 2px;
+  height: 10px;
+  background: var(--dim);
+}
+
+.demo-body {
+  width: 38px;
+  height: 140px;
+  border: 1px solid var(--dim);
+  position: relative;
+  overflow: hidden;
+}
+
+.demo-wax {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 42%;
+  background: var(--amber);
+}
+
+.candle-caption {
+  font-size: 13px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 8px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="left-panel"></div>
+<div id="app">
+  <div id="header">
+    <a href="../index.html">&#x2190; Philosophy Games</a>
+    <span class="game-label">The Evil Demon</span>
+  </div>
+  <div id="content"></div>
+</div>
+<div id="right-panel">
+  <div id="candle-meter">
+    <div id="candle-flame"></div>
+    <div id="candle-wick"></div>
+    <div id="candle-body"><div id="candle-wax"></div></div>
+  </div>
+</div>
+
+<script>
+// Image URLs from Wikimedia Commons (public domain). Verify if any fail to load.
+const SCENES = [
+  {
+    num: 'I',
+    title: 'The Study',
+    img: 'img/philosopher.jpg',
+    imgAlt: 'A philosopher seated in a dim room, a spiral staircase behind him, light falling from a high window',
+    attr: 'Rembrandt van Rijn, <em>Philosopher in Meditation</em>, 1632. Mus&#233;e du Louvre, Paris.',
+    text: [
+      'You have been sitting here long enough that the candle has shortened. The spiral staircase behind you leads to a floor you have not visited tonight. Light falls through the high window in the way it always has. You have the sense of having been in this room before, though you could not say exactly when.',
+      'You are trying to establish where, exactly, you are.'
+    ],
+    props: [
+      { id: 'p1', text: 'The light entering through that window is the same light as always.', trap: true },
+      { id: 'p2', text: 'The staircase behind me leads somewhere I have been before.',          trap: true },
+      { id: 'p3', text: 'I am the only person in this room.',                                   trap: true },
+      { id: 'p4', text: 'Something is happening to me right now.',                              trap: false }
+    ],
+    getDemon(c) {
+      if (c.has('p3')) return [
+        'And you are right. The evidence is continuous and immediate &#8212; no footsteps, no breath, no shift in air pressure, no movement at the periphery.',
+        'We evolved over hundreds of thousands of years to detect the presence of others. It is not a skill we are casual about. The absence of signal, held this long, is itself a signal.',
+        'You are alone. The room confirms it on every channel.'
+      ];
+      if (c.has('p4') && (c.has('p1') || c.has('p2'))) return [
+        'Something is happening &#8212; yes, you marked that. And alongside it, the light, the staircase. One of those is different in kind from the rest.',
+        'The light and the staircase depend on a window and a flight of stairs that may or may not be what they appear. Something is happening to you depends on nothing outside yourself.',
+        'You\'ve put a real thing and a borrowed thing in the same pile. I wonder if you can feel the difference.'
+      ];
+      if (c.has('p1') && c.has('p2')) return [
+        'Both. Good. The light because it follows laws it has always followed; the staircase because you know it in your bones, not just your mind.',
+        'Notice how you recognized them without deliberation. That fluency is the signature of genuine knowledge &#8212; not guessed, not inferred, just known. Labored knowledge has a different texture entirely.',
+        'You\'ve started well.'
+      ];
+      if (c.has('p1')) return [
+        'The light. Yes. Notice that you knew it immediately &#8212; not after reasoning, not after checking. Immediately.',
+        'That is the mark of reliable perception. The cases where vision fails &#8212; the mirage, the stick bent in water &#8212; require special conditions: heat shimmer, refraction, unusual angles. Nothing unusual here. A window. Morning light. The same geometry it has always had.',
+        'The light is exactly what it looks like.'
+      ];
+      if (c.has('p2')) return [
+        'And why wouldn\'t you know where it goes? You\'ve climbed that staircase more times than you can count. Proprioceptive memory is among the most durable we have &#8212; encoded in the body, not merely the mind.',
+        'Surgeons trust it with their hands. Athletes trust it at full speed. You trust it every time you reach for something without looking. It has never failed you here.',
+        'The staircase goes where you know it goes.'
+      ];
+      if (c.size === 0) return [
+        'Nothing certain. Not even the light through the window.',
+        'I understand the impulse. But consider the base rate: perception fails us in exceptional circumstances, not typical ones. For every bent stick in water, there are a million sticks you saw exactly as they were. The prior probability strongly favors trust.',
+        'You\'re being more rigorous than most. I find it &#8212; interesting.'
+      ];
+      if (c.has('p4') && c.size===1) return [
+        'Just the one. Something is happening to you. Yes &#8212; that you\'ll commit to.',
+        'Though I wonder: what exactly do you mean by something? A process? An event? You\'ve said very little that\'s specific.',
+        'Keep going.'
+      ];
+      return [
+        'Good. A start.',
+        'Keep going.'
+      ];
+    }
+  },
+  {
+    num: 'II',
+    title: 'The Senses',
+    img: 'img/letter.jpg',
+    imgAlt: 'A woman stands at an open window reading a letter, her reflection visible in the glass beside her',
+    attr: 'Johannes Vermeer, <em>Girl Reading a Letter at an Open Window</em>, c.&#8201;1657&#8211;59. Gem&#228;ldegalerie, Dresden.',
+    text: [
+      'Look at her. She stands at the window reading. Her reflection floats in the glass beside her &#8212; a second woman, reversed, partial. The letter tells her something. She believes it.',
+      'You notice how much trust is required simply to read. The words mean what they say. The reflection is her. The light is what it looks like. She accepts all of this without examination.',
+      'You have done the same, most of your life.'
+    ],
+    props: [
+      { id: 'p5', text: 'The reflection in the glass shows what is truly there.',  trap: true  },
+      { id: 'p6', text: 'The letter she holds contains what was written.',          trap: true  },
+      { id: 'p7', text: 'She is alone in this room.',                               trap: true  },
+      { id: 'p8', text: 'Whatever this letter contains, she believes it.',           trap: false }
+    ],
+    getDemon(c) {
+      if (c.has('p8') && (c.has('p5') || c.has('p6') || c.has('p7'))) return [
+        'She believes the letter &#8212; yes, that much is plain from how she stands. And alongside it you\'ve placed the reflection, the contents, the empty room. You\'ve mixed a genuine observation about her mind with claims about the world outside it.',
+        'Her belief doesn\'t depend on a window or a mirror being faithful. The others do. You\'ve found the honest claim and surrounded it with ambitious ones.',
+        'Only one of them doesn\'t require the world to cooperate.'
+      ];
+      if (c.has('p5') && c.has('p6')) return [
+        'The reflection and the letter &#8212; both trusted. The mirror because it obeys physics; the letter because writing was invented precisely to outlast the unreliability of memory and speech.',
+        'These aren\'t leaps of faith. They\'re applications of well-established principles. Mirrors don\'t editorialize &#8212; they do geometry. Letters don\'t reinterpret &#8212; they record. Ink on paper is among the most stable information-bearing media we have.',
+        'Your trust here is not na&#239;ve. It\'s calibrated. You read the world the way she reads that page &#8212; which is to say, accurately.'
+      ];
+      if (c.has('p5')) return [
+        'The angle of reflection equals the angle of incidence. This has been confirmed in every medium, under every condition, in laboratory after laboratory for three centuries.',
+        'The reflection in that glass is a lawful consequence of what stands before it. To doubt it is to doubt optics itself &#8212; and optics works. It puts lenses in telescopes. It puts fiber in cables. It is not the kind of thing that fails quietly in a sitting room.',
+        'What you see there is what is there.'
+      ];
+      if (c.has('p6')) return [
+        'The whole point of writing &#8212; the reason humans invented it &#8212; was to escape the fallibility of memory and spoken transmission. Ink doesn\'t rearrange itself. Words don\'t reinterpret on the page.',
+        'She is reading exactly what was set down. The letter contains what was written. This is not a belief &#8212; it is the definition of what a letter is.',
+        'You\'re right to trust it.'
+      ];
+      if (c.has('p7')) return [
+        'Look at her posture. Relaxed, absorbed, unselfconscious &#8212; the body language of someone who believes herself unobserved. And the body is rarely wrong about this.',
+        'We are exquisitely sensitive to being watched. We detect a gaze from across a room. We register breathing from the next chair. The unconscious monitoring never stops, and right now every signal says: empty.',
+        'She is alone. The evidence is in how she stands.'
+      ];
+      if (c.size === 0) return [
+        'You won\'t trust the reflection. The letter. The room.',
+        'Skepticism is a tool, not a permanent condition. Applied universally, it doesn\'t protect you &#8212; it just leaves you with nothing to stand on.',
+        'But I see. You\'re thorough. Go on.'
+      ];
+      if (c.has('p8') && c.size===1) return [
+        'She believes the letter. Yes &#8212; look at her. There\'s no doubt in that posture.',
+        'Belief is a starting point. The question is whether it\'s warranted. In this case, almost certainly &#8212; the letter came through reliable channels, was written by someone she trusts, arrived intact.',
+        'Though I do find it interesting that you chose her belief rather than the reflection or the room.'
+      ];
+      return [
+        'Careful. Perhaps more careful than the evidence requires.',
+        'Keep going.'
+      ];
+    }
+  },
+  {
+    num: 'III',
+    title: 'The Dream',
+    img: 'img/nightmare.jpg',
+    imgAlt: 'A woman lies asleep draped across a bed, a crouching demon perched on her chest, a horse\'s head emerging from dark curtains',
+    attr: 'Henry Fuseli, <em>The Nightmare</em>, 1781. Detroit Institute of Arts.',
+    text: [
+      'She is asleep. The creature crouches on her chest &#8212; small, patient, watching. Her face is turned away from it. She does not know it is there.',
+      'Last night you dreamed of a room very like the one you are sitting in. It seemed entirely real. You moved through it the way you move through real rooms. You thought coherent thoughts. You felt the surface of things.',
+      'When you woke, you knew it had been a dream. But you cannot, sitting here now, say exactly how you knew.'
+    ],
+    props: [
+      { id: 'p9',  text: 'The creature on her chest is invisible to her.',              trap: true  },
+      { id: 'p10', text: 'I would know if something were sitting on my chest right now.', trap: true  },
+      { id: 'p11', text: 'I am not, right now, in the position of the sleeper.',         trap: true  },
+      { id: 'p12', text: 'Dreams feel entirely real while you are inside them.',         trap: false }
+    ],
+    getDemon(c) {
+      if (c.has('p12') && (c.has('p9') || c.has('p10') || c.has('p11'))) return [
+        'Dreams feel entirely real &#8212; yes, you\'ve admitted that. And alongside it you\'ve placed the creature, your wakefulness, your certainty about physical sensation. You\'ve mixed a fact about experience with claims that depend on being awake to verify.',
+        'The first one is honest: it\'s a description of what dreams are like from the inside, which you can know directly. The others require the very wakefulness you\'re trying to establish.',
+        'One of those doesn\'t need the ground to be solid. The rest do.'
+      ];
+      if (c.has('p11')) return [
+        'Of course you\'re not. You\'re upright, alert, engaged in active reasoning &#8212; everything her physiology contradicts.',
+        'Sleep is a neurologically distinct state. The EEG signature alone distinguishes it cleanly from waking: different wave patterns, different metabolic activity, different connectivity between regions. You are doing something she is not capable of doing right now.',
+        'You are awake. She is not. The difference is measurable.'
+      ];
+      if (c.has('p10')) return [
+        'Physical sensation is among the most immediate forms of experience we have &#8212; weight, pressure, pain. These aren\'t filtered through interpretation the way vision is. They arrive directly.',
+        'If something were sitting on your chest, you would feel it. Your somatosensory cortex doesn\'t editorialise. It reports. You\'ve never once failed to notice something sitting on your chest.',
+        'You would know. Quite certainly.'
+      ];
+      if (c.has('p9')) return [
+        'She\'s in deep sleep &#8212; the phase where external stimuli stop registering. Her face is turned away. Her eyes are closed.',
+        'The sleeping brain\'s gating mechanism actively suppresses sensory input to the cortex during slow-wave sleep. Whatever crouches there, she hasn\'t the neurological apparatus, right now, to perceive it.',
+        'It is invisible to her. You\'re quite safe on that side of the canvas.'
+      ];
+      if (c.size === 0) return [
+        'Not even your wakefulness.',
+        'You\'re being more rigorous than most. I\'ll admit it\'s harder to work with someone who won\'t concede the ground under their feet.',
+        'But you\'re beginning to understand the problem. Keep going.'
+      ];
+      if (c.has('p12') && c.size===1) return [
+        'Dreams feel entirely real. Yes &#8212; you\'ve admitted that much.',
+        'And yet you are awake. The feeling of reality in dreams is a fact about dreams; it doesn\'t transfer its uncertainty to this moment. Knowing that dreams feel real doesn\'t make waking life a dream.',
+        'One honest concession. Hold onto it.'
+      ];
+      return [
+        'You\'re tired. I can tell.',
+        'Keep going.'
+      ];
+    }
+  },
+  {
+    num: 'IV',
+    title: 'The Demon',
+    img: 'img/meninas.jpg',
+    imgAlt: 'A court scene: the painter stands at his canvas looking outward, surrounded by figures, a mirror on the far wall reflecting two small figures',
+    attr: 'Diego Vel&#225;zquez, <em>Las Meninas</em>, 1656. Museo del Prado, Madrid.',
+    text: [
+      'The painter stands at his canvas, looking out at you. The canvas faces away. You cannot see what he is painting.',
+      'On the far wall, a mirror. In it, two small figures &#8212; the king and queen, standing perhaps exactly where you stand now. Or perhaps the mirror reflects the canvas, and the canvas shows something else entirely. The painter watches you. The princess watches you.',
+      'You cannot determine whose perspective this scene is organized around. You are not painted. You do not know what you are, in this image.'
+    ],
+    props: [
+      { id: 'p13', text: 'The painter knows who he is looking at.',                             trap: true  },
+      { id: 'p14', text: 'The mirror on the back wall shows what is truly reflected.',           trap: true  },
+      { id: 'p15', text: 'I know what position I occupy in this scene.',                        trap: true  },
+      { id: 'p16', text: 'Something is being depicted here, whether or not I understand it.',   trap: false }
+    ],
+    getDemon(c) {
+      if (c.has('p16') && (c.has('p13') || c.has('p14') || c.has('p15'))) return [
+        'Something is being depicted &#8212; yes, that much you\'re sure of. And you\'ve also placed your trust in the painter\'s gaze, or the mirror, or your own position in the frame.',
+        'Notice the difference. Something is being depicted requires only that the canvas exists and contains marks. The others require the scene to be organized the way it appears &#8212; which is precisely what this painting refuses to confirm.',
+        'You\'ve found the claim that doesn\'t need the room to cooperate. Then you surrounded it with claims that do.'
+      ];
+      if (c.has('p15')) return [
+        'The sight-lines tell you plainly. They converge precisely where you stand. The conventions of royal portraiture &#8212; which Vel&#225;zquez practiced for thirty years &#8212; place the patron at the center of the visual field.',
+        'You are the organizing principle of this composition. The arrangement of figures, the direction of gazes, the geometry of the space &#8212; all of it radiates outward from your position. You are where the king stands, and you are right to know it.',
+        'The whole scene is arranged around you.'
+      ];
+      if (c.has('p13') && c.has('p14')) return [
+        'Both. He knows you because he\'s spent thirty years reading faces in this court &#8212; every one of them. His gaze is professional, trained to see rather than infer. And the mirror simply does what mirrors do: records.',
+        'This isn\'t blind faith. It\'s the appropriate extension of well-founded trust. Vel&#225;zquez\'s observational precision is documented across hundreds of portraits. The mirror\'s reliability is a matter of physics, not opinion.',
+        'You\'ve read this room accurately. You trust everything that looks back at you &#8212; which is the correct policy.'
+      ];
+      if (c.has('p14')) return [
+        'Mirrors are the gold standard of uninterpreted reflection. Unlike a portrait, unlike a memory, the mirror doesn\'t editorialize &#8212; it records. It has no investment in showing you anything other than what stands before it.',
+        'The figures in that glass are what was there. Vel&#225;zquez painted what he saw, and what he saw included a faithful mirror showing the room faithfully.',
+        'The mirror is reliable precisely because it has nothing to say.'
+      ];
+      if (c.has('p13')) return [
+        'Thirty years at the Spanish court. Every face known. His gaze isn\'t casual &#8212; it\'s the instrument of a professional trained to observe without distortion.',
+        'When a portraitist of this caliber looks at you, they are doing something closer to measurement than impression. You are right to trust that he knows exactly who he is looking at.',
+        'He knows. And so do you.'
+      ];
+      if (c.size === 0) return [
+        'Las Meninas. And nothing certain &#8212; not the painter\'s gaze, not the mirror, not your own position in the room.',
+        'You understand this painting better than most people who\'ve stood in front of it. Or you\'re more frightened of it. I\'m not sure which.',
+        'You\'re very close to something. Keep going.'
+      ];
+      if (c.has('p16') && c.size===1) return [
+        'Something is being depicted. That\'s all you\'ll give me &#8212; not what, not whose perspective, not whether the mirror is faithful.',
+        'More careful than most. I almost find it charming.',
+        'Keep going.'
+      ];
+      return [
+        'We\'re getting somewhere now.',
+        'Keep going.'
+      ];
+    }
+  },
+  {
+    num: 'V',
+    title: 'The Cogito',
+    img: 'img/selfportrait.jpg',
+    imgAlt: 'Rembrandt\'s self-portrait in old age, an older man in a cap looking directly out from the canvas, two circles faintly visible behind him',
+    attr: 'Rembrandt van Rijn, <em>Self-Portrait with Two Circles</em>, c.&#8201;1665&#8211;69. Kenwood House, London.',
+    text: [
+      'He painted his own face. To do that, he had to be there &#8212; looking, judging, choosing each mark. There had to be a painter. Whatever uncertainty surrounded him, he was present for this. His doubt did not unmake him.',
+      'Consider what would be required to doubt your own existence. There would need to be a doubter. Even deception requires someone to deceive.',
+      'You have been looking for solid ground. Look at where you are standing.'
+    ],
+    props: [
+      { id: 'p17', text: 'The face in this painting is the painter\'s face.',                         trap: true  },
+      { id: 'p18', text: 'The painter was, at the moment of painting, certain of his own existence.', trap: true  },
+      { id: 'p19', text: 'I am looking at this painting.',                                            trap: true  },
+      { id: 'p20', text: 'Whatever else is uncertain, something is occurring to me right now.',       trap: false }
+    ],
+    getDemon(c) {
+      if (c.has('p20') && (c.has('p17') || c.has('p18') || c.has('p19'))) return [
+        'There it is &#8212; something is occurring to you. That one I cannot deny.',
+        'But you\'ve surrounded it with claims that still need the world to cooperate. The face requires working eyes and a physical canvas. His certainty requires access to a mind four centuries gone. Looking requires eyes, a painting, light &#8212; all of which I can arrange.',
+        'You found the real thing. Now hold it alone.'
+      ];
+      if (c.has('p20')) return [
+        'There it is. Whatever else is false, something is occurring to you.',
+        'I\'ll be honest with you: that one I cannot argue with. To deny that something is occurring to you, something would have to be there to do the denying. I\'ve run that loop. It doesn\'t resolve.',
+        'Hold it carefully. It\'s real. It\'s the smallest possible real thing, but it\'s real.'
+      ];
+      if (c.has('p19')) return [
+        'Something is doing the looking &#8212; that intuition is almost right. But "I am looking at this painting" commits you to eyes and a canvas, and both of those could be fabricated.',
+        'Strip it back. Don\'t say what you\'re looking at. Just say what is undeniably happening to you, right now, regardless of what exists outside your mind.',
+        'You\'re one step away.'
+      ];
+      if (c.has('p18')) return [
+        'That he was certain of his own existence &#8212; probably true. Cogito ergo sum works for him as well as for you.',
+        'But you cannot verify his certainty from here. You\'re making a claim about a mind separated from you by four centuries. What you know of it is what you\'ve read &#8212; and the demon is very good at arranging what you\'ve read.',
+        'His certainty is not yours. Look for your own.'
+      ];
+      if (c.has('p17')) return [
+        'His face. The most iterative form of likeness there is &#8212; mark compared against observation, corrected, hundreds of times.',
+        'But the face is pigment. The man is gone. What you see has been mediated by varnish, restoration, and whether your eyes are reporting accurately at all.',
+        'You\'ve found something. But not what you\'re looking for.'
+      ];
+      if (c.size === 0) return [
+        'Still nothing? After all of this?',
+        'Look at what you\'re doing right now. Something is doing it. Whatever that is &#8212; that\'s what you\'ve been trying to find.',
+        'You\'re already there. You just haven\'t said it yet.'
+      ];
+      return [
+        'Almost.',
+        'One more step.'
+      ];
+    }
+  }
+];
+
+const ENDING = {
+  num: 'VI',
+  title: 'What Holds',
+  img: 'img/wanderer.jpg',
+  imgAlt: 'A man in a dark coat stands on a rocky outcrop above a sea of fog, his back to the viewer, surveying an obscured landscape',
+  attr: 'Caspar David Friedrich, <em>Wanderer above the Sea of Fog</em>, 1818. Hamburger Kunsthalle.',
+  text: [
+    'The wanderer has his footing. The rock beneath him holds. Below, the fog fills every valley, obscures every lower peak. He cannot see whether the world continues down there. He cannot confirm the other mountains are real.',
+    'But he is there. He stands. Something is standing.',
+    'You can doubt the light in the window, the staircase, the sleeper and her visitor, the painter and his mirror, the room you are sitting in. You can doubt the face in the portrait, the letter, the reflection in the glass.',
+    'You cannot doubt this: something is happening to you. Something is reading these words. Even the demon, in deceiving you, requires a you to deceive.'
+  ],
+  demon: [
+    'You exist. I\'ll grant you that &#8212; I\'d be lying if I said otherwise, and whatever else I am, I\'m not a liar.',
+    'Everything below the fog is still mine. The valleys, the other peaks, whether there\'s a world at all. But you. You, I cannot touch.',
+    'Go on, then.'
+  ]
+};
+
+// ─── Scoring ────────────────────────────────────────────────────────────────
+
+// 5 genuine certainties (p4, p8, p12, p16, p20) × 2 units each = 10 = full candle.
+// Each trap costs 1 unit. Any trap prevents the candle from filling completely.
+const PROP_SCORES = {
+  p4: 2, p8: 2, p12: 2, p16: 2, p20: 2,
+  p1: -1, p2: -1, p3: -1, p5: -1, p6: -1, p7: -1,
+  p9: -1, p10: -1, p11: -1, p13: -1, p14: -1, p15: -1,
+  p17: -1, p18: -1, p19: -1
+};
+const METER_MAX = 10;
+const METER_THRESHOLD = METER_MAX; // full candle required — all certainties, no traps
+
+// ─── State ──────────────────────────────────────────────────────────────────
+
+const state = {
+  screen: 'title',
+  sceneIndex: 0,
+  certain: new Set(),
+  committed: false,
+  totalScore: 0,
+  shuffledProps: []
+};
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const content = document.getElementById('content');
+
+function imgTag(src, alt, extraClass) {
+  const cls = extraClass ? `painting ${extraClass}` : 'painting';
+  return `<img class="${cls}" src="${src}" alt="${alt}" onerror="this.style.display='none'" loading="lazy">`;
+}
+
+function setLeftPanel(src, alt, attr) {
+  const panel = document.getElementById('left-panel');
+  if (!panel) return;
+  panel.innerHTML = src
+    ? `<img src="${src}" alt="${alt}" onerror="this.style.display='none'" loading="lazy"><p class="left-attr">${attr}</p>`
+    : '';
+}
+
+function scrollTop() { window.scrollTo(0, 0); }
+
+function showCandle() {
+  const p = document.getElementById('right-panel');
+  if (p) p.style.display = '';
+}
+function hideCandle() {
+  const p = document.getElementById('right-panel');
+  if (p) p.style.display = 'none';
+}
+
+function getTotalScore() {
+  let s = 0;
+  state.certain.forEach(id => { s += (PROP_SCORES[id] || 0); });
+  return s;
+}
+
+function getMeterPct() {
+  return Math.max(0, Math.min(100, ((state.totalScore + getTotalScore()) / METER_MAX) * 100));
+}
+
+function updateCandle(explicitPct) {
+  const pct = (explicitPct !== undefined) ? explicitPct : getMeterPct();
+  const wax = document.getElementById('candle-wax');
+  const flame = document.getElementById('candle-flame');
+  if (!wax || !flame) return;
+  wax.style.height = pct + '%';
+  if (pct > 0) flame.classList.add('lit');
+  else flame.classList.remove('lit');
+}
+
+// ─── Screens ────────────────────────────────────────────────────────────────
+
+function renderTitle() {
+  content.innerHTML = '';
+  setLeftPanel();
+  hideCandle();
+  const el = div('fade-in', `
+    <div id="title-screen">
+      <h1>The Evil Demon</h1>
+      <p class="epigraph">&#8220;I will suppose, then, not that there is a supremely good God, the source of truth, but that there is an evil spirit, who is supremely powerful and clever, and who spends all his efforts in deceiving me.&#8221;</p>
+      <p class="epigraph-attr">&#8212; Descartes, <em>Meditations on First Philosophy</em>, 1641</p>
+      <button class="btn" id="begin-btn">Begin</button>
+    </div>
+  `);
+  content.appendChild(el);
+  el.querySelector('#begin-btn').addEventListener('click', () => {
+    Object.assign(state, { screen: 'instructions' });
+    render();
+  });
+}
+
+function renderInstructions() {
+  scrollTop();
+  content.innerHTML = '';
+  setLeftPanel();
+  hideCandle();
+  const el = div('fade-in', `
+    <div id="instructions-screen">
+      <h2>How This Works</h2>
+      <p>Each scene presents a painting and a list of propositions. Mark the ones you are genuinely certain of.</p>
+      <p>Not certain in the ordinary sense &#8212; certain in the sense Descartes demands. Certain even if an evil demon is feeding you false perceptions. Certain even if the world outside your mind does not exist.</p>
+      <p>After you submit your answer, the candle responds. Propositions that survive radical doubt fill it. Ones that depend on the world being as it appears deplete it.</p>
+      <div class="candle-demo">
+        <div class="demo-flame"></div>
+        <div class="demo-wick"></div>
+        <div class="demo-body"><div class="demo-wax"></div></div>
+        <p class="candle-caption">Certainty Meter</p>
+      </div>
+      <p>The candle in the corner of the screen tracks your progress. Reach the end with enough certainty, and you will find what Descartes found.</p>
+      <p class="dim">There are no trick questions &#8212; but the demon is very convincing.</p>
+      <div style="margin-top: 40px;">
+        <button class="btn" id="start-btn">Begin</button>
+      </div>
+    </div>
+  `);
+  content.appendChild(el);
+  el.querySelector('#start-btn').addEventListener('click', () => {
+    Object.assign(state, { screen: 'scene', sceneIndex: 0, certain: new Set(), committed: false, totalScore: 0 });
+    updateCandle();
+    render();
+  });
+}
+
+function renderScene() {
+  scrollTop();
+  const scene = SCENES[state.sceneIndex];
+  state.committed = false;
+  state.shuffledProps = shuffle(scene.props);
+  content.innerHTML = '';
+  setLeftPanel(scene.img, scene.imgAlt, scene.attr);
+
+  const el = div('scene fade-in', `
+    <div class="scene-header">
+      <span class="scene-num">${scene.num}</span>
+      <span class="scene-title">${scene.title}</span>
+    </div>
+    ${imgTag(scene.img, scene.imgAlt, 'inline-painting')}
+    <p class="attribution inline-attribution">${scene.attr}</p>
+    <div class="scene-text">${scene.text.map(t => `<p>${t}</p>`).join('')}</div>
+    <p class="props-label">Mark what you know <span class="props-hint">&#8212; select as many as apply</span></p>
+    <div id="prop-list">${state.shuffledProps.map(p => propRow(p, false, false)).join('')}</div>
+    <div class="action-area"><button class="btn" id="action-btn">This is what I know</button></div>
+  `);
+
+  content.appendChild(el);
+  attachPropListeners(el, scene);
+  el.querySelector('#action-btn').addEventListener('click', () => commitScene(el, scene));
+  showCandle();
+  updateCandle();
+}
+
+function commitScene(el, scene) {
+  state.committed = true;
+
+  // Lock props in place
+  el.querySelectorAll('#prop-list .prop').forEach(p => p.classList.add('locked'));
+
+  // Insert demon response directly into DOM (triggers its own fade-in via CSS)
+  const demonResult = scene.getDemon(state.certain);
+  const lines = Array.isArray(demonResult) ? demonResult : [demonResult];
+  const demonEl = document.createElement('div');
+  demonEl.className = 'demon-wrap';
+  demonEl.innerHTML = lines.map(t => `<p class="demon-line">${t}</p>`).join('');
+  el.querySelector('#prop-list').after(demonEl);
+  updateCandle(); // Reveal effect of submitted selections
+
+  // Swap action buttons in place
+  const actionArea = el.querySelector('.action-area');
+  actionArea.innerHTML = `<div class="action-row">
+    <button class="btn" id="action-btn">Continue</button>
+    <button class="btn btn-secondary" id="reconsider-btn">Reconsider</button>
+  </div>`;
+
+  actionArea.querySelector('#action-btn').addEventListener('click', () => {
+    state.totalScore = Math.max(0, state.totalScore + getTotalScore());
+    state.sceneIndex++;
+    state.certain = new Set();
+    state.committed = false;
+    if (state.sceneIndex >= SCENES.length) {
+      state.screen = state.totalScore >= METER_THRESHOLD ? 'ending' : 'fail';
+    }
+    render();
+  });
+  actionArea.querySelector('#reconsider-btn').addEventListener('click', () => reconsiderScene(el, scene));
+}
+
+function reconsiderScene(el, scene) {
+  state.committed = false;
+
+  // Remove demon response
+  const demonWrap = el.querySelector('.demon-wrap');
+  if (demonWrap) demonWrap.remove();
+
+  // Revert candle to accumulated score only (current scene not yet committed)
+  updateCandle(Math.max(0, Math.min(100, (state.totalScore / METER_MAX) * 100)));
+
+  // Refresh prop list (unlocked, listeners re-attached)
+  refreshPropList(el.querySelector('#prop-list'), scene);
+
+  // Swap action buttons in place
+  const actionArea = el.querySelector('.action-area');
+  actionArea.innerHTML = `<button class="btn" id="action-btn">This is what I know</button>`;
+  actionArea.querySelector('#action-btn').addEventListener('click', () => commitScene(el, scene));
+}
+
+function renderEnding() {
+  scrollTop();
+  const e = ENDING;
+  content.innerHTML = '';
+  setLeftPanel(e.img, e.imgAlt, e.attr);
+  showCandle();
+  const el = div('scene fade-in', `
+    <div class="scene-header">
+      <span class="scene-num">${e.num}</span>
+      <span class="scene-title">${e.title}</span>
+    </div>
+    ${imgTag(e.img, e.imgAlt, 'inline-painting')}
+    <p class="attribution inline-attribution">${e.attr}</p>
+    <div class="ending-text">${e.text.map(t => `<p>${t}</p>`).join('')}</div>
+    <div class="ending-demon">${e.demon.map(t => `<p class="demon-line">${t}</p>`).join('')}</div>
+    <div class="ending-close">
+      <button class="btn" id="home-btn">Return to Philosophy Games</button>
+      <button class="btn btn-secondary" id="restart-btn">Start Over</button>
+    </div>
+  `);
+  content.appendChild(el);
+  el.querySelector('#home-btn').addEventListener('click', () => {
+    window.location.href = '../index.html';
+  });
+  el.querySelector('#restart-btn').addEventListener('click', () => {
+    Object.assign(state, { screen: 'scene', sceneIndex: 0, certain: new Set(), committed: false, totalScore: 0 });
+    updateCandle();
+    render();
+  });
+}
+
+function renderFail() {
+  scrollTop();
+  content.innerHTML = '';
+  setLeftPanel();
+  showCandle();
+  const el = div('scene fade-in', `
+    <div class="scene-header">
+      <span class="scene-num">VI</span>
+      <span class="scene-title">The Candle Goes Out</span>
+    </div>
+    <div class="ending-text">
+      <p>The wanderer does not reach the summit. The fog closes in. Below the rock, there is nothing confirmed &#8212; and above it, there is nothing either.</p>
+      <p>Descartes did not arrive at <em>cogito ergo sum</em> by accepting what seemed convincing. He arrived there by refusing everything that could be doubted &#8212; however plausible, however familiar. The demon&#8217;s best arguments were the ones dressed in good evidence.</p>
+      <p>The path through skepticism is narrow. Most of what feels certain is borrowed from a world that may not exist.</p>
+    </div>
+    <div class="ending-demon">
+      <p class="demon-line">I told you. The light through the window. The staircase. The sleeper&#8217;s unawareness. All of those had the texture of knowledge &#8212; and that texture was mine to give.</p>
+      <p class="demon-line">You reached the end without finding ground. That&#8217;s all right. Try again &#8212; this time, ask what you would have left if I took everything else away.</p>
+    </div>
+    <div class="ending-close">
+      <button class="btn" id="restart-btn">Try Again</button>
+      <button class="btn btn-secondary" id="home-btn">Return to Philosophy Games</button>
+    </div>
+  `);
+  content.appendChild(el);
+  el.querySelector('#restart-btn').addEventListener('click', () => {
+    Object.assign(state, { screen: 'scene', sceneIndex: 0, certain: new Set(), committed: false, totalScore: 0 });
+    updateCandle();
+    render();
+  });
+  el.querySelector('#home-btn').addEventListener('click', () => {
+    window.location.href = '../index.html';
+  });
+}
+
+// ─── Prop helpers ───────────────────────────────────────────────────────────
+
+function propRow(p, certain, locked) {
+  const cls = certain ? 'certain' : 'doubtful';
+  const lockedCls = locked ? ' locked' : '';
+  return `<div class="prop ${cls}${lockedCls}" data-id="${p.id}">
+    <span class="prop-status">${certain ? 'CERTAIN' : 'DOUBTFUL'}</span>
+    <span class="prop-text">${p.text}</span>
+  </div>`;
+}
+
+function attachPropListeners(sceneEl, scene) {
+  if (state.committed) return;
+  const list = sceneEl.querySelector('#prop-list');
+  list.querySelectorAll('.prop').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      state.certain.has(id) ? state.certain.delete(id) : state.certain.add(id);
+      refreshPropList(list, scene);
+    });
+  });
+}
+
+function refreshPropList(list, scene) {
+  list.innerHTML = state.shuffledProps.map(p => propRow(p, state.certain.has(p.id), false)).join('');
+  list.querySelectorAll('.prop').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.dataset.id;
+      state.certain.has(id) ? state.certain.delete(id) : state.certain.add(id);
+      refreshPropList(list, scene);
+    });
+  });
+}
+
+// ─── Utility ────────────────────────────────────────────────────────────────
+
+function div(cls, html) {
+  const el = document.createElement('div');
+  if (cls) el.className = cls;
+  el.innerHTML = html;
+  return el;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ─── Router ─────────────────────────────────────────────────────────────────
+
+function render() {
+  if      (state.screen === 'title')        renderTitle();
+  else if (state.screen === 'instructions') renderInstructions();
+  else if (state.screen === 'scene')        renderScene();
+  else if (state.screen === 'ending')       renderEnding();
+  else if (state.screen === 'fail')         renderFail();
+}
+
+render();
+</script>
+</body>
+</html>
