@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ledger — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:     #f5e4c0;
+  --amber:  #3d2005;
+  --dim:    #9a7848;
+  --bright: #1a0a00;
+  --red:    #7a1010;
+  --ledger: #eddcaa;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.hidden { display: none !important; }
+
+/* ── TITLE SCREEN ─────────────────────────────── */
+#title-screen {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 80px 24px 60px;
+  text-align: center;
+}
+#title-screen h1 {
+  font-size: 22px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+.title-sub {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 44px;
+}
+.epigraph {
+  font-style: italic;
+  color: var(--dim);
+  font-size: 13px;
+  line-height: 1.9;
+  max-width: 380px;
+  margin: 0 auto 8px;
+}
+.epigraph-attr {
+  font-size: 13px;
+  color: var(--dim);
+  margin-bottom: 52px;
+}
+.btn {
+  display: inline-block;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 11px 30px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  text-decoration: none;
+}
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+.btn-ghost { border-color: transparent; color: var(--dim); }
+.btn-ghost:hover { border-color: var(--dim); color: var(--amber); }
+
+/* ── GAME CONTAINER ───────────────────────────── */
+#game-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── HEADER ───────────────────────────────────── */
+#game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--dim);
+  font-size: 13px;
+  flex-shrink: 0;
+}
+#game-header a {
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#game-header a:hover { color: var(--amber); }
+.game-label {
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+}
+
+/* ── TWO-PANEL LAYOUT ─────────────────────────── */
+#main-panels {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  max-width: 1080px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* LEFT: DIALOGUE */
+#dialogue-panel {
+  flex: 1;
+  min-width: 0;
+  padding: 36px 20px 60px;
+  cursor: default;
+}
+
+/* RIGHT: LEDGER */
+#ledger-panel {
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--dim);
+  padding: 22px 22px 32px;
+  background: var(--ledger);
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  align-self: flex-start;
+}
+
+@media (max-width: 760px) {
+  #main-panels { flex-direction: column; }
+  #ledger-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--dim);
+    position: static;
+    max-height: none;
+  }
+  #dialogue-panel { padding: 24px 20px 40px; }
+}
+
+/* ── LEDGER INTERNALS ─────────────────────────── */
+.ledger-header {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--bright);
+  line-height: 1.8;
+  padding-bottom: 10px;
+  border-bottom: 2px double var(--bright);
+  margin-bottom: 18px;
+}
+
+.ledger-entry {
+  display: flex;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(154, 120, 72, 0.3);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.entry-num {
+  flex-shrink: 0;
+  color: var(--dim);
+  font-size: 13px;
+  padding-top: 1px;
+  min-width: 16px;
+}
+.entry-body {
+  font-style: italic;
+  color: var(--bright);
+}
+
+/* Collapse animation */
+@keyframes entryCollapse {
+  0%   { opacity: 1; transform: translateY(0);  max-height: 80px; }
+  60%  { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 0; transform: translateY(6px); max-height: 0; padding-top: 0; padding-bottom: 0; border-bottom-width: 0; }
+}
+.entry-collapsing {
+  animation: entryCollapse 0.65s ease forwards;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-collapsing { animation: none; opacity: 0; max-height: 0; padding: 0; border-bottom-width: 0; }
+}
+
+/* Final red entry */
+.ledger-final {
+  padding: 10px 0 0;
+}
+.entry-final-text {
+  font-style: italic;
+  color: var(--red);
+  font-size: 13px;
+  line-height: 1.65;
+}
+@keyframes finalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ledger-final {
+  animation: finalFadeIn 1s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ledger-final { animation: none; }
+}
+
+/* ── DIALOGUE PANEL INTERNALS ─────────────────── */
+.speaker-label {
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 16px;
+}
+
+#dialogue-text { margin-bottom: 22px; }
+
+#dialogue-text p {
+  margin-bottom: 13px;
+  color: var(--amber);
+  font-size: 15px;
+  line-height: 1.65;
+}
+#dialogue-text p:last-child { margin-bottom: 0; }
+
+#dialogue-text p.stage-dir {
+  color: var(--dim);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Inline stage directions inside regular paragraphs */
+#dialogue-text span.stage-dir {
+  color: var(--dim);
+  font-style: italic;
+  font-size: 0.88em;
+}
+
+/* ── CHOICES ──────────────────────────────────── */
+#choices-area { margin-top: 6px; }
+.choices-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.choice-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-top: 1px solid rgba(154, 120, 72, 0.32);
+  padding: 11px 0 11px 0;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--amber);
+  cursor: pointer;
+  line-height: 1.5;
+  transition: color 0.15s, padding-left 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.choice-btn:last-child {
+  border-bottom: 1px solid rgba(154, 120, 72, 0.32);
+}
+.choice-btn:hover { color: var(--bright); padding-left: 6px; }
+.choice-btn:focus { outline: 1px solid var(--dim); outline-offset: 2px; }
+.choice-btn::before { content: '→  '; color: var(--dim); opacity: 0.6; }
+
+/* Gleam sweep on reveal (matches Euthyphro game) */
+.choice-btn::after {
+  content: '';
+  position: absolute;
+  top: -10%; left: 0;
+  width: 100%; height: 120%;
+  background: linear-gradient(
+    108deg,
+    transparent 30%,
+    rgba(255, 255, 250, 0.72) 50%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  animation: choiceGleam 2.8s ease-out forwards;
+  animation-delay: var(--gleam-delay, 0s);
+  pointer-events: none;
+}
+@keyframes choiceGleam {
+  from { transform: translateX(-110%); }
+  to   { transform: translateX(160%); }
+}
+
+/* ── CONTINUE BUTTON ──────────────────────────── */
+.continue-btn {
+  margin-top: 4px;
+  background: transparent;
+  border: none;
+  font-family: var(--font);
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+.continue-btn::before { content: '↓  '; }
+.continue-btn:hover { color: var(--bright); }
+.continue-btn:focus { outline: 1px solid var(--dim); outline-offset: 3px; }
+
+/* ── CLOSING VIEW ─────────────────────────────── */
+#closing-view { padding-bottom: 20px; }
+
+.closing-attribution {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+.closing-name {
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: var(--bright);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.closing-hr {
+  border: none;
+  border-top: 1px solid var(--dim);
+  margin: 0 0 24px;
+}
+.closing-body p {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--amber);
+  margin-bottom: 14px;
+}
+.closing-body p:last-child { margin-bottom: 0; }
+.closing-body em {
+  font-style: italic;
+  color: var(--bright);
+}
+.btn-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 36px;
+}
+
+/* ── SKIP CURSOR ──────────────────────────────── */
+#dialogue-text.typing-active {
+  cursor: text;
+}
+
+/* ── PORTRAIT ─────────────────────────────────── */
+.hume-portrait {
+  display: block;
+  width: 220px;
+  margin: 16px auto 6px;
+  filter: grayscale(18%) sepia(42%) brightness(0.88) contrast(1.06);
+  border: 1px solid var(--dim);
+}
+.portrait-attr {
+  text-align: center;
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 36px;
+}
+.closing-portrait {
+  float: right;
+  width: 120px;
+  margin: 0 0 14px 22px;
+  filter: grayscale(18%) sepia(42%) brightness(0.88) contrast(1.06);
+  border: 1px solid var(--dim);
+}
+
+/* Centred dialogue portrait */
+.dialogue-portrait-wrap {
+  display: block;
+  text-align: center;
+  margin: 0 0 28px;
+}
+.dialogue-portrait-wrap img {
+  display: inline-block;
+  width: 200px;
+  filter: grayscale(18%) sepia(42%) brightness(0.88) contrast(1.06);
+  border: 1px solid var(--dim);
+}
+.dialogue-portrait-attr {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+  text-align: center;
+  margin-top: 4px;
+}
+@media (max-width: 760px) {
+  .dialogue-portrait-wrap img {
+    width: 140px;
+  }
+}
+
+/* ── FADE ANIMATIONS ──────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.6s ease both; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ TITLE -->
+<div id="title-screen">
+  <h1>The Ledger</h1>
+  <div class="title-sub">A dialogue on induction</div>
+  <img id="portrait-title" class="hume-portrait" alt="David Hume, by Allan Ramsay (1754)">
+  <p class="portrait-attr">Allan Ramsay, 1754</p>
+  <p class="epigraph">"Custom, then, is the great guide of human life."</p>
+  <p class="epigraph-attr">— David Hume, <em>An Enquiry Concerning Human Understanding</em></p>
+  <button class="btn" onclick="beginGame()" aria-label="Begin">Begin</button>
+</div>
+
+<!-- ═══════════════════════════════ GAME CONTAINER -->
+<div id="game-container" class="hidden">
+
+  <div id="game-header">
+    <a href="../index.html" aria-label="Return to Philosophy Games">← PHIL. GAMES</a>
+    <span class="game-label">The Ledger</span>
+    <span></span>
+  </div>
+
+  <div id="main-panels">
+
+    <!-- LEFT: DIALOGUE / CLOSING -->
+    <div id="dialogue-panel" onclick="handlePanelClick(event)" aria-live="polite">
+
+      <!-- Dialogue view -->
+      <div id="dialogue-view">
+        <div class="dialogue-portrait-wrap">
+          <img id="portrait-dialogue" alt="David Hume, by Allan Ramsay (1754)">
+          <div class="dialogue-portrait-attr">Allan Ramsay, 1754</div>
+        </div>
+        <div class="speaker-label">HUME</div>
+        <div id="dialogue-text"></div>
+        <div id="choices-area"></div>
+      </div>
+
+      <!-- Closing view (shown at end) -->
+      <div id="closing-view" class="hidden fade-in">
+        <div class="closing-attribution">David Hume</div>
+        <div class="closing-name">1711 – 1776</div>
+        <hr class="closing-hr">
+        <img id="portrait-closing" class="closing-portrait" alt="David Hume, by Allan Ramsay (1754)">
+        <div class="closing-body">
+          <p>Hume's <em>problem of induction</em> remains unsolved. No philosopher has produced a non-circular justification for the belief that the future will resemble the past. Science, logic, probability, and common sense all assume what they are trying to prove.</p>
+          <p>Hume's response was not skeptical paralysis but <em>naturalism</em>: we are creatures of habit, and habit works, and that is what we have.</p>
+          <p>Karl Popper tried to eliminate induction from science entirely. Nelson Goodman showed the problem runs even deeper than Hume thought. The debate continues.</p>
+          <p>The ledger stays open.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn" onclick="playAgain()" aria-label="Play Again">Play Again</button>
+          <a href="../index.html" class="btn btn-ghost" aria-label="Return to Menu">Return to Menu</a>
+        </div>
+      </div>
+
+    </div><!-- /dialogue-panel -->
+
+    <!-- RIGHT: LEDGER -->
+    <div id="ledger-panel" aria-label="Evidence ledger">
+      <div class="ledger-header">Evidence for the<br>Reliability of Experience</div>
+      <div id="ledger-lines"></div>
+    </div>
+
+  </div><!-- /main-panels -->
+</div><!-- /game-container -->
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// PORTRAIT (Allan Ramsay, 1754 — public domain via Wikimedia Commons)
+// ═══════════════════════════════════════════════════════
+const HUME_PORTRAIT = '/9j/4AAQSkZJRgABAQAAAQABAAD/7QBIUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAA8cAVoAAxslRxwCAAACAAIAOEJJTQQlAAAAAAAQ/OEfici3yXgvNGI0B1h36//hABhFeGlmAABJSSoACAAAAAAAAAAAAAAA/+EE32h0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8APD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0iQkU0NDlCQjgzODg5NDkyMDhEOEY1M0FCNEM0REVBOEUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RkRENUY1MDREMTcwMTFFOEFFQ0I5MjJENUQyQzZERkEiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RkRENUY1MDNEMTcwMTFFOEFFQ0I5MjJENUQyQzZERkEiIHBob3Rvc2hvcDpBdXRob3JzUG9zaXRpb249IlBob3RvZ3JhcGhlciIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSBNYWNpbnRvc2giPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpkNTM4NGUyMi1lYTQ0LTRhODktYmZjYy0xZjVkYjMyNGFkZDYiIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDo1NTQ5ZmZiNS04MzI3LTcwNDQtYTg4Yy0zNDg0NGE4MTllMWQiLz4gPGRjOmNyZWF0b3I+IDxyZGY6U2VxPiA8cmRmOmxpPkFudG9uaWEgUmVldmU8L3JkZjpsaT4gPC9yZGY6U2VxPiA8L2RjOmNyZWF0b3I+IDxkYzp0aXRsZT4gPHJkZjpBbHQ+IDxyZGY6bGkgeG1sOmxhbmc9IngtZGVmYXVsdCI+RGF2aWQgSHVtZSwgMTcxMSAtIDE3NzYuIEhpc3RvcmlhbiBhbmQgcGhpbG9zb3BoZXI8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/Pv/bAEMABgQFBgUEBgYFBgcHBggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/AABEIAXABLAMBEQACEQEDEQH/xAAcAAACAwEBAQEAAAAAAAAAAAABAgADBAUGBwj/xAA9EAABBAEDAwIFAgQFAwIHAAABAAIDESEEEjEFQVEiYQYTMnGBkaEHFEKxI1JiwdEV4fAzciQmQ2OSovH/xAAZAQADAQEBAAAAAAAAAAAAAAAAAQIDBAX/xAAoEQEBAAIDAQEAAgMAAgIDAAAAAQIRAyExEkEEURMiMmFxFDNCUoH/2gAMAwEAAhEDEQA/APgcm5pu+y8yvRhGuIKlUPvNZSG03uB5TOCHn3RAgkRohL8HyUQA0ur1H9E9jRDIG96tObpdRmfMS48rSY6TarsnuntItCNjRwFNo0YKRoW90GZoDqygGbGLOUbgO3F1Sm0SG3A2AMKVRW6rFBOKQf8AnsgIAgkd7FEIhVAAAnujQBhPCf0WhET/AOppA8o+oNLmOIH+Ye6jZzcWNAOQSPYpVeOQB53V2RtXvhi6sEpbo0hJHfCNkUOJvsnsaEOKNgbKey0DnHsAlsaIXE4wqmSLFJa0EguLfZPe/wAKzS99VlTVQlJGIvg0gIeMBIykEphGjHhBGJa3/ko1afiiSYmwFpMEXL+lJ3OJtV4kQ2uUtkYBBggCEAzccqR4IdeEaB2NNpWiGI88qZT0jCO6KYgNJwUtiQ2PAQaAA9kACPCCKWpygu2gU9hADaDWxso2VNo0uc/Hn2SUTa0utEpeo4ba9Vk9k/S0rLwHEOT0culjQKu9zULl2JBHCWgCAICAJCCLXIPKZlY31EFOJB1War8omVK4w724rv3RSiscqTE0QfTnyiGAwUxsCT+EArsCyqxhb0pI3nvSuaiLdj8vb/ynsjAAA/7pEUNQaV4CBE24SAHCAg4QBZeUqa0OP/8AFNAEk88Ih7ACzjJTGtmMbmfU1zfuCEt7V82eoBlBGbYUgwKANJGgjs8p7LRxGByls4m2ic4SGgNe6AgwPPsnseCKcKKQI6Kz6rIVTIFi3MJOdvhPYnS1rgeLpCp2h9kjRqIBu0xEHBxachFAJcTkBEIrg0mxf6KT6q6RqvJOKms5UGB4oIhF7Jgrn0njjsrVRO4rTxHph6VPppRCAIA5pBJtF3lOASzwfwjYEim+SiiKsJAQO5Rs10MT5pAyJhe88NaFPnqscbldR14OgSlu7Uyti/0gbj/ws7yT8dmH8PK/9XR5egUfRM5w8EUUv8jT/wCFP7a+n6uLpwbBp9K18xPqJy5ym7y7rbDjx4+o6+t1M2p027+Rn07waoMJaR5yFEjWYz9cOeN8hLdRoLPHzI2Vf47FXP8AxUXhxy6scXVbYZizaavG4UVpj3HNn/Hk8SNocLabCHLlh8+nEYPJpCDtjAqjacJJGnJKKJVZFnIUhAwoAhtFAKW5QDx1dIMXsBcawSnCV0WYrH2TAW2zRTVKFVkIgFpu/IT9BrwnCThFBDKWkgKbJTmVh5nmyTyU8u049KLtSY5pBK3kNGVcgtV2XKt6QZoA4U90eGAF3ygA5vhEoC6wmRmo2Esj7ogQ8ZTCsY+6QggIN63oMMOn6FFqWj/HnnexxP8AlFVX7rn5Lblp6f8AExkx21zSUQDx4UR3Ot0bpeo6gx3EcAF7niv0R1GeWem9k2i6YXM0ULJdY7BkOdg9vCn1Mlyu65nUeuSPeYInOe4/U7/YJzFpMYrj6jM0bi8Njbw0nn3Kej0o1euj1bHHXQwyQn/Owft3RjNeC4yuW3pOj1D9+j+bATw2i5tfcrT6v6xy4pWLWaCTTyOaHskA/wAp/uETLfrh5P4+WN6ZAA0ncDjwqjnss9DPdNI1aQQt8IMKxWEgmzNICVVikgLQb9k4AmDS2rvwmIwSBzTnsrmqDxyBwrujWjixvKcM4FoxBvNIJQ4AHIBKkLHi8lFpSFa0cKTB5AaR2AVQeMjQXuV70hZtHF17pT+wgFHCNkY0PCAg8oCYJygCKqkADXdVIkHMs4OEwAAtI3V6T0z+aifM8n5bXbabzfusc89dR2fxv485JvKvQCJkenihYNsbSSB7nv8Assd7r1McZjNRv6LoRrNXJPqDt00ABcXdz2H+6Vuiyy1NQ/XPiQMhfBoiWxDBIwXFGOP9l8yduXBI/wDkGiNu/V6klx7bWj3VfvZztYzSt0kJdK/fIcuI8onavVWk0+q6xNt0MDjGDlxGB+nJTup6dyk9daH4fkNh0Woncz6nNiNA/fhLabnK2R9J1LojDpIDE3u97gP3KnZfUcmXoMURL9Zr4wQctYQ40q3tHzK8xrhE2SQQ3QPpJPKqIzwx/VUB+Zg1auV5/Lx/N3D7SDwmxE8VSQIftSRjVgcUkBA7CkBNmeR+EQF2Ua5CNhXLEHiu4TlDG6J0ZsdlpLvqnrXi1psWPyjZxNzh/TaJ4EO88YQD7QeSLRIWwfiwppA0bWm+Sg4zSHcSBkd1c6RRY2krQByUQGHBVaTtKtLw4hBwgILBQBBscIAtAKcJDwaT2AGeRlIR9G+FunF3whFPonwDUvkfubKwEPINbb5Bqlycl/31XqfxdfClrf5vVCGSD5eoGCGj0jyTfCXjrk0r69rmabTnQaM/4TDueby93FlOT9on91m+HvhfU9ajbqp5Y9NoyabbqdLRo14z3TuUxRbbXsOm/Cri5wnli00QIbUfre6uGgcAKfo7lr8dPV9N+G+nb/5psuscB9BfQv3P/CmW/gn3lP6crU/Emt0Zhi6fpYdDBqG74GsO81Zo5x2Van6U45+uFret9b12pZp9RrZj8wmgDX5wqmoqYY4+OZr5pxM+IamSRjDttzjn8JxUYNTO4Rltmh+yDcVztwJ3WTlVGGVICWuDgThUyzxmU1XTiIkjDgeeUnBlj83SFtXlCdE4HCQKRg1SRyJkeEDR7PfCYGt11wggLB35RAqlhDh90zlZNpY42qlUcUWghVCSjYpVIAMd/wBTh9kTFInkkqaTPK6/yiQbIBSC2iAlcoJLFeFQAGgkDsI5KAl2noGT1okrFI8CAcBIHLTtVaKV9D/hlLHqOm9Q0MtExPbK0HwRR/cBcnPO9u/+Ll1p0er/ACemNLYC5zZhuc8nOP6VlO3o49zt5DofRtT8Q9Sc4OLNPuL5ZOzW/wDPhaW6ifzb3sWkh0LodFpWubEyzGCbrvz3PJWVu+1wms6mzRaPUahjyfl03B5tORWtuIL6hp4p9dOIoZDuEcfqkeP9lW9eH54Gq0+t1fUmzmBsMUbflQxveB8toFCz2wn1pM0p080bZtTPcbxpIyN7DYJPZGhXBjLptY02QGgvkKoVzusakP2tYa3ZdjlXhEZZOaDg1dKmNPV1aRWNWgeRNsu2uSrn5cett7mc9kTtylEdYtGiAN/RGgUMznhTo02Czmk4BjBF80nCR2OSgAK7oCnUR20muyasb+MsVjBVShYKySrhDyqhKpjghRE1mbkkpUIBSCQDygzY7eEoFZH6qtjSAflBCiAzCAMKiFuSgGCQFmTaAtPhUTpfC2tn0HXNM/T2RK4QvaP6muNf91nyY7xb/wAfLWWnudfC/Wv1UAy4AyMH2wf7hck6e15E13VItBpmdG6KHCRjWx2wCnvPJJ7lEm+6Ux1PqulN0j4g1MkUzICxrmAvY4gi+9d/7KfrHwpmbT/BfUN73TPh+XLkxk3SPsXk29BD8MwR9MZo5ZnyMYKaSAdn/tJFhT9XbPd28/1X4WLIphFO54e3+tuR9iqmQnJZXjdfoZtJppNMA1sQ9ZIJJeQaytcbK0me+448ko08L4Yj82aQ+vYLoeFUK5a9cp+nllkIMUhNZABwql0z3Vn/AE7UltmPY3y40nKWlMjPluLXGvwgWE7mkIsbtLqy1uyU23sfClhnxb7jWC17baQR7Jyuayz1ADWMoIKNJGA7oAWR90BCLHlBIKA9/wCycAO72gRjkZTvZONIDcrSJo0VaWKZ1kgd1M6SjcBQEHBTIa7YSMLonaeyBCqoVTsnAnakeCHYMeyXp+CPPZE6K3Y1d1wjYNH3pEI10MqoHS+GGtk+IenNdhvz2Wfyp5L/AK1v/Gn+73XW3T6GeSaAhk0Mge13tf8AYhck7ezrcb/4a9N/nur67rEzAGh5bE0ZDXHLq+wNflLO6mmWd3dPqkcI2jlYqxxARAucQD4QfyqlhIHejm0xMY4PU5GttufzwhOWDwvxCwPFVht4IWmPTGW4+OFpHRNeIJGNiY4gBzcAfdXtWOc/XN6rr9T03VTaaFoYA769tblcm5tTkydQ1UpNvt3lMbUNgdI7fNJkp/Ra2d2njAJByi0TFRI1oNDlKVOWmvpgcS+x6UOXmsb6wm5iONpGBF/hALisjHugi1WBkICEY5QEwRhOBW+O2lEVKz1XPIWkoqB1CrWkTpz2DdISeFOVTFhq1EBTjhMi+c8oAXSegIs2nIWz0a4TgKxpOCptNZVYGEgUE1zhAEm0jPH9sK4moccJiOp8KG/iPpw/+8D/AHWfJf8AWuj+L/3HqPiTXSa+QshtscILZJAcOzhc0mnsyfj1Pwx1mDoXQNJp2x73bPmyG6ouN/rVKLLa5sspja60X8QdKZmxHSTsBxvJ7o/x1U5p/T13T9WyfRtmjcXMeNwPBCjWm0ymTh/FXxXB03RFxG597WtHcp44fTPLP56j5874q6lqyTFoyQ7ggWtZxSfrG8mVcrX9Y1Vk6iEhpwcZCfzGdyscwzs1BJB57J60X1trcBqIH6WXMobuifWTXLT/ALIla8eW+q8tIHNcQRkYIpUq0plINcpyDaAl3t7Jla0aXT/Nf7eVNY8mfy6bGCNu1oACUctu0cDhVKlHMv7pBSQQnAgyEyIW/dIJRvn9U4AaMnwgCPBRAzyR0+8K4v2KzHTiCAfwtJGbDCAAScqMvU4j5NIkGyG/OEy2W0BAM55TNaxvsmlZ25CVpkJAwCpMm5AC74wgxZfbKRGBz3VEsuhhVCaujar+S6rpdSeIpA4/bv8Ass85uab8OXxnK9f1tjmyx6WFrGwOcC3Z/VfBXPL+val/Xr9JqNH8PaUv1DI90jrc+RpdQ7Cln3l455J3a16T4g0fWopP5XRiRsf1E6YsA/IuvyrvHlj6yx5ePK6j0/QWB2kfTdsRbY8LKujH/Xp4r5On13xP8jUsMkYcTs5BPbCcqM/VXWOrN6e1wbopjGX/AC2/IoNaewJ7la8eFz8Z82ePDrbzHXNVqmTM+bpn/LLQ4h9OoH/UOPyj4+UY5zOdG6d0L+bd89gLYxkiv2S+vwXHTL1OMw6j/DJaWmwfBThS2XbhdU26m9SwBrwakaOAfIVxt9fXblFpuxyVUoXRxGxZsnslaWV1HY0sPy4q/qKhx5Xd2tc2k4gG+6cIcZwmCPF5HKNBS7BNjCZF2msEoAC8gogQDumEGRaAqmFsuuE1Y0gmDQARauZFcXOGG0Ea7Zfg0TgBURQwltd0SdDZBGcpaNY2MAeU5C2lkEnkICtz9xU6MOEHABycICBAhozzhICLz5QDtPpocqpSFmCpVK910+Zmt0PR3EOdO2T5b3HimmgPfsVzZzVr1uLP64n1rW9K08x0kpijMjDYJF5WMuj6vrT0rosWn+YIQyIPPr2Dla3kyvrDHh48buRt1Mo0sD2Mra1p/VY114Y291810s50/X3akd3g/oU/xGU3a9xqIIdfpHGMMEZp20NwD9lUtnjLLGZdZTbyXWOjfNfepldKxpsMAoX9kbqscZJqRr6fpmaXp73yMDXOzygrHz/4jlB1j9iueMq81rHGOVwB9MjaIWkGF70yxD1IbRs0Td0/AoKax5r06vATcgOymkiDBpyeyey0SQ48BBq65pOUi8cYKAANolAkVdJkDfpRASUhrDfhBwkewMAO3hKNppzQ0bvYLb2uX8WgN2kk5TpENDuiU9FAx7I2SOd+AjY0pLiU4YsYDm0tEjvTYCRq7KYEBKg7PT2SB85tAQBAFnKDdv4d1rtNrIY3E/KdIHf+13FrPlx3HT/H5Nf61980uq3sZfNBcT1ccJY6+jmAY4HGOUUfMcDrOpLdJqHE9iiTao+b6LqbH6ib5l7QefHK0+dOfe6+ldNdt0kTmO3sLQQ4Gw4KWkx3Ca2aJt+hoP2QqYPL9a6jUUgDseyrGMuR851sxl1RNp1zuf1HJYStcWdumSMkJ1vjenV6XH6XyH7BQ5+a96bScJxgATT4WhRtAhO+EGhGDaICFlGwcJwi7bCYJx/ukB4CZFf5QatwLm+rsglMgp5VRpGC8rTxzwzbpLZj7I0aDikaBSPc2n4kpbu4wmADSAUgrN90GFIBhdpBYMisFAMRhMkakYjBQGiFxa4Ecgg2i9qx6fcehasarp+nnafqYD+VwZY6unucGcyxd6Od/wAum2T9+UmleV+JuviHo2pjk0MjJHuLdzwb/CrGM7l0+b6DqzHQTaYQO3OyHgfstfm3thMo+ifw2Guh6NNFrWlsXzLhDvqArOOwtZ5xpx5Oj1d5bG+z9rKiN7eng+sTfWCSAto5c7t5km5XFT7WLN1A+ptgrXFnWaJhLwBkp1WN07mmZ8rTtaeVDDK7pvqu0IN4pUkCAOEAhHJSMpN82noAQfOEyKQe2E4Cm690Ao4QCmqQCPto/wBkr0FTml1E3wql6Dm+bWtZ4oHU7KUFODaYKLvBS2ekrKIQqiA4u0gqPKRxAEBYxtohHIx6eBymALgMJWnIgwbCcI3cWgRbEaNpVUfVv4car5vSnQk+qJxH4K5eWd7eh/Gz/wBXtGPDCwHAJ5PdZOq5Brmxahny3FpBIJBomvsql0n5uTzuo0fTtLqyYfksPPbBVys7i0wdRjkLoYHt+Y0XtBylrZfVxP1BxOhD3gB1ZSkV/k2+e9Xtzn1wqhWuEwerPKieoqnUxmSZoHha4oa9PpWRAGgXItZZZb8aCA4X+ySAFA0U4VMM8JkUjJygldc90CGFZCAUDmkwVwNZTgIePbymCdikCO5ykCO5KVICa7H9FcDkuFFa1EQJQxuuEBGnOUSARd8pxNQA9kwV4P6pGUt8pSAzWqtFtZx+iCAVVdlJkdROEjgjjlOA7TYT3sLI6Sole4/hvrRB1F8LjiVv7hZck6dPBlq2PpkoZqdjXk7W+DSw06pbXFl6YXzTGLqBYeKlN0nt1YTG49uV1Ho0Wk0+ybqhlvsAEHlMdKeiaDS6fUfzELXySt/rkOB7UntzZ3+3X65r3SQURXp7BDKV4jXH0+rJKIdrjjDiUoVq3TsBO82TwrnjLO/jRVflJmUtBN0gh2jFhOEm0ZTBSAgkHdAKR4QAzZwgFJ5TCs/mk4CVg0gE2u75S0FdEE3dJaAuaVcJyXdlaU7lMho0kaVQwnCophLNoIDZNlMhNYQEGAigM3kpGhwUgUlI4DTbigLGnJpOULMfhOiOj0bWO0etimYfVG4GvKize4vG6u32bp+sZqdPFPG62vFilz2O3GrJ9JpZ3F07LJxyp26cJWHU9P0LWUyK65JNolPVY5AzSx7mkAVmuFTnz9cHWdUD2lm7cSaFIQ4Wtk+ZI4DgIFY3elHgi/TkCNv3VyMc72tBCSDNoDISBCbCYAZThAOSgtIcdsoCfcEJwg82EwV4FWEeAhGMJgpaMoCraQDlAFoxRz7pwgJLcVaNG4Z5VoHhAEX2SMOyZD2z+qZIBacgKlSMBi+6cAnJKZF7/ZRtQHvaDVm0gdoCAZpCIDNT2a6I7XA8JbVJ0+jfATdcemzTfKdJoWvoVyD3r2U5477jTDP56rvz6p4jLohvb98hc9x27MOT5c2bq22L1MdY8qdK/wAjgdU6lqNUwxxB237UFcZW7cwNLM2S+kyquQht7jkpFO1LWPly0YPfsESXIZWYtG35Za27xa01phbvtYwjKkkcUSEHYZQArCYShm0BKJHskRXGxQTCNJIrkKoSOHccJkQZCRlePKYVnhAAGimFb2Oc6wRSNDenHIVxAAYKBECRgchBCPurhHApt90ypTgWkE7ZTCAZS0CnuAkZSfZSYDlBiEAwyp2NLoInyYYLU3LTXDjuTfBpGty827lZXktrqx4ZJ2+1fwo1MOo6E7SBo+ZA8kjyHZBWuN/XJz4/OTudb+GItY4yaV38tqKJLmjDvuE7JUYclx/8x4Lq/S+saHdv05mYD9cfqCzuFdGPLjXmdTJq3DbIxzB4cKRMar7xjG6J/dwH2T+S/wAkRkDLBLS4+Sj5kK52tO303QCtmyTG5gR2CPSvQjuoCUUgGa4QaflMkOB2SAdigkGBaogbwaThARhMAcCwgyvukErIFZKDJiyLwmAL6PBKC04h59ldukSbAEgFI4I8eU4BGDlMi3R9k4Fm70i+fCpOiOJJSpxBWQkBJ8opwozkpGByfCk02pAzWqdqmLZpdIXm5MAdlnlnrx0cfDvuugxrWCmimhY7265JD9jSP/Ru18G9cl6H1WOdhJhd6ZWDu3/tyteLL8rm5+P6m4++9P1kXUIGSQvB3NsAnsVp44NLXwkh4MYLa7FOUq43UOkxTg3G5o8fLDgrlG3ndb8KmRsjtNo3y7bNYbZ8Ad0+jmTxmp6ZrpIZJtPopzCw04tiOP8AdRWks/XEDrJskkfgBS0ec1fU3t1z3Rm2N9IxyqkVqfrfpNfFqBQpj/BPKizSbjpq3cpJEeEBEgTI+yAN4tMkJwmSMz3TkIQbBtMFIwf7pGqfYwEAtnkJwK9xsg0gKZLa80LvOSgbcly0QjfdIbWe/dUROcogTbaZGrGUAlUEjCz+iNmgBNpAarlBwQLUWnMdrooHv59IWdzkb48NvrbBp2M9/usrna6MOORpAoUOOFDWISbrsgG5aRwE5BstlotpyiXXhV7D4P8Aix2hazTal22KwGvv6M/2W2OW+q5eXi3/ALYvpfTutyMqA6yOaSQXFuO4E+NyXJ/kn+2E6cvH8S/HJVk/XZIjs6hopIj3cwbgPuAs8f5Ml1lG9/i7m8K39I6lA5x/lp4JJS6xFe0u/Vb4c2GfUrn5OHPDuxy5Xu0XX3SykiWd5L279wjB4rGFqU7xfLP4lR/yHXte5oIZKRIwcAlwyR+bWeU7b8PcfOdhcXeVW9NdEbbTafqb06vT+php+XOSW9ndwouKbNuw1wcNzHAg8EFSjSA8oMO6QG6GVSQxScAN5TIXZKABJpI1RtIAb5tOBSTl1IBQ4AZIv3CqFXH5bavSIjfuiQUxN/dOlBxtruU4YH0hBIeMoAGsooDCk0SqpFsUbpPZvlZ5Z6bcfFv1rihDeBnysbna6ccJPGhra9yoaaWN79qSNCSeUGjTZTLa0NF5PpT0NqpKzSCtUhxF/wBghO3b6H8Qavp0UkLHudp3iiy+PstMOT59Yc3DOWdXT2vTfjTTTv07Zg92yOj802QR48j7rDn4pyT6k7afx8MsP9bk6HVerQ6roLgWxtcC0tk2Ddtv/wDVyf8AG5ePhy1njvTL+Xwcmcswy9aelak9VYwMLtRKGbjIx1lwBqzffyu7DPHOWxyfOXHJMnyL466pN1L4h1T5j6WO+Wxo4a1uB/z+Vn7duzDGY46jgxDBpKqil4olXEVS4EEq4z016DXSaU0Tcfgqcsd+HO/Xe02oj1DNzCD5HcLLVLxYEEbNJwi3QopkANJgSgkB9KkycFOArxbEwz4aTn91MNC4DutJ4hyKt3sq2mQh+pEMwQSBENO5KokvCWwBdXKNjQWp2qRoghLzZHpWeWWm/Hhvtvijrsue3bqkWsw04UriNNi+EFBAoflM4juD7IAMsn3RChmO8pyhHgkkgfcoJQWY5+6EnZRGf0RDhyQBybCrY016HXzREwSTuZpZaD8XQ8pXGZXtN3p9A+Gns6BNpB0vUPkdJuaJJar1UbAHZb8VnccXJOt18q+IC53WdYZMvMrr7ZsojpnjJDwaU1UBzLOU5U2KHt8q5S0QNzXYp7KRGSSaeQOjJBCfVTenW0fVWvAbONp/zAYU/Gk2b8dIOFYILTwVKBBFoCD6uMJg+DaCITTfSlDVmxm0wjpABWEyY5pAHcY8qP1TOd9naTX3VzZMzgNg85VRCo4KBEbi0GYd7PCISDgqiC6CR6LySSlTkWaeMyPoceVGV00ww+nWgjAafTgLC3bsxx1DkUPChaO4A7FApXO7eyCtFhsoOCTykBBFcqk7Vufg0kNlZKQ0gnlMtpu9JRALT6TlAggixZQZTkEE8hAr1XQtW8M08czgdRpw1xBJDmtugKOD2yteOT6+o5OTz5rz3xnp3af4i1zXCreXAfdV+1eN3jK48Z7BKrlNYrhIbUSOJNUGtHYK5E2hQohMh2h7avKN6HqjZTj7K9su5W3Q6x0BDH2Wf2U6VZt22va4WCKpJkNgIAWTwgwLqx2S0FTpG2R/dMM0k/PBQNMznFxJUmdlltg4VxLK491aVQzaQiDmkBBk0iA/akyKRaRi4YAHKSpG/RxBoo4Hlc+eW67ePHU02tcCK7KNtYSZ/CPRTE2avASHtUu5PuiJ9Mx1NJQcLuJPunogcSKHlGiKCQUwQnBTJA7BRoLY3N2m+UqcQbTeeEuwgbnKA7Xw62LUarUajUyyMEMDmta0WXOI9IvsMK8ZlP8AllZMpb/Sz+IMJdrtLqhkTwtN+TS1z6rPh7x1/TybGFwN4HhTbprIhxgDCISt7eVUpE7YTILIcnotjIByEYpy/sjhuanOi/G/pk9gxOOR9KKVm5t0w491KULqF7gAgKJZbNgoDK+UlLs9KvKAVzhWUBdGRt5TiWV59A8q6meEGEAOEBGogOMphORhI4t0se95ceOyyzy1HRw4b7roDAGMdgud1De1wIRBelWof3OBeVWMTatBBbZ7pZeqx8JfugkHCAUmjyghcbRAWzX2TAHGU4Fbk4RonULrdR4RrsK9Tqd7iWtp4wCFWOH9lbtoa8naXc1ws9K29N8B/wAtDJrZdSHtNtDXbtrauzfk8LfjyxntcXPMvMZ+u78adLMvwboNdECY4dgDv9Luf0ITz1ro+HL/AGsr5rxfZZOpS85KuIpDfIThFPftaZErKpNN2SCqzdcKme/wgc5sm5pogp/mlSadzS6oTRAnB7hZ3pNCR2eceEiUPdZ5wgyEgFADOaSBH8eycCyOtqCZybiaebWtRAPHukAHCAhuyEGYcJkgtxod1FqsZt1IYxHEAOVz53bvwx1NLDW4BQoJWmieEQWMs3qYVpj1UXxoqmAAVhZ/q/woTJPPZAK7lOEjTk2jQTz7oBb/AETIHkYTgGMEeyVoE7CQ4Bu7zSOwmMWgOzpdVPrelHQQaZz2wOJuNgtxJvJWdxmN+rU7+unt9PqJZv4Yz6CWL5b4aY4kkh1m7Hvf4XXNZYbjkn+vL2+VvH6rKOtU4eVUTYq7qgDhnkIhaVnyqiLDNIcy7yEeU1MpzavGMsp2BH7oazxZpJfluI7HBSym0Vv3FwWSVRNnKYKTd5QBBxlIRW40FUJazLRykGYO9AC1y9RBHCUA9gg0I8JQJfpT2Iu0bPmTDwFnndRtwzddRtknwFzOyFbhp8lAC7YWuP2TLbHzLt7WtPzaP1suyso0KEyKmRXcpwFQQEoCZ7cJgpKcI0ZJaSUqcAHJygGc+yAOyJA9x8EMil6LqRs9bJyXOabJG0UK/X7rHkne2cvdfS+hsZqOjs0shY2EB7JA5oPkmx9ja7eLvjcPLdclr88ymyHNyHCwVlr8d8u5tS+7pxAPjkqoCAOBsCvc8p7gAt5pEoV1ZoK0VWwkPIvhO+JCYEnKeJXsgN0fCpON7KTTz4RPBfXQ08lsH6FY2apG754UgvBTAgYSBRR5opktYDtQbM0AA0tKzMxt2noQKoZUmjeUBCUjb9AzbG51ZWWddXFjqNjG2MnCxblnFOweyZVU7Lf2RCZif/iY6Wn/AONT+tffJWUWBQFZOVUKgbKZFGEwA8oAj9kAjhYNJwjM3UWtaSUX+zhIZA8kAEO8FO42FKcUSkHqehS6CD4d1LojKOpun9Tt5DQwDGLqyfKyzmVs/pHX/wDXtfgzqmo1HQOrySEuZHA5rX1yQ0ix9hhdHD5py8+P+23x6AAxbGkgso590sr3t0cfc0NNZdDJ5PlLdrTxW4i04VVPOfbsqiVDiQcrSdkruyaVIqE2MlEhUoOU0Tqpt3Eo3petrNPJtcWngqcpuE1k4tZEPKQQBALeaTDbp2kx2nA5zDtkI9qVpWsOU9lFdbkvSGgAaKlQMFkDyaQMZuutE0BlBc2XrvxnTQxwpJUUyW9x8cJFVbxxXNpwqoiIdqbHZaZdYpl3WqvUVk0K4UEyVpkhODhOAgOcpgN2EEnikEhGK90wXc9oJZgnB90SS+jtQwSumDjYo5taXUmk97aRlwCz/FPefw9ZDJ0PrTBpmTai8CQbgcYBHdVOpuue6+47HwNptToeqanW7oooYNOZZoxQjaMktIGBgEpcVmW60/l5Y3GYx4H4pfoZvinqM3Sdo0LpiGbRQ+49rRl5plxblm3Gk9IPlEdDOXc5V6SrJPdVCKQCTZThKfsrRUIxlMtkQi+mvARppspPqwnPE310IXb2WsMpqlDiuFJhdWggrz3TDo6Zp+SLCqKkcrUDZIT35VRFg3n8JJJeKHlAFx9PuiAYLMjR7pZeL4527DR6Auau2LIh6SfOEtKhZm1wgqrsFhcOSjRMmm9OrI7Utcv+UY9ZNd8rFoV3CcBKVEgzYJQStwynAXumR2VSRmJ/RIijhM4IIQQY3E0gPQfAmrH87Po3N3DUNLXevbXeyftf6o5bMMbbGGMuWXT0jOqR6TUa/pTmNgZPH8stZw+iSRf2WXFbZcp+jkx7m/x83hie0E45IOR+63yyiCzHz3yni6JemZxytINJ9X0go8TpU6hi7PsqgKfqx5VM6jxhKJVPVxOQXkIOVHclEFa9K+2Uss4Gg8LMJ90BG+pzW8klOB12GmgBtq4tyOoivlkcFvKc9TWdp9P2QzRnulQLvsgNGjjJduKzzv434cf11mgZFeyxrqngNeGt213S2EmNtv8ACBVbRg8ISyxjbqDfNLS/8pn/AEuskrNohPKcBeyCQAAZ4QQOBNUnAQis/smBsCqyghBtorBQEGR7JGG0DPdPY0hvNJlXofgfprdVrtRNK57WaZnzPQ6j45/2WPNl1plh668nQRJqI9Y6aV0r7fFGSLb/AKjXPdZzk+ZrXTTX1XhuqxSabqeqhcXN+XIRkV9r/ZduOtbctZjYiAdhwJCfW+m3H3FRe0igC4j9FWq0I4uI9RodgE5r8L0o4NYTTQb7posI4nynEkdwqiMvC9wmIMlWUsTyNA/a7PCMpsm9r9zRfZc9hoSiEu0Ue6UuPbhNWMdRh2tq6/CqLc/UR/M023uMhH6Vm45sZolOsqI4u0JhwLCSpNujBHUeDwubK9u3HHU00sxXe1KwkAqyc+yegVrr57JErkc5jtzc+VWPab0oa4vn3cYVXqFj3V4JtQ0TygFKcJA2xgo2QHBwUQA42U4Cg8+6eiFh9VoBpQ+NgfQLTn7JTV6MscgkFt+ydxsG0JIaSEk5ePbfw/1VaPXae6+YwHeB6gLo5BsD8FZZT/Znj/y7nWdVHpJtcGPLH22KOgTsirt4Kwwn160zvz4+b/FL2v6457XOdvjjcST/AKa578cr0ccdYarkxu7dMMbw9j2V6mix7hRZrtvxeWKKDSQtPWgE9wOO6CVmjwqiLVTwWkKp2ikJVEB4Qm+E7Kk40x9SUX6QijymWmrTSWC1ZZ4/pLifHKmB09LHshF8nlJpjDOPqNHHZaTqCqCaaAClYUrnzDZKfBRO4nygkjS3TtuQeBlTlemvFN10mU2P7rnrrg7rFJGrc48KoRQ4jCNJ2aQ3fhEFVQHdI72CrLwsPVwsqFocIgKEEZpsIOA4GjacpKuGiqVAo/dMjNCRq5mylu1jjV5BKrGz2lU00To2uDuTmkZZb8EmljztjJUybqc/+XX+HHS/z0bdPt3uHpLhYUZRlvT2PWX6vQdAl074PnSahwmLo4iXtI5bXIryueSZ8m2susNV896zppTPK6a2zRRRAN5HqAx+LXdhlrWP/tzXHu1XDpHRw/NO7cRkEjH72oyz3dNOPqssmDfdaRsofk+FcInCaCON58Kp0zpWi06lHDlKUENUrRAJwjSxd7JQVInbXWizcJ0tJH82UHloysb/AEeM7dN7xHGT4Sas1l2VcRSucarGEWiMuobbL7hTKMoqYQWgHlOpnbZpIsnyVlnXRxY67aj3B4CybFshOEjs5CArce4CtKiWQ7atPGIyp9CSS8/hLkHH7Wpt0Fm1A8ZRAXPhMhANoAu90oakgBXCQNuyPtSCMzggmilTA+P3RAjRbSUBXqmlzA1ufsq4+rusuW9O18N306Q6vbMflEOJbWAcG/bKJnu6YXC5ake01c8X/T9J/wBP1Lp4ppS4mRxLhf8ASB2TzuM70rV3Zk8b8SyFvVpWwlhEjiWTNOHBoqv2Tw6xKa/WAFkjGwiQF4G6/wDMq9heXbm6w7JXNI4Swm46ZdspdZ4WuioUXXQKN6QUtrBOfATlTpB7IRQJKINKzwqRCOVRSdkBBykHoOmwmLTAu+pywt3dtMZousk9W0cDlJVVMcC3KqJMnShHNxXZSpnDNslHhPfSPK6OicL5yMLHOa7dHHetHecmws5Git3CoAHI0UI42CFUKs0lK8WV7XaDDJPup5PYfF+tbVi2BycAN5QQ5xVoAVjKABbSewDeatMjP+qqBpIyEfVhMI0c4CCIbMpLeRilU8Y8l7ev6ZpBJ0CWN8wjhmIMn+ba0g1+eFnjZMrSxtxsuki1ZGjm1UcUjdLBbmv2/UeAK8pTdvbXl5ryY6scDSdLdN0Y66af63HYyiazWT7p58vzn8SM/jeP04sB3y7MmQu2t+66Mpqb/GfqzUwSMAEoO4flThlL41wl0z0Gk0N1eVpva7EBJFu/ZH/pnlSmu3KcSrr3VFYB4KBVZ+kqozV8lUYoDZ0zTfPm3H6G8rPPLXSsJt3J5AyPH2CzaOY8kuPdIhDCR3TG1t+kJ1MAnmkjJKwuaS36hwiCxXA+gSOQjKb6LHLTaHiRoc1Ya1dOqWZTcLfYo0BAFUnASYU0kHCc9TfGORxJytcYyq/QEbJPwo5PYvj/AFtr0grBqjRZpMCWBvKWwcABiQI4cUnAQg1lUSsc5TJAC8Pd8xrdvYcp+fhlhkc+RzXnIHITympspTcMuz5KQU6c3NkE2VdnTmt3bXtIYZX9Pha1oaIjuIIvcuS63f7XNyLtG1muaNDHuaySKRjIg6yKG7cfuRSqW73CvnbgzxNmeyKOZ8EDhTg4f+m+jg+x8hOdW2zsa6V9M6EDqQ11h8dulDzQAGbB7rTLlt6L5kZOoRgGt2fHf9Ucfm2mPTkSEh1cBdGK1ZNdsKmVTm0JChfsgFKcJWcEqmdVgWSqOLIozI8MaMnCVups5NvQ6eJungDBz/UVhvfbWTTNNLvOOBgJBnJHKEma/HJTI7e6DhhjlARuDSIaiePbb2cd05/SLNdq4pTG6x9J5CWWOxhn81ta4GiDhY2adW9rmlubShk1Q28Zwrk7Rb050lla4sl+hHpeO6jkXx/rokYaAVzxsaOi/wCyAZ2Rg5tIFJHYWgK3EDyqhAW2MOBRArogKiUytd6vlmt31Wrxs/RSQsMVlzrcU8rvxMgyvphpGM7GV1LTaWL5+A6qpLLL5c2L6N03R6lvStNIyN87S3a5pd/6eeRfI9ljlxXG/UVOSZf60enRwx9WGraKaxj2vBFUdhSxyn3NTQsvxduPqtc/W6qQRfKbpwA50rxef78qs89jDDU7TTj+dZ8vRteWl1T6h3ez/wBuFGOOVqsspI5/WxootM+CLVOn1DPW0FwO1pJFD+66rhZP/DPj5plnp5OQ07C0x8dSsnCqRjUa7PHCNEZo5v8AVLY0VwoJwKzmyqjKq2jJrKo47XTNKIm73/WVhlfqtcZpdqpato/Kk6wl2SgtkvJCZHaccBAXXn8oGI8i0GF4u8pAAeUH6zTR7SSPpP7K5dsssdH0cu22uOCpzx/Y0489dVuZQOTYWLdTrJPUB+q0xjPOsg9XPCvxnGrp/wBT/ss+TxfHe63t9JHsFhtuVrqs3lBQ900V4SNW95BqsJyBHC82nCICM8Ep6JJAAxOBQTg2VWiK5ycgUSuHA5V4xjzXWOo09KY/U6uJgtji4BoBq3e6vHGTLThyztm31X4T6g5k0nS55I5HsBdG+O/pvIPk559l0fyOLH5/yY9Rz8HJlb8Zd12upaeOWN0hZ/itsBx8HBXn3GfW/wBd2OV1r8fN9Hq9LpOmazTSsa2aRxc1xJwAO3lc2WOWWUsdmNklYvhfV9TlfJpdCGvDgXO3/wBI832XVlh/VYbn6xdW+TBrBBLp2wvFsBYKujz9rW3+PlmO7ltz458f+Sax04E1/McFePjvtJwmzotFlFLFaD7KNKSwOUFpneTuIbyVpP8Ayzs3XR6boqPzJBjsFnnl9dReOOm+eX5YNfV/ZQrxznuLjaIRdpd+M2nvQk2Qd00rGixzSRxdfKVEAE8IUiAhQSHIIPCPB6yPbscf8pWku2dml8MxDdpNjys8sWmGf5QnduIHlGJ5VW7DVcRfGrQZcT7LLl8acXrc8kArCNiWf7JhoHFVZUmpP157J/hA0kDgJgtgWeE4Stzw7G4Wq1otqnYKqApCcDK4284Ws8cvJd11uidP1M26TROaZg4bW43e9XyfZbcFwyus3DzTLCbxfT/hLoOq6bqXarUa64nxC4hFRJ9yeK9q90/5HPjnPnXjPg47hd7N1iWupaWQSBzJXVGGnkDknsvLv/2R6WGvi9PAxQg6jUGUGmGpI3gO25rc1Vl/r01l3OmnT6ybp8hfoHsjlaN3obTZB/5/5aWNsu02S9NOv1+l1mifqdawAO9NnOwk8fqujjuWW8WGcxx1XgtQ0idw91rjenVVZACqEIo+yQhjmqShiSNuRn+6CrX0/RbnfMlFC1OWW+oUjoTyCJuOewU+Kc9zy4mygld8pkU35ThbBBLGVtSPa0EZRREbRKRpVcpgCM+yQHsgFcwOaiUWbZZGFmRwtMbtnZpASQDn7paVLsHcZTgrb0wel33WPM14v1vf9AWEagGjCNhaRzaRqeC7CZASD7Jkqlw11c9leIqqZzHRja3aewHZVjLvtFs0SNxMQvJvlOztWPcST0sJ8BE7ot1GRpAcc5GbWunHf7fQPg7qI0OmjbUD/mC3Nc27z3PlcmfJlhl0v/HMp2zajX6yLq+qA1D26d85aNPI8n0GqoeMr1ceLHm4ZfHmf5Lxcvm3QGq/+YtNNqBhszY4Y+zWg0CvGxt29ayaZJtM/UdT3Rf/AEmkTWP6Qa9VeeFXJnMfS48bfHLZsim+W9zd8D/pe4C2nmkS3Wz0y9Q0Blja1k0fymuMlOeOPJ91tw80w3tjzcVz8cTVC5SeLC2wvTonkUuZRoZVygpFIhIDQP8AumNt2j0zpBulFN5APdZ5ZfkEdGWURM4HsFPh3pzpZC9xc4o0navJ5TLZScphCUEVMtr4tobm0tjSWQTSRnB58pGZvCcOgcJAKItABA0UtQNbUPjIJLFcy/tncdeFwRRwUxG3p5Aa4A5tY8sb8XjWXYpY6ajuyPIRoH+bg2lo9q3OynIRLzwqJLBJR4CPYCbItVKWgc0kDgV4RKcZdUapt85K0wn6y5LqaJE3e4N8qrdTbn09foYo4GMkGmMha35Qbw0Ywfc2uf6nJLt0eTT0elibEZfmaVjNS1m5pfT3NdgV7Yzwsd54y47TZhlZlpx9TI5+r02reC6WWQRbgMNqhf3/AO6mbp9Rh1Rn0XU+qauE74PnOFHII3YuuF058X30xx5vh5iZ8mu1RlItzze3z9ltjjMJ8xVu+3odHA06YQP/AMP5ot/o3OAAsY+6zuOv9f0t/rgdRgdBJtcbIJAPFhaY+1tJZO2IgkjwtIC96AJPYJlbp0tDoKIkn57N8LO5b6gk/a2zSNjb79gp0e9OdLIXEkm7RpO1dWmkDx7IgCqCZpwgFuymn0wJ7EpDa4D1kJU4J7pKiNPKAYFMJu5CAUnwkNpfm0GgcgK5oQ8W3BVY5aRcds4LozyQQr1KUtlbIdUKqT/8gsMuP+m2PLL61BzXZabCz1Z1WuxrCQAjNJgA0WjZIBmkwU1lAKSfKYYHv3yOslbyajkzy3WzpbRJrGNpxAIJ2iyFGc6GE3l3493BZ0IifAGbLax44duIy7PkEflYf4/7b/P1f9O3c6nGIYIZtC1rmxtAAc43t8WfYKuTD9jnwyu7jk4unkh1XUYnNc0t3/MLHHLSM4/RYYzteVsjx/XtUZtYDC5zX0Q9wPOeMLswy6u3Plx23pXotO9zY5hkl+weGnz+6nu35jeTUd6fqD9BpJ42ybdQ9tSXQaaGA0j7qscPn0sPnPLVutPL67Vv1gdNL9bjZJ7nynJrJ1ZXfajT6aWYWBtb/mP+yu2Rnt1NNpI9OLaLd3c5Rbb6UCbUBoIZk+UbNgdJv3G7zRNo0hWCDxlHifRJpEVov5TIb5QRSiAoKYWMaKyUiXVeayElADQPlICEGmEAAP0QEANoBqTMCPKQQHlMbAta8HcLROhqVUYay3IVfSLiAcWOtpIKWtjHK4rWao7aeMKf8f8ATWc0/WlkjX5a7CyuNjSZS+LWgSOIJIG20vB6yC4pi2+ey0/6my8WOfWFMh7Z5nUw+StMZ2jK6jOB7WtHK39JDnahu5nzDYOwDJ+1KMtTxeE31t7DqEsc8lhwhc5gDdopxHggf9lF9dnDL8avjb02PUarTSmLVOYIRu2AEuPpJwbrkJzpj/Kyxk1ru/qtnTY4ov5vT6n5zpNK76PU0v2ZIPb7FLObc3Hl/rqvJdNg0pZqXal+6TcAGnx3Ky5Msupi6MdfrnGdoMkIc5rLsEexwt8ZlJ9RGOWq68mqZq9DJHDbXPcCXOGQa4HkK7l+Ix4fbf1k0+kDQC/1OHnhT23l1NLnysi7guSTtim1Tnuq8JjbJJK50bgxpv7UnJJe03K2dE+iAMaCSM3X6qvbulOsdFjdsaAGkk5Kdm0S66giR15b27JfMP6v9IXuHLaoZRMYPqh8wH6sfhHyPo1gjlLQ2ArymNnD25t2QlqjcraIdxweOSU/gSh8kckp/wCM9mbCKq/3R8Hs38vQs8I+INoIRXKf+OF9C2DnIAR8Q/pPk82n8QbT5ArNJfEGw+Q3yn/jhfQGBt/Ul/jh/SfIA7o+IPopgaR2KXwPWd2lz6XV7FNPyrML2g+yR6sQSPb6QcKfiVUysMyRu8PIyPwlcbrSpn2v+ZG8fVX3UfNi/qUjojI7/DILR7hVj16y5Lu9E/lpG5a3cSq3L0iY7ej+HoW6eeI2xsxPLnYI9vCy5PqS3FUw709NrIxMYhK0hgNPcwjcR4WGPP8A/tGmMywlmNX6OPSaDTamNz5Lna5rS45IINAVwBa2x5Maz5LnnlHC+Ho4NDq3wl7w8Q/4gJwcLXW3Tz44f49z1586Cd251sLjgPcTYHiu6Pnf/phOp/5Ww9OZFl20u7uP/Cr5Lw72sYKaRY8J/wCM/tllc51gu2o+E/TIWWSLU/I+iiEg4PZFxOU3yzVFyXyf0Ahzg5R8p2BhvlyNaG9h8k9nIAO04kw99AeyJdDW1b9HIJnNkIAIDiRmxWB/yrmU10i420XaTBcJM4G2uEvofP6eLSVGA54BAzhF3bsSSRZHCwN9RN+wTmI2/9k=';
+(function() {
+  const src = 'data:image/jpeg;base64,' + HUME_PORTRAIT;
+  ['portrait-title', 'portrait-closing', 'portrait-dialogue'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.src = src;
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// DIALOGUE DATA
+// ═══════════════════════════════════════════════════════
+
+// Paragraphs wrap stage directions in *(like this)* for special styling.
+// A paragraph that is *nothing but* a stage direction gets the stage-dir class.
+
+const NODES = {
+
+  start: {
+    paragraphs: [
+      "Ah, welcome. Sit, please — I find these conversations go better when everyone is comfortable. I've been thinking about a small problem. Nothing serious. Just the entire basis of human knowledge.",
+      "You believe the sun will rise tomorrow. Yes?"
+    ],
+    continueLabel: 'Yes, of course.',
+    next: 'start_2'
+  },
+
+  start_2: {
+    paragraphs: [
+      "Of course you do. So do I, for that matter. Now — and here is where it gets interesting — why do you believe it?",
+      "I ask only because I enjoy keeping records. *(gestures toward the ledger)* Humor me."
+    ],
+    choices: [
+      { text: '"My senses have always given me reliable information about the world."',              next: 'cp1_a' },
+      { text: '"Science has established that the Earth\'s rotation is consistent and measurable."', next: 'cp1_b' },
+      { text: '"Everyone relies on this assumption and it has never let anyone down."',              next: 'cp1_c' }
+    ]
+  },
+
+  cp1_a: {
+    entry: { num: 1, text: 'Experience has consistently confirmed the testimony of the senses.' },
+    paragraphs: [
+      "Reliable! Yes, I like that word. Very sturdy. *(makes a show of writing)*",
+      "Excellent. A fine foundation. Though I notice you used the word \"always\" — or near enough. We shall return to that."
+    ],
+    next: 'trunk1'
+  },
+
+  cp1_b: {
+    entry: { num: 1, text: 'Scientific method has validated the regularity of natural phenomena.' },
+    paragraphs: [
+      "Science! The very best of us, doing the very best work. I have nothing but admiration. *(makes a show of writing)*",
+      "Splendid. Very modern of you. I do have one small question about the scientific method itself — but we'll get there."
+    ],
+    next: 'trunk1'
+  },
+
+  cp1_c: {
+    entry: { num: 1, text: 'Universal human reliance on this assumption confirms its reliability.' },
+    paragraphs: [
+      "Universal practice! The wisdom of the species! I find that rather charming, actually. *(makes a show of writing)*",
+      "Quite so. Though I wonder — if everyone believed something false, would their believing it make it true? No matter. Write it down regardless."
+    ],
+    next: 'trunk1'
+  },
+
+  trunk1: {
+    paragraphs: [
+      "Good. We have our first entry. Now — you've given me a reason. But reasons, like debts, tend to require their own backing.",
+      "Tell me: what makes that reason a good one?"
+    ],
+    choices: [
+      { text: '"Because nature operates according to uniform laws that don\'t change arbitrarily."',                    next: 'cp2_a' },
+      { text: '"Because the probability of it failing, given how often it has succeeded, is vanishingly small."',      next: 'cp2_b' },
+      { text: '"Because acting otherwise would be irrational — no functioning mind could do otherwise."',              next: 'cp2_c' }
+    ]
+  },
+
+  cp2_a: {
+    entry: { num: 2, text: 'Nature is governed by uniform laws that guarantee the consistency of experience.' },
+    paragraphs: [
+      "Uniform laws of nature! Now we are getting somewhere philosophical. *(writes with evident pleasure)*",
+      "I do love this one. It has such confidence. Such sweep. A uniform nature — yes. We shall keep that thought in mind as we go a little deeper."
+    ],
+    next: 'trunk2'
+  },
+
+  cp2_b: {
+    entry: { num: 2, text: 'The overwhelming probability of continued success justifies the expectation.' },
+    paragraphs: [
+      "Probability! The mathematics of hope. I respect it enormously. *(writes)*",
+      "Beautifully put. Though I notice probability is itself calculated from past frequencies. But we needn't dwell on that yet."
+    ],
+    next: 'trunk2'
+  },
+
+  cp2_c: {
+    entry: { num: 2, text: 'Rational thought requires the assumption of continuity — no coherent alternative exists.' },
+    paragraphs: [
+      "Rationality itself demands it! The mind has no choice! *(writes with a grin)*",
+      "Marvelous. Though I wonder — is it rational because it's true, or true because it seems rational? A small distinction. Let's continue."
+    ],
+    next: 'trunk2'
+  },
+
+  trunk2: {
+    paragraphs: [
+      "Excellent. The ledger is filling nicely. We have reasons, and reasons for those reasons. Very tidy. Very human.",
+      "Now. One more layer, if you'll indulge me. Beneath all of this — beneath the laws, the probabilities, the rationality — what is the thing that actually anchors it all? The bottom entry. The one that holds the rest up."
+    ],
+    choices: [
+      { text: '"Logic itself — the principle of consistency is a truth of reason, not just experience."', next: 'cp3_a' },
+      { text: '"The order of the universe — whether by nature or design, things hold together."',         next: 'cp3_b' },
+      { text: '"Some things simply don\'t require a further foundation. This is just how things are."',   next: 'cp3_c' }
+    ]
+  },
+
+  cp3_a: {
+    entry: { num: 3, text: 'The principle of consistency is a logical truth, not contingent on experience.' },
+    paragraphs: [
+      "Logic! A truth of reason! Independent of all experience! *(writes slowly, deliberately)*",
+      "Ah. But here I must be precise. Logic tells us that contradictions cannot both be true. It does not tell us that tomorrow must resemble today. That is a matter of fact, not a relation of ideas. Logic, I'm afraid, cannot reach it."
+    ],
+    next: 'trunk3'
+  },
+
+  cp3_b: {
+    entry: { num: 3, text: 'The universe is ordered in a way that guarantees the continuity of natural patterns.' },
+    paragraphs: [
+      "The order of the universe! Guaranteed from without or within! *(writes)*",
+      "A beautiful thought. Though I notice that our evidence for this universal order is — the regularity of our experience. Which is rather what we were trying to establish. But do go on."
+    ],
+    next: 'trunk3'
+  },
+
+  cp3_c: {
+    entry: { num: 3, text: 'The reliability of experience is a foundational fact requiring no further justification.' },
+    paragraphs: [
+      "It just is! The bedrock! No further questions! *(writes, barely containing delight)*",
+      "I respect the honesty of this more than you might expect. Though I wonder if \"it just is\" is a foundation or simply the place where we've stopped digging. Let us see."
+    ],
+    next: 'trunk3'
+  },
+
+  trunk3: {
+    paragraphs: [
+      "*(setting down the pen, surveying the ledger)*",
+      "There we are. Three entries — perhaps more, depending on how generously we count. A fine ledger. Very respectable.",
+      "Now. One last question. I promise it is the last.",
+      "Each of these entries — the reliability of your senses, the uniformity of nature, the demands of reason, the order of the universe — each of them rests on something. And when I trace that something back, and back again, I keep arriving at the same place.",
+      "Tell me: what is the single thing — the one thing — that all of these reasons ultimately assume?"
+    ],
+    choices: [
+      { text: '"That the future will resemble the past."',                       next: 'reduction' },
+      { text: '"That experience is a reliable guide to what comes next."',       next: 'reduction' },
+      { text: '"That things have worked this way before."',                      next: 'reduction' }
+    ]
+  },
+
+  reduction: {
+    paragraphs: [
+      "*(quietly, with a small smile)*",
+      "Yes. Exactly that."
+    ],
+    trigger: 'reduction',
+    next: 'post_reduction'
+  },
+
+  post_reduction: {
+    paragraphs: [
+      "One entry. After all that — just the one.",
+      "Every reason you gave me was a good reason. I want to be clear about that. I'm not saying you were wrong. I'm saying that every reason, when followed far enough, arrives here. At the fact of past regularity. At habit. At custom.",
+      "You believed the sun would rise because it always has. You trusted your senses because they always have been trustworthy. You invoked nature's uniformity because nature always has been uniform — in your experience.",
+      "The word \"always\" was in there from the beginning. We just dressed it up."
+    ],
+    next: 'coda'
+  },
+
+  coda: {
+    paragraphs: [
+      "Now. I should tell you what I do with this conclusion, because I think it matters.",
+      "I do not despair. I do not stop predicting. I do not sit in a darkened room refusing to believe the kettle will boil.",
+      "I play backgammon. I dine with friends. I expect the sun tomorrow with the same cheerful confidence I always have.",
+      "The habit runs deeper than the argument. Custom is not a failure of reason — it is something older than reason, and more reliable in practice. We are built to expect. We cannot help it. Even the philosopher who sees the problem most clearly still flinches when something flies at his face.",
+      "What changes, when you see this clearly, is not what you do. It is what you claim. You stop calling habit knowledge. You hold your certainties a little more lightly. You become — I think — more honest, and perhaps more curious, and a little more amused by the whole business.",
+      "That seems to me like enough.",
+      "*(stands, extends hand)*",
+      "Thank you for keeping the ledger with me."
+    ],
+    next: 'closing'
+  }
+
+};
+
+// ═══════════════════════════════════════════════════════
+// ANIMATION STATE
+// ═══════════════════════════════════════════════════════
+const anim = {
+  active: false,
+  skipFn: null,      // call to complete animation instantly
+  timers: []
+};
+
+function safeTimeout(fn, delay) {
+  const t = setTimeout(fn, delay);
+  anim.timers.push(t);
+  return t;
+}
+
+function clearAnimTimers() {
+  anim.timers.forEach(clearTimeout);
+  anim.timers = [];
+}
+
+// ═══════════════════════════════════════════════════════
+// LEDGER TYPEWRITER STATE
+// ═══════════════════════════════════════════════════════
+const ledgerTyping = { timers: [] };
+function ledgerTimeout(fn, delay) {
+  const t = setTimeout(fn, delay);
+  ledgerTyping.timers.push(t);
+  return t;
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function beginGame() {
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('game-container').classList.remove('hidden');
+  navigate('start');
+}
+
+function playAgain() {
+  // Clear all timers
+  clearAnimTimers();
+  ledgerTyping.timers.forEach(clearTimeout);
+  ledgerTyping.timers = [];
+  anim.active = false;
+  anim.skipFn = null;
+
+  // Reset ledger
+  document.getElementById('ledger-lines').innerHTML = '';
+
+  // Show dialogue view, hide closing
+  document.getElementById('dialogue-view').classList.remove('hidden');
+  document.getElementById('closing-view').classList.add('hidden');
+
+  navigate('start');
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function navigate(nodeId) {
+  if (nodeId === 'closing') { showClosing(); return; }
+
+  const node = NODES[nodeId];
+  if (!node) { showClosing(); return; }
+
+  // Clear UI
+  document.getElementById('dialogue-text').innerHTML = '';
+  document.getElementById('choices-area').innerHTML = '';
+
+  // Add ledger entry immediately (typewriter runs in parallel)
+  if (node.entry) {
+    addLedgerEntry(node.entry.num, node.entry.text);
+  }
+
+  // Show paragraphs, then either choices or continue
+  showParagraphs(node.paragraphs, () => {
+
+    if (node.trigger === 'reduction') {
+      triggerReduction(() => navigate(node.next));
+      return;
+    }
+
+    if (node.choices) {
+      showChoices(node.choices);
+    } else {
+      showContinue(node.continueLabel || 'Continue', () => navigate(node.next));
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// TEXT HELPERS
+// ═══════════════════════════════════════════════════════
+function isFullStageDir(text) {
+  return /^\*\([^)]+\)\*$/.test(text.trim());
+}
+
+function stripStageMarkers(text) {
+  return text.replace(/^\*\(|\)\*$/g, '').trim();
+}
+
+// Convert inline *(stage dir)* to styled spans — used AFTER typewriter completes
+function formatInline(text) {
+  return text.replace(/\*\(([^)]+)\)\*/g, '<span class="stage-dir">($1)</span>');
+}
+
+// Plain display text for during typewriting (no markup)
+function plainDisplay(text) {
+  if (isFullStageDir(text)) return '(' + stripStageMarkers(text) + ')';
+  return text.replace(/\*\(([^)]+)\)\*/g, '($1)');
+}
+
+// ═══════════════════════════════════════════════════════
+// PARAGRAPH DISPLAY (typewriter)
+// ═══════════════════════════════════════════════════════
+const CHAR_SPEED   = 22;   // ms per character
+const PARA_PAUSE   = 340;  // ms pause between paragraphs
+
+function showParagraphs(paragraphs, onDone) {
+  const container = document.getElementById('dialogue-text');
+  container.innerHTML = '';
+  container.classList.add('typing-active');
+
+  clearAnimTimers();
+  anim.active = true;
+
+  // Pre-create all paragraph elements (empty)
+  const pEls = paragraphs.map(text => {
+    const p = document.createElement('p');
+    if (isFullStageDir(text)) p.classList.add('stage-dir');
+    container.appendChild(p);
+    return { el: p, text };
+  });
+
+  // Skip function: show all text immediately
+  anim.skipFn = function() {
+    clearAnimTimers();
+    anim.active = false;
+    anim.skipFn = null;
+    container.classList.remove('typing-active');
+
+    pEls.forEach(({ el, text }) => {
+      if (isFullStageDir(text)) {
+        el.textContent = '(' + stripStageMarkers(text) + ')';
+      } else {
+        el.innerHTML = formatInline(text);
+      }
+    });
+    onDone();
+  };
+
+  // Type paragraphs sequentially
+  let stopped = false;
+
+  function typePara(idx) {
+    if (stopped || !anim.active) return;
+    if (idx >= pEls.length) {
+      anim.active = false;
+      anim.skipFn = null;
+      container.classList.remove('typing-active');
+      onDone();
+      return;
+    }
+
+    const { el, text } = pEls[idx];
+    const display = plainDisplay(text);
+    const isFull  = isFullStageDir(text);
+    let charIdx = 0;
+
+    function typeChar() {
+      if (stopped || !anim.active) return;
+      if (charIdx <= display.length) {
+        el.textContent = display.slice(0, charIdx);
+        charIdx++;
+        safeTimeout(typeChar, CHAR_SPEED);
+      } else {
+        // Finalize with proper HTML formatting
+        if (!isFull) el.innerHTML = formatInline(text);
+        safeTimeout(() => typePara(idx + 1), PARA_PAUSE);
+      }
+    }
+
+    typeChar();
+  }
+
+  typePara(0);
+}
+
+// ═══════════════════════════════════════════════════════
+// PANEL CLICK → SKIP ANIMATION
+// ═══════════════════════════════════════════════════════
+function handlePanelClick(e) {
+  // Only skip if a button wasn't clicked
+  if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') return;
+  if (anim.active && anim.skipFn) {
+    anim.skipFn();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// CHOICES & CONTINUE
+// ═══════════════════════════════════════════════════════
+function showChoices(choices) {
+  const area = document.getElementById('choices-area');
+  area.innerHTML = '';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'choices-label';
+  lbl.textContent = 'Your response:';
+  area.appendChild(lbl);
+
+  choices.forEach((choice, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice.text;
+    btn.setAttribute('aria-label', choice.text);
+    btn.style.setProperty('--gleam-delay', (i * 0.18) + 's');
+    btn.addEventListener('click', () => {
+      area.innerHTML = '';
+      navigate(choice.next);
+    });
+    area.appendChild(btn);
+  });
+}
+
+function showContinue(label, onContinue) {
+  const area = document.getElementById('choices-area');
+  area.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'continue-btn';
+  btn.textContent = label;
+  btn.setAttribute('aria-label', label);
+  btn.addEventListener('click', () => {
+    area.innerHTML = '';
+    onContinue();
+  });
+  area.appendChild(btn);
+}
+
+// ═══════════════════════════════════════════════════════
+// LEDGER — ADD ENTRY
+// ═══════════════════════════════════════════════════════
+function addLedgerEntry(num, text) {
+  const container = document.getElementById('ledger-lines');
+
+  const div = document.createElement('div');
+  div.className = 'ledger-entry';
+
+  const numSpan = document.createElement('span');
+  numSpan.className = 'entry-num';
+  numSpan.textContent = num + '.';
+
+  const bodySpan = document.createElement('span');
+  bodySpan.className = 'entry-body';
+  bodySpan.textContent = '';
+
+  div.appendChild(numSpan);
+  div.appendChild(bodySpan);
+  container.appendChild(div);
+
+  // Typewriter the entry text
+  let i = 0;
+  function typeChar() {
+    if (i <= text.length) {
+      bodySpan.textContent = text.slice(0, i);
+      i++;
+      ledgerTimeout(typeChar, 30);
+    }
+  }
+  ledgerTimeout(typeChar, 200); // slight initial delay
+}
+
+// ═══════════════════════════════════════════════════════
+// LEDGER — REDUCTION ANIMATION
+// ═══════════════════════════════════════════════════════
+function triggerReduction(onDone) {
+  const entries = Array.from(document.querySelectorAll('#ledger-lines .ledger-entry'));
+  if (!entries.length) { showFinalEntry(onDone); return; }
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const INTERVAL = 680;
+
+  if (prefersReduced) {
+    entries.forEach(e => { e.style.opacity = '0'; e.style.maxHeight = '0'; e.style.padding = '0'; e.style.borderWidth = '0'; });
+    setTimeout(() => showFinalEntry(onDone), 300);
+    return;
+  }
+
+  // Collapse entries last-to-first
+  [...entries].reverse().forEach((entry, i) => {
+    setTimeout(() => {
+      entry.classList.add('entry-collapsing');
+    }, i * INTERVAL);
+  });
+
+  // After all collapsed, clear and show final
+  const totalDelay = entries.length * INTERVAL + 900;
+  setTimeout(() => {
+    document.getElementById('ledger-lines').innerHTML = '';
+    showFinalEntry(onDone);
+  }, totalDelay);
+}
+
+function showFinalEntry(onDone) {
+  const container = document.getElementById('ledger-lines');
+  const div = document.createElement('div');
+  div.className = 'ledger-final';
+
+  const span = document.createElement('span');
+  span.className = 'entry-final-text';
+  span.textContent = '';
+  div.appendChild(span);
+  container.appendChild(div);
+
+  const finalText = 'It has always worked before.';
+  let i = 0;
+
+  function typeChar() {
+    if (i <= finalText.length) {
+      span.textContent = finalText.slice(0, i);
+      i++;
+      setTimeout(typeChar, 48);
+    } else {
+      setTimeout(onDone, 900);
+    }
+  }
+  setTimeout(typeChar, 700);
+}
+
+// ═══════════════════════════════════════════════════════
+// CLOSING SCREEN
+// ═══════════════════════════════════════════════════════
+function showClosing() {
+  document.getElementById('dialogue-view').classList.add('hidden');
+  document.getElementById('closing-view').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
