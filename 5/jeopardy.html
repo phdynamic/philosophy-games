@@ -486,6 +486,11 @@ var BAKUNIN_IMG = {
   alt: 'Photograph of Mikhail Bakunin'
 };
 
+var PLAYER_IMG = {
+  src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120' fill='%236b4820'%3E%3Ccircle cx='50' cy='36' r='22'/%3E%3Cellipse cx='50' cy='98' rx='38' ry='28'/%3E%3C/svg%3E",
+  alt: 'Player silhouette'
+};
+
 var CAT_KEYS = { 'Law': 'law', 'Religion': 'religion', 'Art': 'art', 'Ideology': 'ideology', 'The State': 'state' };
 
 // ─── Categories ────────────────────────────────────────────────────────────
@@ -776,7 +781,7 @@ function checkAnswer(input, clue) {
   if (!cleaned) return false;
   return clue.answers.some(function(ans) {
     var a = ans.toLowerCase();
-    return cleaned === a || cleaned.indexOf(a) !== -1 || a.indexOf(cleaned) !== -1;
+    return cleaned === a || cleaned.indexOf(a) !== -1;
   });
 }
 
@@ -858,7 +863,7 @@ function renderGame() {
   boardHtml += '</div>';
 
   var scoreHtml = '<div class="scoreboard">\
-    <div class="score-col"><div class="score-name">You</div><div class="score-val">' + state.scores.player + '</div></div>\
+    <div class="score-col"><div class="score-name">You</div><div class="score-val">' + state.scores.player + '</div><img class="score-portrait" src="' + PLAYER_IMG.src + '" alt="' + PLAYER_IMG.alt + '"></div>\
     <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + state.scores.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
     <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + state.scores.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
   </div>';
@@ -945,7 +950,8 @@ function renderResult() {
 
   var resultHtml = '';
   if (r.correct) {
-    resultHtml = '<p class="result-label correct">Correct &#8212; +' + r.clue.value + ' points</p>';
+    resultHtml = '<p class="result-label correct">Correct &#8212; +' + r.clue.value + ' points</p>\
+      <p class="result-answer">The answer: <strong>What is ' + correctAnswer + '?</strong></p>';
   } else {
     resultHtml = '<p class="result-label wrong">Incorrect</p>\
       <p class="result-answer">The answer: <strong>What is ' + correctAnswer + '?</strong></p>';
@@ -1055,11 +1061,16 @@ function renderAiTurn() {
 
   var turn = state.aiQueue.shift();
 
+  var aiCorrectAnswer = turn.clueData.answers[0];
+  aiCorrectAnswer = aiCorrectAnswer.charAt(0).toUpperCase() + aiCorrectAnswer.slice(1);
+
   var el = div('fade-in', '\
     <div style="padding-top:32px;">\
       <div class="ai-turn">\
         <p class="ai-name">' + turn.name + '\'s Turn</p>\
         <p class="ai-clue-info">' + turn.clueData.category + ' for ' + turn.clueData.value + '</p>\
+        <p class="clue-text" style="font-size:14px;margin:16px 0;">' + turn.clueData.clue + '</p>\
+        <p class="result-answer">Answer: <strong>What is ' + aiCorrectAnswer + '?</strong></p>\
         <p class="ai-result-label ' + (turn.correct ? 'correct' : 'wrong') + '">' + (turn.correct ? 'Correct &#8212; +' + turn.clueData.value : 'Incorrect') + '</p>\
       </div>\
       <div class="marx-wrap">\
@@ -1114,7 +1125,7 @@ function renderEnding() {
       <div class="final-scoreboard">\
         <p class="final-winner">Winner: ' + winner + '</p>\
         <div class="scoreboard">\
-          <div class="score-col"><div class="score-name">You</div><div class="score-val">' + s.player + '</div></div>\
+          <div class="score-col"><div class="score-name">You</div><div class="score-val">' + s.player + '</div><img class="score-portrait" src="' + PLAYER_IMG.src + '" alt="' + PLAYER_IMG.alt + '"></div>\
           <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + s.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
           <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + s.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
         </div>\
