@@ -403,6 +403,7 @@ html, body {
   display: block;
   text-align: center;
   margin: 0 0 28px;
+  contain: layout style;
 }
 .dialogue-portrait-wrap img {
   display: inline-block;
@@ -474,7 +475,6 @@ html, body {
         <div class="closing-attribution">David Hume</div>
         <div class="closing-name">1711 – 1776</div>
         <hr class="closing-hr">
-        <img id="portrait-closing" class="closing-portrait" alt="David Hume, by Allan Ramsay (1754)">
         <div class="closing-body">
           <p>Hume's <em>problem of induction</em> remains unsolved. No philosopher has produced a non-circular justification for the belief that the future will resemble the past. Science, logic, probability, and common sense all assume what they are trying to prove.</p>
           <p>Hume's response was not skeptical paralysis but <em>naturalism</em>: we are creatures of habit, and habit works, and that is what we have.</p>
@@ -752,10 +752,6 @@ function playAgain() {
   document.getElementById('dialogue-view').classList.remove('hidden');
   document.getElementById('closing-view').classList.add('hidden');
 
-  // Restore portrait for replay
-  var portraitWrap = document.querySelector('.dialogue-portrait-wrap');
-  if (portraitWrap) portraitWrap.style.display = '';
-
   navigate('start');
 }
 
@@ -767,12 +763,6 @@ function navigate(nodeId) {
 
   const node = NODES[nodeId];
   if (!node) { showClosing(); return; }
-
-  // Hide the dialogue portrait after the first node (prevents re-slide on mobile)
-  var portraitWrap = document.querySelector('.dialogue-portrait-wrap');
-  if (portraitWrap && nodeId !== 'start') {
-    portraitWrap.style.display = 'none';
-  }
 
   // Clear UI
   document.getElementById('dialogue-text').innerHTML = '';
