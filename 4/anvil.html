@@ -873,11 +873,13 @@ function attemptSynthesis(a, b) {
   // Hide synth button
   document.getElementById('synth-area').innerHTML = '';
 
-  // For the final synthesis: fade the entire tile container together
+  // For the final synthesis: fade the entire scene out together
   if (willBeTarget && isFinalStage) {
-    var container = document.getElementById('tile-container');
-    container.style.transition = 'opacity 0.5s ease-out';
-    container.style.opacity = '0';
+    var sceneEl = content.querySelector('.scene');
+    if (sceneEl) {
+      sceneEl.style.transition = 'opacity 0.6s ease-out';
+      sceneEl.style.opacity = '0';
+    }
   } else {
     // For normal syntheses: fade only the two selected tiles
     var tiles = document.querySelectorAll('#tile-container .tile');
@@ -906,17 +908,12 @@ function attemptSynthesis(a, b) {
     var nameR = CONCEPTS[synth.result].name;
     state.chainEntries.push(nameA + ' + ' + nameB + ' = <span class="chain-result">' + nameR + '</span>');
 
-    // ── Final stage completion: fade everything out, then render ending ──
+    // ── Final stage completion: scene is already fading, just wait then render ending ──
     if (targetReached && isFinalStage) {
-      var sceneEl = content.querySelector('.scene');
-      if (sceneEl) {
-        sceneEl.style.transition = 'opacity 0.6s ease-out';
-        sceneEl.style.opacity = '0';
-      }
       setTimeout(function() {
         renderFinalEnding(synth);
         state.animating = false;
-      }, 700);
+      }, 300);
       return;
     }
 
