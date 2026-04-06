@@ -873,22 +873,34 @@ function attemptSynthesis(a, b) {
   // Hide synth button
   document.getElementById('synth-area').innerHTML = '';
 
-  // For the final synthesis: fade the entire scene out together
+  // For the final synthesis: fade entire scene and render ending after fade
   if (willBeTarget && isFinalStage) {
     var sceneEl = content.querySelector('.scene');
     if (sceneEl) {
       sceneEl.style.transition = 'opacity 0.6s ease-out';
       sceneEl.style.opacity = '0';
     }
-  } else {
-    // For normal syntheses: fade only the two selected tiles
-    var tiles = document.querySelectorAll('#tile-container .tile');
-    tiles.forEach(function(t) {
-      if (t.dataset.id === a || t.dataset.id === b) {
-        t.classList.add('merging');
-      }
-    });
+    // Add chain entry now, then render ending after fade completes
+    var nameA = CONCEPTS[a].name;
+    var nameB = CONCEPTS[b].name;
+    var nameR = CONCEPTS[synth.result].name;
+    state.chainEntries.push(nameA + ' + ' + nameB + ' = <span class="chain-result">' + nameR + '</span>');
+    state.available = [synth.result];
+    state.selected = [];
+    setTimeout(function() {
+      renderFinalEnding(synth);
+      state.animating = false;
+    }, 650);
+    return;
   }
+
+  // For normal syntheses: fade only the two selected tiles
+  var tiles = document.querySelectorAll('#tile-container .tile');
+  tiles.forEach(function(t) {
+    if (t.dataset.id === a || t.dataset.id === b) {
+      t.classList.add('merging');
+    }
+  });
 
   setTimeout(function() {
     // Remove consumed concepts, add result
@@ -907,15 +919,6 @@ function attemptSynthesis(a, b) {
     var nameB = CONCEPTS[b].name;
     var nameR = CONCEPTS[synth.result].name;
     state.chainEntries.push(nameA + ' + ' + nameB + ' = <span class="chain-result">' + nameR + '</span>');
-
-    // ── Final stage completion: scene is already fading, just wait then render ending ──
-    if (targetReached && isFinalStage) {
-      setTimeout(function() {
-        renderFinalEnding(synth);
-        state.animating = false;
-      }, 300);
-      return;
-    }
 
     // ── Stage target reached (stages I-IV): show result + commentary ──
     var container = document.getElementById('tile-container');
