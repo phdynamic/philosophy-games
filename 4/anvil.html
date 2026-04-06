@@ -1054,6 +1054,8 @@ function renderFinalEnding(synth) {
   var sceneEl = content.querySelector('.scene');
   if (sceneEl) {
     sceneEl.innerHTML = '';
+    sceneEl.style.transition = '';
+    sceneEl.style.opacity = '1';
   }
 
   var rc = CONCEPTS[synth.result];
