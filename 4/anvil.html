@@ -877,8 +877,10 @@ function attemptSynthesis(a, b) {
   if (willBeTarget && isFinalStage) {
     var sceneEl = content.querySelector('.scene');
     if (sceneEl) {
+      // Remove the fade-in animation — its fill-mode overrides inline opacity
+      sceneEl.classList.remove('fade-in');
+      sceneEl.style.opacity = '1';
       sceneEl.style.transition = 'opacity 0.8s ease-out';
-      // Force the browser to register the transition before changing opacity
       sceneEl.offsetHeight;
       sceneEl.style.opacity = '0';
     }
