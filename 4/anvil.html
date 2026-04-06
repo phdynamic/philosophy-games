@@ -866,25 +866,34 @@ function attemptSynthesis(a, b) {
 
   state.animating = true;
 
-  // Animate merging tiles
-  var tiles = document.querySelectorAll('#tile-container .tile');
-  tiles.forEach(function(t) {
-    if (t.dataset.id === a || t.dataset.id === b) {
-      t.classList.add('merging');
-    }
-  });
+  var stage = STAGES[state.stageIndex];
+  var willBeTarget = synth.result === stage.target;
+  var isFinalStage = state.stageIndex === STAGES.length - 1;
 
   // Hide synth button
   document.getElementById('synth-area').innerHTML = '';
+
+  // For the final synthesis: fade the entire tile container together
+  if (willBeTarget && isFinalStage) {
+    var container = document.getElementById('tile-container');
+    container.style.transition = 'opacity 0.5s ease-out';
+    container.style.opacity = '0';
+  } else {
+    // For normal syntheses: fade only the two selected tiles
+    var tiles = document.querySelectorAll('#tile-container .tile');
+    tiles.forEach(function(t) {
+      if (t.dataset.id === a || t.dataset.id === b) {
+        t.classList.add('merging');
+      }
+    });
+  }
 
   setTimeout(function() {
     // Remove consumed concepts, add result
     state.available = state.available.filter(function(c) { return c !== a && c !== b; });
     state.available.push(synth.result);
 
-    var stage = STAGES[state.stageIndex];
-    var targetReached = synth.result === stage.target;
-    var isFinalStage = state.stageIndex === STAGES.length - 1;
+    var targetReached = willBeTarget;
 
     if (targetReached) {
       state.available = [synth.result];
