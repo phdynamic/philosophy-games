@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marxist Jeopardy! — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html { overflow-y: scroll; }
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#app {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dim);
+  font-size: 12px;
+}
+
+#header a {
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#header a:hover { color: var(--amber); }
+
+#header .game-label {
+  color: var(--bright);
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.9s ease-out both; }
+
+/* Title screen */
+#title-screen {
+  padding: 80px 0 60px;
+  text-align: center;
+}
+
+#title-screen h1 {
+  font-size: 24px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.title-subtitle {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 40px;
+}
+
+.title-portrait {
+  width: 220px;
+  max-width: 60%;
+  display: block;
+  margin: 0 auto 32px;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+.title-portrait-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 40px;
+}
+
+.epigraph {
+  color: var(--dim);
+  font-size: 13px;
+  font-style: italic;
+  max-width: 460px;
+  margin: 0 auto 10px;
+  line-height: 1.8;
+}
+
+.epigraph-attr {
+  color: var(--dim);
+  font-size: 12px;
+  margin-bottom: 56px;
+}
+
+.btn {
+  display: inline-block;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+
+.btn-secondary {
+  border-color: transparent;
+  color: var(--dim);
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 8px 0;
+}
+.btn-secondary:hover { border-color: transparent; color: var(--amber); }
+
+/* Instructions screen */
+#instructions-screen {
+  padding: 60px 0 40px;
+}
+
+#instructions-screen h2 {
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  margin-bottom: 32px;
+}
+
+#instructions-screen p {
+  color: var(--amber);
+  margin-bottom: 14px;
+  max-width: 620px;
+}
+
+#instructions-screen p.dim {
+  color: var(--dim);
+  font-size: 13px;
+}
+
+/* Jeopardy board */
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  margin-bottom: 24px;
+}
+
+.board-cat {
+  padding: 14px 8px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  border-bottom: 2px solid var(--dim);
+}
+
+.board-cell {
+  padding: 16px 8px;
+  text-align: center;
+  border: 1px solid var(--dim);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--amber);
+  background: var(--bg);
+  transition: border-color 0.2s, color 0.2s;
+  user-select: none;
+}
+
+.board-cell:hover {
+  border-color: var(--bright);
+  color: var(--bright);
+}
+
+.board-cell.taken {
+  opacity: 0.2;
+  cursor: default;
+  border-color: transparent;
+}
+
+.board-cell.taken:hover {
+  border-color: transparent;
+  color: var(--amber);
+}
+
+/* Scoreboard */
+.scoreboard {
+  display: flex;
+  justify-content: space-around;
+  margin: 24px 0;
+  padding: 16px 0;
+  border-top: 1px solid rgba(154, 120, 72, 0.28);
+  border-bottom: 1px solid rgba(154, 120, 72, 0.28);
+}
+
+.score-col { text-align: center; }
+
+.score-name {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 4px;
+}
+
+.score-val {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--bright);
+}
+
+.round-label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Clue display */
+.clue-area {
+  margin: 32px 0;
+  padding: 32px;
+  border: 1px solid var(--dim);
+  text-align: center;
+}
+
+.clue-category {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+
+.clue-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--bright);
+  margin-bottom: 20px;
+}
+
+.clue-text {
+  font-size: 15px;
+  color: var(--amber);
+  line-height: 1.7;
+  margin-bottom: 28px;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.answer-input {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 16px;
+  padding: 10px 14px;
+  font-family: var(--font);
+  font-size: 14px;
+  border: 1px solid var(--dim);
+  background: transparent;
+  color: var(--amber);
+  outline: none;
+}
+
+.answer-input:focus { border-color: var(--bright); }
+
+/* Result display */
+.result-label {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.result-label.correct { color: var(--bright); }
+.result-label.wrong { color: var(--dim); }
+
+.result-answer {
+  font-size: 14px;
+  color: var(--amber);
+  margin-bottom: 24px;
+}
+
+/* Marx commentary */
+.marx-wrap {
+  margin: 28px 0 0;
+  padding-left: 20px;
+  border-left: 2px solid var(--dim);
+  animation: marxFadeIn 1.2s ease-out both;
+  text-align: left;
+}
+
+@keyframes marxFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.marx-line {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--dim);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+.marx-line:last-child { margin-bottom: 0; }
+
+.marx-source {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 12px;
+  letter-spacing: 1px;
+}
+
+/* AI turn display */
+.ai-turn {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid rgba(154, 120, 72, 0.28);
+  text-align: center;
+}
+
+.ai-name {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+
+.ai-clue-info {
+  font-size: 14px;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+
+.ai-result-label {
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.ai-result-label.correct { color: var(--bright); font-weight: bold; }
+.ai-result-label.wrong { color: var(--dim); }
+
+/* Ending */
+.ending-text p { margin-bottom: 14px; color: var(--amber); }
+
+.ending-close {
+  margin-top: 56px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.final-scoreboard {
+  margin: 32px 0;
+  text-align: center;
+}
+
+.final-winner {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--bright);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .board-cat { padding: 10px 4px; font-size: 10px; letter-spacing: 1px; }
+  .board-cell { padding: 12px 4px; font-size: 13px; }
+  .clue-area { padding: 20px 16px; }
+  .scoreboard { flex-wrap: wrap; gap: 16px; }
+}
+
+/* Left panel (Marx portrait on wide screens) */
+#left-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(50vw - 390px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#left-panel img {
+  max-width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+
+#left-panel .left-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 879px) {
+  #left-panel { display: none; }
+}
+
+/* Score portraits */
+.score-portrait {
+  width: 60px;
+  display: block;
+  margin: 8px auto 0;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+</style>
+</head>
+<body>
+
+<div id="left-panel"></div>
+<div id="app">
+  <div id="header">
+    <a href="../index.html">&#x2190; Philosophy Games</a>
+    <span class="game-label">Marxist Jeopardy!</span>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ─── Image ─────────────────────────────────────────────────────────────────
+
+var MARX_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Karl_Marx_001.jpg?width=900',
+  alt: 'Photograph of Karl Marx',
+  attr: 'John Jabez Edwin Mayall, <em>Karl Marx</em>, 1875.'
+};
+
+var ENGELS_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Friedrich_Engels_portrait_(cropped).jpg?width=200',
+  alt: 'Portrait of Friedrich Engels'
+};
+
+var BAKUNIN_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Mikhail_Bakunin.jpg?width=200',
+  alt: 'Photograph of Mikhail Bakunin'
+};
+
+var PLAYER_IMG = {
+  src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120' fill='%236b4820'%3E%3Ccircle cx='50' cy='36' r='22'/%3E%3Cellipse cx='50' cy='98' rx='38' ry='28'/%3E%3C/svg%3E",
+  alt: 'Player silhouette'
+};
+
+var CAT_KEYS = { 'Law': 'law', 'Religion': 'religion', 'Art': 'art', 'Ideology': 'ideology', 'The State': 'state' };
+
+// ─── Categories ────────────────────────────────────────────────────────────
+
+var CATEGORIES = ['Law', 'Religion', 'Art', 'Ideology', 'The State'];
+
+// ─── Clues (25 total) ──────────────────────────────────────────────────────
+
+var CLUES = {
+  law_100: {
+    category: 'Law', value: 100,
+    clue: 'Marx argued that laws in capitalist society primarily serve to protect this type of relationship.',
+    answers: ['property', 'property relations', 'private property'],
+    marx: 'Law does not arise from thin air. It crystallises the property relations of the ruling class and calls them universal. Every statute book is a mirror of who owns what.',
+    source: 'A Contribution to the Critique of Political Economy, 1859'
+  },
+  law_200: {
+    category: 'Law', value: 200,
+    clue: 'Marx argued that this document, celebrated as a triumph of universal rights, actually codified the rights of the bourgeois individual to accumulate and exclude.',
+    answers: ['declaration of the rights of man', 'rights of man', 'declaration of rights'],
+    marx: 'The so-called rights of man are nothing but the rights of the member of civil society &#8212; that is, of egoistic man, of man separated from other men and from the community.',
+    source: 'On the Jewish Question, 1843'
+  },
+  law_300: {
+    category: 'Law', value: 300,
+    clue: 'Marx used this term for the process by which peasants were violently expelled from common lands, creating a propertyless class forced to sell its labour.',
+    answers: ['primitive accumulation', 'original accumulation', 'so-called primitive accumulation'],
+    marx: 'The history of this expropriation is written in the annals of mankind in letters of blood and fire. Capital comes dripping from head to foot, from every pore, with blood and dirt. And the law? The law enclosed the commons and called it improvement.',
+    source: 'Capital, Volume I, 1867'
+  },
+  law_400: {
+    category: 'Law', value: 400,
+    clue: 'In this work, Engels argued that the modern family, private property, and the state all emerged together as instruments of class domination.',
+    answers: ['the origin of the family', 'origin of the family private property and the state', 'origin of the family'],
+    marx: 'Engels traced the thread I had only sketched. Family law, inheritance law, property law &#8212; they are not three separate systems. They are one system with three masks, all serving the same function: the transmission of accumulated wealth across generations.',
+    source: 'The Origin of the Family, Private Property and the State (Engels), 1884'
+  },
+  law_500: {
+    category: 'Law', value: 500,
+    clue: 'Marx described this legal concept as the mechanism by which the extraction of unpaid labour is made to appear as a fair exchange between equals.',
+    answers: ['the wage contract', 'wage contract', 'the wage system', 'wage system', 'contract', 'labour contract', 'employment contract', 'labor contract'],
+    marx: 'The contract between worker and capitalist is the masterpiece of bourgeois law. Two free individuals, equal before the law, agree to an exchange. That one of them has nothing to sell but his own hide &#8212; this the law does not mention.',
+    source: 'Capital, Volume I, 1867'
+  },
+  religion_100: {
+    category: 'Religion', value: 100,
+    clue: 'Marx identified this as the earthly institution whose suffering religion exists to console, calling it the &#8220;heart of a heartless world.&#8221;',
+    answers: ['society', 'civil society', 'bourgeois society', 'capitalist society'],
+    marx: 'Religious suffering is at one and the same time the expression of real suffering and a protest against real suffering. Change the world that requires consolation, and the consolation becomes unnecessary.',
+    source: 'Critique of Hegel\'s Philosophy of Right, 1843'
+  },
+  religion_200: {
+    category: 'Religion', value: 200,
+    clue: 'Marx called religion this pharmaceutical metaphor &#8212; not to mock believers, but to describe its function as consolation for real suffering.',
+    answers: ['opium', 'the opium of the people', 'opiate', 'opium of the people', 'opium of the masses'],
+    marx: 'I said opium, not poison. Opium dulls real pain. It does not cure the disease. The question is not whether the patient feels better, but why he is sick. Religion is the sigh of the oppressed creature. Abolish the conditions that require sighing.',
+    source: 'Critique of Hegel\'s Philosophy of Right, 1843'
+  },
+  religion_300: {
+    category: 'Religion', value: 300,
+    clue: 'Marx borrowed this concept from Ludwig Feuerbach to describe how humans create God in their own image, then bow before their own creation as if it were an independent, alien power.',
+    answers: ['projection', 'religious projection', 'religious alienation'],
+    marx: 'Feuerbach saw it in religion; I see it everywhere. The worker creates wealth and stands impoverished before it. The citizen creates the state and kneels before its authority. The pattern is always the same: human powers projected outward and returned as domination.',
+    source: 'Economic and Philosophic Manuscripts, 1844'
+  },
+  religion_400: {
+    category: 'Religion', value: 400,
+    clue: 'Marx argued that this variant of Protestantism, emphasising predestination and worldly asceticism, was uniquely suited to the ideological needs of early capitalism.',
+    answers: ['calvinism', 'calvinist', 'reformed protestantism', 'puritanism'],
+    marx: 'It is no accident that capitalism and Calvinism rose together. A theology that makes wealth a sign of divine election and poverty a mark of damnation &#8212; what factory owner could ask for a more convenient God? The economic base selects its theology the way a key selects its lock.',
+    source: 'Capital, Volume I, 1867'
+  },
+  religion_500: {
+    category: 'Religion', value: 500,
+    clue: 'Marx used this term, borrowed from the language of religion, to describe how commodities in capitalist markets appear to have inherent value and social power independent of the human labour that created them.',
+    answers: ['commodity fetishism', 'fetishism of commodities', 'fetishism'],
+    marx: 'A commodity appears at first sight an extremely obvious, trivial thing. But its analysis brings out that it is a very strange thing, abounding in metaphysical subtleties and theological niceties. I borrowed the word from the missionaries deliberately. When a tribesman bows to a carved idol, we call it fetishism. When a broker bows to a price ticker, we call it economics.',
+    source: 'Capital, Volume I, 1867'
+  },
+  art_100: {
+    category: 'Art', value: 100,
+    clue: 'Marx argued that the dominant artistic values of any era reflect the interests of this group.',
+    answers: ['ruling class', 'the ruling class', 'capitalist class', 'the capitalist class'],
+    marx: 'The ideas of the ruling class are in every epoch the ruling ideas. The class which has the means of material production at its disposal controls the means of mental production. Raphael painted madonnas because the Church paid for madonnas. The brush follows the purse.',
+    source: 'The German Ideology, 1846'
+  },
+  art_200: {
+    category: 'Art', value: 200,
+    clue: 'Marx noted that ancient Greek art retained its power to move audiences despite the disappearance of the social conditions that produced it, calling this the problem of art\'s &#8220;unequal development&#8221; relative to this.',
+    answers: ['material production', 'economic base', 'the economic base', 'productive forces', 'material basis'],
+    marx: 'The difficulty is not in understanding that Greek art is bound to certain forms of social development. The difficulty is that it still affords us artistic pleasure and in certain respects serves as a norm and unattainable model. A man cannot become a child again without becoming childish &#8212; but does he not enjoy the child\'s naivety?',
+    source: 'Grundrisse, 1858'
+  },
+  art_300: {
+    category: 'Art', value: 300,
+    clue: 'Engels praised this French novelist for depicting the decline of the aristocracy so truthfully that his work constituted a triumph of realism despite his royalist sympathies.',
+    answers: ['balzac', 'honore de balzac'],
+    marx: 'Engels was right about Balzac. A reactionary who, by the sheer force of honest observation, produced a more devastating portrait of bourgeois society than any socialist pamphlet. The base asserts itself through the work even when the author\'s conscious intentions point the other way.',
+    source: 'Letter from Engels to Margaret Harkness, 1888'
+  },
+  art_400: {
+    category: 'Art', value: 400,
+    clue: 'Marx used this term for the process by which a worker\'s creative capacity is reduced to repetitive mechanical motion, making labour the opposite of free artistic expression.',
+    answers: ['alienated labour', 'alienation of labour', 'estranged labour', 'alienated labor'],
+    marx: 'Under capitalism the worker does not affirm himself in his work but denies himself. He does not develop freely his physical and mental energy but mortifies his body and ruins his mind. Art is what labour could be. Alienated labour is what art must not become.',
+    source: 'Economic and Philosophic Manuscripts, 1844'
+  },
+  art_500: {
+    category: 'Art', value: 500,
+    clue: 'In the Grundrisse, Marx speculated that in a post-capitalist society, this distinction &#8212; between the person who paints and the person who makes shoes &#8212; would dissolve, as individuals develop their capacities universally.',
+    answers: ['division of labour', 'division of labor', 'the division of labour', 'the division of labor'],
+    marx: 'In communist society there are no painters, only people who among other things engage in painting. The division of labour pins each man to a single function and calls it his identity. Abolish the division and the artist is not a special kind of person &#8212; every person is a special kind of artist.',
+    source: 'The German Ideology, 1846; Grundrisse, 1858'
+  },
+  ideology_100: {
+    category: 'Ideology', value: 100,
+    clue: 'Marx and Engels opened The Communist Manifesto by declaring that all written history is the history of these.',
+    answers: ['class struggles', 'class struggle', 'class conflict'],
+    marx: 'Freeman and slave, patrician and plebeian, lord and serf, guild-master and journeyman &#8212; in a word, oppressor and oppressed. Everything else &#8212; the philosophies, the religions, the legal codes &#8212; is commentary.',
+    source: 'The Communist Manifesto, 1848'
+  },
+  ideology_200: {
+    category: 'Ideology', value: 200,
+    clue: 'Marx used this architectural metaphor to describe the relationship between economic production and the legal, political, and cultural institutions that arise from it.',
+    answers: ['base and superstructure', 'base superstructure', 'superstructure', 'base/superstructure', 'base'],
+    marx: 'The mode of production of material life conditions the social, political and intellectual life process in general. It is not the consciousness of men that determines their being, but on the contrary, their social being that determines their consciousness.',
+    source: 'A Contribution to the Critique of Political Economy, 1859'
+  },
+  ideology_300: {
+    category: 'Ideology', value: 300,
+    clue: 'Marx described this as the condition in which workers are &#8220;a class against capital but not yet a class for itself&#8221; &#8212; aware of shared misery but not yet of shared interest.',
+    answers: ['class in itself', 'a class in itself'],
+    marx: 'The separate individuals form a class only insofar as they have to carry on a common battle against another class. A sack of potatoes does not make a political force. The transition from class-in-itself to class-for-itself &#8212; that is the entire problem of revolutionary organisation.',
+    source: 'The Poverty of Philosophy, 1847'
+  },
+  ideology_400: {
+    category: 'Ideology', value: 400,
+    clue: 'This concept, developed most fully by Georg Luk&#225;cs from Marx\'s work, describes the inability of a class to perceive its own real conditions due to ideological distortions inherent in its social position.',
+    answers: ['false consciousness', 'reification', 'ideological mystification'],
+    marx: 'The ruling ideas are nothing more than the ideal expression of the dominant material relationships. The class that rules materially also rules intellectually. And the most effective domination is the kind the dominated mistake for common sense.',
+    source: 'The German Ideology, 1846'
+  },
+  ideology_500: {
+    category: 'Ideology', value: 500,
+    clue: 'In The Eighteenth Brumaire, Marx wrote that historical events occur twice &#8212; &#8220;the first time as tragedy, the second time as&#8221; this.',
+    answers: ['farce', 'a farce'],
+    marx: 'Hegel remarks somewhere that all great world-historic facts and personages appear twice. He forgot to add: the first time as tragedy, the second time as farce. The superstructure recycles its forms long after the base has moved on.',
+    source: 'The Eighteenth Brumaire of Louis Bonaparte, 1852'
+  },
+  state_100: {
+    category: 'The State', value: 100,
+    clue: 'Marx and Engels described the modern state executive as &#8220;nothing but a committee for managing the common affairs of&#8221; this entire group.',
+    answers: ['the bourgeoisie', 'bourgeoisie', 'the whole bourgeoisie', 'the capitalist class', 'capitalist class'],
+    marx: 'A committee for managing the common affairs of the whole bourgeoisie. I meant it quite literally. The state does not stand above classes. It serves one class while wearing the costume of universality.',
+    source: 'The Communist Manifesto, 1848'
+  },
+  state_200: {
+    category: 'The State', value: 200,
+    clue: 'Engels argued that the state would not be abolished by decree but would gradually do this once class distinctions disappeared.',
+    answers: ['wither away', 'wither', 'die out', 'whither away', 'wither away'],
+    marx: 'The state is not abolished. It withers away. When there are no more classes to hold down, the state loses its function. It does not need to be destroyed. It simply becomes unnecessary, like an umbrella in a world without rain.',
+    source: 'Anti-D&#252;hring (Engels), 1878'
+  },
+  state_300: {
+    category: 'The State', value: 300,
+    clue: 'Marx called this short-lived 1871 government &#8220;the political form at last discovered under which to work out the economical emancipation of labour.&#8221;',
+    answers: ['the paris commune', 'paris commune', 'commune'],
+    marx: 'For seventy-two days the workers of Paris governed themselves. They abolished the standing army, made all officials electable and recallable, paid them workers\' wages. The base reorganised itself and the superstructure followed within the week. Then Versailles drowned it in blood.',
+    source: 'The Civil War in France, 1871'
+  },
+  state_400: {
+    category: 'The State', value: 400,
+    clue: 'Marx described this concept as the necessary transitional period between capitalism and communism, in which the working class uses state power to transform economic relations.',
+    answers: ['dictatorship of the proletariat', 'proletarian dictatorship', 'workers state'],
+    marx: 'Between capitalist and communist society lies a period of revolutionary transformation. The state in this period can be nothing but the revolutionary dictatorship of the proletariat. Note: I said dictatorship of a class, not of a person. Bakunin never understood the difference, which is why he understood nothing.',
+    source: 'Critique of the Gotha Programme, 1875'
+  },
+  state_500: {
+    category: 'The State', value: 500,
+    clue: 'Marx argued that Napoleon Bonaparte\'s seizure of power demonstrated this phenomenon, where the state apparatus achieves temporary autonomy from any single class during a period of class equilibrium.',
+    answers: ['bonapartism', 'relative autonomy of the state', 'state autonomy', 'relative autonomy'],
+    marx: 'When the bourgeoisie has lost the capacity to rule and the proletariat has not yet gained it, the state steps forward with its own man. Bonaparte did not represent the bourgeoisie &#8212; he represented the executive power made independent. Even the superstructure has its moments of rebellion against the base. But only moments.',
+    source: 'The Eighteenth Brumaire of Louis Bonaparte, 1852'
+  }
+};
+
+// ─── AI Accuracy Rates ────────────────────────────────────────────────────
+
+var AI_ACCURACY = {
+  engels:  { 100: 0.95, 200: 0.90, 300: 0.80, 400: 0.65, 500: 0.50 },
+  bakunin: { 100: 0.85, 200: 0.75, 300: 0.55, 400: 0.40, 500: 0.25 }
+};
+
+// ─── Marx Reaction Lines for AI Turns ──────────────────────────────────────
+
+var ENGELS_RIGHT = [
+  'Friedrich, as usual, gets it right. He was always the better student of facts.',
+  'Engels has the advantage of having helped write the exam.',
+  'Correct. Though I notice Friedrich never had to worry about the rent while studying these questions.',
+  'My old friend demonstrates once again that he understood the material &#8212; having also paid for it.',
+  'Engels answers correctly. The Manchester factory owner turned revolutionary &#8212; still the most productive contradiction I ever encountered.'
+];
+
+var ENGELS_WRONG = [
+  'Even Friedrich nods. Though I suspect he was thinking about cotton prices.',
+  'Wrong. I shall not mention this in our next correspondence.',
+  'Friedrich misses the mark. Perhaps he has been spending too much time with the Chartists.'
+];
+
+var BAKUNIN_RIGHT = [
+  'Bakunin stumbles into the correct answer, no doubt by accident.',
+  'Even an anarchist finds the truth occasionally. Usually by tripping over it.',
+  'Correct, Mikhail &#8212; though I suspect you would abolish the question if you could.',
+  'Bakunin gets it right. I will not pretend this does not irritate me.'
+];
+
+var BAKUNIN_WRONG = [
+  'Bakunin answers incorrectly. Anarchism: a political philosophy that extends its opposition to authority even to the authority of correct answers.',
+  'Wrong. But then Mikhail never let factual accuracy interfere with revolutionary enthusiasm.',
+  'Bakunin misses. He would have done better to read my work instead of burning it.'
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────
+
+var state = {
+  screen: 'title',
+  board: {},
+  scores: { player: 0, engels: 0, bakunin: 0 },
+  currentClue: null,
+  currentResult: null,
+  aiQueue: [],
+  round: 0,
+  engelsIdx: 0,
+  bakuninIdx: 0
+};
+
+var content = document.getElementById('content');
+var leftPanel = document.getElementById('left-panel');
+
+function setLeftPanel(show) {
+  if (!show) {
+    leftPanel.innerHTML = '';
+    leftPanel.style.opacity = '0';
+    return;
+  }
+  leftPanel.innerHTML = '<img src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"><p class="left-attr">' + MARX_IMG.attr + '</p>';
+  leftPanel.style.opacity = '1';
+}
+
+// ─── Utility ───────────────────────────────────────────────────────────────
+
+function div(cls, html) {
+  var el = document.createElement('div');
+  if (cls) el.className = cls;
+  el.innerHTML = html;
+  return el;
+}
+
+function scrollTop() {
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function initBoard() {
+  state.board = {};
+  for (var key in CLUES) {
+    state.board[key] = true;
+  }
+}
+
+function getAvailable() {
+  var arr = [];
+  for (var key in state.board) {
+    if (state.board[key]) arr.push(key);
+  }
+  return arr;
+}
+
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function checkAnswer(input, clue) {
+  var cleaned = input.toLowerCase()
+    .replace(/^(what|who|where)\s+(is|are|was|were)\s+/i, '')
+    .replace(/[?.!,'""\u201C\u201D]/g, '')
+    .replace(/^(the|a|an)\s+/i, '')
+    .trim();
+  if (!cleaned) return false;
+  return clue.answers.some(function(ans) {
+    var a = ans.toLowerCase();
+    return cleaned === a || cleaned.indexOf(a) !== -1;
+  });
+}
+
+// ─── Render: Title ─────────────────────────────────────────────────────────
+
+function renderTitle() {
+  scrollTop();
+  setLeftPanel(false);
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="title-screen">\
+      <h1>Marxist Jeopardy!</h1>\
+      <div class="title-subtitle">a game of base and superstructure</div>\
+      <img class="title-portrait" src="' + MARX_IMG.src + '" alt="' + MARX_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy">\
+      <p class="title-portrait-attr">' + MARX_IMG.attr + '</p>\
+      <p class="epigraph">&#8220;The philosophers have only interpreted the world in various ways; the point, however, is to change it. But first &#8212; a game show.&#8221;</p>\
+      <p class="epigraph-attr">&#8212; loosely after <em>Theses on Feuerbach</em>, 1845</p>\
+      <button class="btn" id="begin-btn">Begin</button>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#begin-btn').addEventListener('click', function() {
+    state.screen = 'instructions';
+    render();
+  });
+}
+
+// ─── Render: Instructions ──────────────────────────────────────────────────
+
+function renderInstructions() {
+  scrollTop();
+  setLeftPanel(false);
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="instructions-screen">\
+      <h2>How This Works</h2>\
+      <p>This is Jeopardy &#8212; or rather, a Marxist inversion of it. You are competing against Friedrich Engels and Mikhail Bakunin. I am your host.</p>\
+      <p>The board contains five categories, each representing a domain of the superstructure: Law, Religion, Art, Ideology, and The State. Marx argued that all of these are shaped by the economic base &#8212; the mode of production. Every clue connects to this thesis.</p>\
+      <p>Each round, you select a clue from the board. Type your answer in &#8220;What is...?&#8221; format. Then Engels and Bakunin will each take a clue. The board shrinks by three each round.</p>\
+      <p>Points are awarded for correct answers. Points are not deducted for incorrect ones &#8212; capitalism already punishes the worker enough.</p>\
+      <p class="dim">Higher values require deeper knowledge of Marxist theory. There are 25 clues total.</p>\
+      <div style="margin-top: 40px;">\
+        <button class="btn" id="start-btn">Begin</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#start-btn').addEventListener('click', function() {
+    initBoard();
+    state.scores = { player: 0, engels: 0, bakunin: 0 };
+    state.round = 1;
+    state.screen = 'game';
+    render();
+  });
+}
+
+// ─── Render: Game Board ────────────────────────────────────────────────────
+
+function renderGame() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var boardHtml = '<div class="board">';
+  // Category headers
+  for (var c = 0; c < CATEGORIES.length; c++) {
+    boardHtml += '<div class="board-cat">' + CATEGORIES[c] + '</div>';
+  }
+  // Value rows
+  var values = [100, 200, 300, 400, 500];
+  for (var v = 0; v < values.length; v++) {
+    for (var ci = 0; ci < CATEGORIES.length; ci++) {
+      var cat = CAT_KEYS[CATEGORIES[ci]];
+      var clueId = cat + '_' + values[v];
+      var available = state.board[clueId];
+      boardHtml += '<div class="board-cell' + (available ? '' : ' taken') + '" data-id="' + clueId + '">' + (available ? values[v] : '&#8212;') + '</div>';
+    }
+  }
+  boardHtml += '</div>';
+
+  var scoreHtml = '<div class="scoreboard">\
+    <div class="score-col"><div class="score-name">You</div><div class="score-val">' + state.scores.player + '</div><img class="score-portrait" src="' + PLAYER_IMG.src + '" alt="' + PLAYER_IMG.alt + '"></div>\
+    <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + state.scores.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+    <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + state.scores.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+  </div>';
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <p class="round-label">Round ' + state.round + '</p>\
+      ' + boardHtml + '\
+      ' + scoreHtml + '\
+      <p style="text-align:center;color:var(--dim);font-size:13px;margin-top:8px;">Select a clue from the board.</p>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+
+  // Attach click listeners to available cells
+  el.querySelectorAll('.board-cell:not(.taken)').forEach(function(cell) {
+    cell.addEventListener('click', function() {
+      state.currentClue = cell.dataset.id;
+      state.screen = 'clue';
+      render();
+    });
+  });
+}
+
+// ─── Render: Clue ──────────────────────────────────────────────────────────
+
+function renderClue() {
+  scrollTop();
+  setLeftPanel(true);
+  var clue = CLUES[state.currentClue];
+  content.innerHTML = '';
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="clue-area">\
+        <p class="clue-category">' + clue.category + '</p>\
+        <p class="clue-value">' + clue.value + '</p>\
+        <p class="clue-text">' + clue.clue + '</p>\
+        <input type="text" class="answer-input" id="answer-input" placeholder="What is..." autocomplete="off" autofocus>\
+        <div><button class="btn" id="submit-btn">Submit</button></div>\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+
+  var input = el.querySelector('#answer-input');
+  var submitBtn = el.querySelector('#submit-btn');
+
+  function doSubmit() {
+    var answer = input.value.trim();
+    if (!answer) return;
+    var correct = checkAnswer(answer, clue);
+    if (correct) {
+      state.scores.player += clue.value;
+    }
+    state.board[state.currentClue] = false;
+    state.currentResult = { correct: correct, clue: clue, playerAnswer: answer };
+    state.screen = 'result';
+    render();
+  }
+
+  submitBtn.addEventListener('click', doSubmit);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSubmit();
+  });
+
+  // Focus the input after render
+  setTimeout(function() { input.focus(); }, 100);
+}
+
+// ─── Render: Result ────────────────────────────────────────────────────────
+
+function renderResult() {
+  scrollTop();
+  setLeftPanel(true);
+  var r = state.currentResult;
+  content.innerHTML = '';
+
+  var correctAnswer = r.clue.answers[0];
+  // Capitalise first letter
+  correctAnswer = correctAnswer.charAt(0).toUpperCase() + correctAnswer.slice(1);
+
+  var resultHtml = '';
+  if (r.correct) {
+    resultHtml = '<p class="result-label correct">Correct &#8212; +' + r.clue.value + ' points</p>\
+      <p class="result-answer">The answer: <strong>What is ' + correctAnswer + '?</strong></p>';
+  } else {
+    resultHtml = '<p class="result-label wrong">Incorrect</p>\
+      <p class="result-answer">The answer: <strong>What is ' + correctAnswer + '?</strong></p>';
+  }
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="clue-area">\
+        <p class="clue-category">' + r.clue.category + '</p>\
+        <p class="clue-value">' + r.clue.value + '</p>\
+        <p class="clue-text">' + r.clue.clue + '</p>\
+        ' + resultHtml + '\
+      </div>\
+      <div class="marx-wrap">\
+        <p class="marx-line">' + r.clue.marx + '</p>\
+        <p class="marx-source">&#8212; ' + r.clue.source + '</p>\
+      </div>\
+      <div style="margin-top:32px;text-align:center;">\
+        <button class="btn" id="continue-btn">Continue</button>\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+  el.querySelector('#continue-btn').addEventListener('click', function() {
+    doAiTurns();
+  });
+}
+
+// ─── AI Turns ──────────────────────────────────────────────────────────────
+
+function doAiTurns() {
+  state.aiQueue = [];
+  var available = getAvailable();
+
+  if (available.length === 0) {
+    state.screen = 'ending';
+    render();
+    return;
+  }
+
+  // Engels picks
+  var engelsClue = pickRandom(available);
+  var engelsData = CLUES[engelsClue];
+  var engelsCorrect = Math.random() < AI_ACCURACY.engels[engelsData.value];
+  state.board[engelsClue] = false;
+  if (engelsCorrect) state.scores.engels += engelsData.value;
+
+  var engelsReaction = engelsCorrect
+    ? ENGELS_RIGHT[state.engelsIdx % ENGELS_RIGHT.length]
+    : ENGELS_WRONG[state.engelsIdx % ENGELS_WRONG.length];
+  state.engelsIdx++;
+
+  state.aiQueue.push({
+    name: 'Engels',
+    clueId: engelsClue,
+    clueData: engelsData,
+    correct: engelsCorrect,
+    reaction: engelsReaction
+  });
+
+  // Bakunin picks
+  available = getAvailable();
+  if (available.length > 0) {
+    var bakuninClue = pickRandom(available);
+    var bakuninData = CLUES[bakuninClue];
+    var bakuninCorrect = Math.random() < AI_ACCURACY.bakunin[bakuninData.value];
+    state.board[bakuninClue] = false;
+    if (bakuninCorrect) state.scores.bakunin += bakuninData.value;
+
+    var bakuninReaction = bakuninCorrect
+      ? BAKUNIN_RIGHT[state.bakuninIdx % BAKUNIN_RIGHT.length]
+      : BAKUNIN_WRONG[state.bakuninIdx % BAKUNIN_WRONG.length];
+    state.bakuninIdx++;
+
+    state.aiQueue.push({
+      name: 'Bakunin',
+      clueId: bakuninClue,
+      clueData: bakuninData,
+      correct: bakuninCorrect,
+      reaction: bakuninReaction
+    });
+  }
+
+  state.screen = 'aiTurn';
+  render();
+}
+
+function renderAiTurn() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  if (state.aiQueue.length === 0) {
+    // All AI turns shown, check if board has clues left
+    var available = getAvailable();
+    if (available.length === 0) {
+      state.screen = 'ending';
+      render();
+      return;
+    }
+    state.round++;
+    state.screen = 'game';
+    render();
+    return;
+  }
+
+  var turn = state.aiQueue.shift();
+
+  var aiCorrectAnswer = turn.clueData.answers[0];
+  aiCorrectAnswer = aiCorrectAnswer.charAt(0).toUpperCase() + aiCorrectAnswer.slice(1);
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="ai-turn">\
+        <p class="ai-name">' + turn.name + '\'s Turn</p>\
+        <p class="ai-clue-info">' + turn.clueData.category + ' for ' + turn.clueData.value + '</p>\
+        <p style="font-size:14px;color:var(--amber);line-height:1.7;margin:16px 0;">' + turn.clueData.clue + '</p>\
+        <p class="result-answer">Answer: <strong>What is ' + aiCorrectAnswer + '?</strong></p>\
+        <p class="ai-result-label ' + (turn.correct ? 'correct' : 'wrong') + '">' + (turn.correct ? 'Correct &#8212; +' + turn.clueData.value : 'Incorrect') + '</p>\
+      </div>\
+      <div class="marx-wrap">\
+        <p class="marx-line">' + turn.reaction + '</p>\
+      </div>\
+      <div style="margin-top:32px;text-align:center;">\
+        <button class="btn" id="continue-btn">Continue</button>\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+  el.querySelector('#continue-btn').addEventListener('click', function() {
+    if (state.aiQueue.length > 0) {
+      renderAiTurn();
+    } else {
+      var available = getAvailable();
+      if (available.length === 0) {
+        state.screen = 'ending';
+        render();
+      } else {
+        state.round++;
+        state.screen = 'game';
+        render();
+      }
+    }
+  });
+}
+
+// ─── Render: Ending ────────────────────────────────────────────────────────
+
+function renderEnding() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var s = state.scores;
+  var winner, winnerLine;
+  if (s.player >= s.engels && s.player >= s.bakunin) {
+    winner = 'You';
+    winnerLine = 'You have out-studied both a factory owner and an anarchist. I am cautiously impressed. Though I note that answering questions about revolution is considerably easier than making one.';
+  } else if (s.engels >= s.player && s.engels >= s.bakunin) {
+    winner = 'Engels';
+    winnerLine = 'Friedrich wins. He has the advantage of having lived through the material I only theorised. Also, he paid for most of it. I suppose some debts extend even to quiz shows.';
+  } else {
+    winner = 'Bakunin';
+    winnerLine = 'Bakunin wins. I refuse to analyse how this happened. Some contradictions are better left unresolved. Anarchism: somehow triumphant even when it should not be. Especially when it should not be.';
+  }
+
+  var el = div('fade-in', '\
+    <div style="padding-top:32px;">\
+      <div class="final-scoreboard">\
+        <p class="final-winner">Winner: ' + winner + '</p>\
+        <div class="scoreboard">\
+          <div class="score-col"><div class="score-name">You</div><div class="score-val">' + s.player + '</div><img class="score-portrait" src="' + PLAYER_IMG.src + '" alt="' + PLAYER_IMG.alt + '"></div>\
+          <div class="score-col"><div class="score-name">Engels</div><div class="score-val">' + s.engels + '</div><img class="score-portrait" src="' + ENGELS_IMG.src + '" alt="' + ENGELS_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+          <div class="score-col"><div class="score-name">Bakunin</div><div class="score-val">' + s.bakunin + '</div><img class="score-portrait" src="' + BAKUNIN_IMG.src + '" alt="' + BAKUNIN_IMG.alt + '" onerror="this.style.display=\'none\'" loading="lazy"></div>\
+        </div>\
+      </div>\
+      <div class="marx-wrap" style="margin-top:8px;">\
+        <p class="marx-line">' + winnerLine + '</p>\
+      </div>\
+      <div class="marx-wrap" style="margin-top:32px;">\
+        <p class="marx-line">So the board is cleared. The categories exhausted. Law, Religion, Art, Ideology, The State &#8212; all of them, you see, are superstructure. They feel solid. They feel natural. They feel like they have always been there and always will be.</p>\
+        <p class="marx-line">But they have not. And they will not.</p>\
+        <p class="marx-line">Every legal code was written by someone. Every religion arose under specific material conditions. Every artistic movement reflects the class that patronises it. Every ideology serves an interest. Every state protects a property relation. None of this is permanent. None of this is natural. All of it is historical.</p>\
+        <p class="marx-line">The point of this exercise was not the points. It was the pattern. Once you see that the superstructure rests on the base &#8212; that consciousness does not determine life, but life determines consciousness &#8212; you cannot unsee it. It is in the newspaper. It is in the courtroom. It is in the church. It is in the gallery. It is in the parliament.</p>\
+        <p class="marx-line">Whether you scored well or poorly is, I confess, not very interesting to me. What matters is whether you noticed the structure beneath the structure.</p>\
+      </div>\
+      <div class="ending-text" style="margin-top:36px;">\
+        <p>Karl Marx published <em>Capital</em> in 1867. He spent most of his adult life in exile in London, frequently in poverty, supported financially by Engels. He died in 1883, stateless, and was buried in Highgate Cemetery.</p>\
+        <p>His analysis of capitalism as a historically specific mode of production &#8212; not a natural order but a system with a beginning, a logic, and an end &#8212; remains the single most influential framework in the social sciences. Every serious attempt to understand the relationship between economic life and culture begins with, or against, Marx.</p>\
+        <p style="color:var(--dim);font-style:italic;margin-top:20px;">&#8220;The philosophers have only interpreted the world in various ways; the point, however, is to change it.&#8221;</p>\
+        <p style="color:var(--dim);font-size:12px;">&#8212; <em>Theses on Feuerbach</em>, 1845</p>\
+      </div>\
+      <div class="ending-close">\
+        <button class="btn" id="home-btn">Return to Philosophy Games</button>\
+        <button class="btn btn-secondary" id="restart-btn">Play Again</button>\
+      </div>\
+    </div>\
+  ');
+
+  content.appendChild(el);
+  el.querySelector('#home-btn').addEventListener('click', function() {
+    window.location.href = '../index.html';
+  });
+  el.querySelector('#restart-btn').addEventListener('click', function() {
+    state.screen = 'title';
+    state.scores = { player: 0, engels: 0, bakunin: 0 };
+    state.round = 0;
+    state.engelsIdx = 0;
+    state.bakuninIdx = 0;
+    render();
+  });
+}
+
+// ─── Router ────────────────────────────────────────────────────────────────
+
+function render() {
+  if      (state.screen === 'title')        renderTitle();
+  else if (state.screen === 'instructions') renderInstructions();
+  else if (state.screen === 'game')         renderGame();
+  else if (state.screen === 'clue')         renderClue();
+  else if (state.screen === 'result')       renderResult();
+  else if (state.screen === 'aiTurn')       renderAiTurn();
+  else if (state.screen === 'ending')       renderEnding();
+}
+
+render();
+</script>
+</body>
+</html>
