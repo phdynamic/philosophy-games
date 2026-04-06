@@ -752,6 +752,10 @@ function playAgain() {
   document.getElementById('dialogue-view').classList.remove('hidden');
   document.getElementById('closing-view').classList.add('hidden');
 
+  // Restore portrait for replay
+  var portraitWrap = document.querySelector('.dialogue-portrait-wrap');
+  if (portraitWrap) portraitWrap.style.display = '';
+
   navigate('start');
 }
 
@@ -763,6 +767,12 @@ function navigate(nodeId) {
 
   const node = NODES[nodeId];
   if (!node) { showClosing(); return; }
+
+  // Hide the dialogue portrait after the first node (prevents re-slide on mobile)
+  var portraitWrap = document.querySelector('.dialogue-portrait-wrap');
+  if (portraitWrap && nodeId !== 'start') {
+    portraitWrap.style.display = 'none';
+  }
 
   // Clear UI
   document.getElementById('dialogue-text').innerHTML = '';
