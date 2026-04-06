@@ -852,7 +852,8 @@ function attemptSynthesis(a, b) {
 
     // If target reached, clear leftover decoys so only the result remains
     var stage = STAGES[state.stageIndex];
-    if (synth.result === stage.target) {
+    var targetReached = synth.result === stage.target;
+    if (targetReached) {
       state.available = [synth.result];
     }
     state.selected = [];
@@ -863,20 +864,31 @@ function attemptSynthesis(a, b) {
     var nameR = CONCEPTS[synth.result].name;
     state.chainEntries.push(nameA + ' + ' + nameB + ' = <span class="chain-result">' + nameR + '</span>');
 
-    // Re-render tiles
+    // Re-render tiles area
     var container = document.getElementById('tile-container');
-    var tilesHtml = '';
-    for (var i = 0; i < state.available.length; i++) {
-      var cid = state.available[i];
-      var c = CONCEPTS[cid];
-      var isNew = cid === synth.result;
-      tilesHtml += '<div class="tile' + (isNew ? ' appearing' : '') + '" data-id="' + cid + '">\
-        <div class="tile-name">' + c.name + '</div>\
-        <div class="tile-desc">' + c.desc + '</div>\
+    var workspaceLabel = document.querySelector('.workspace-label');
+    if (targetReached) {
+      // Stage complete: show only the synthesized result, hide selection prompt
+      if (workspaceLabel) workspaceLabel.style.display = 'none';
+      var rc = CONCEPTS[synth.result];
+      container.innerHTML = '<div class="tile appearing synthesized" data-id="' + synth.result + '">\
+        <div class="tile-name">' + rc.name + '</div>\
+        <div class="tile-desc">' + rc.desc + '</div>\
       </div>';
+    } else {
+      var tilesHtml = '';
+      for (var i = 0; i < state.available.length; i++) {
+        var cid = state.available[i];
+        var c = CONCEPTS[cid];
+        var isNew = cid === synth.result;
+        tilesHtml += '<div class="tile' + (isNew ? ' appearing' : '') + '" data-id="' + cid + '">\
+          <div class="tile-name">' + c.name + '</div>\
+          <div class="tile-desc">' + c.desc + '</div>\
+        </div>';
+      }
+      container.innerHTML = tilesHtml;
+      attachTileListeners();
     }
-    container.innerHTML = tilesHtml;
-    attachTileListeners();
 
     // Update chain
     var chainArea = document.querySelector('.chain');
@@ -979,14 +991,17 @@ function renderEnding() {
     </div>\
     ' + imgTag(IMAGES.athens.src, IMAGES.athens.alt, 'inline-painting') + '\
     <p class="attribution inline-attribution">' + IMAGES.athens.attr + '</p>\
-    <div class="ending-text">\
-      <p>You have followed the path of Spirit from its most abstract beginning &#8212; pure Being, indistinguishable from Nothing &#8212; to its self-comprehension in Absolute Knowing.</p>\
-      <p>Hegel published the <em>Phenomenology of Spirit</em> in 1807, finishing the manuscript the night before Napoleon&#8217;s troops entered Jena. He called it a &#8220;voyage of discovery.&#8221; The system he built from it occupied the rest of his life.</p>\
-      <p>His method &#8212; thesis, antithesis, synthesis, though he never used those words &#8212; remains one of the most influential frameworks in the history of thought. Marx inverted it. Kierkegaard revolted against it. Every generation since has had to reckon with it.</p>\
+    <div class="hegel-wrap" style="margin-top:0;">\
+      <p class="hegel-line">You began with the emptiest thought imaginable &#8212; pure Being, indistinguishable from Nothing &#8212; and arrived here. That is not an accident. It is the nature of thought itself.</p>\
+      <p class="hegel-line">Every concept you encountered was incomplete. Being lacked determination. Lordship lacked genuine recognition. Right lacked inwardness. And every incompleteness drove you forward, because a contradiction is not an error &#8212; it is a demand. The concept insists on its own completion.</p>\
+      <p class="hegel-line">You may have noticed: nothing was discarded along the way. Being was not replaced by Becoming &#8212; it was <em>preserved</em> within it. The lord and bondsman were not eliminated by mutual recognition &#8212; they were <em>aufgehoben</em>, lifted up and kept. This is the secret of the dialectic. It does not destroy. It gathers.</p>\
+      <p class="hegel-line">The Absolute is not a final answer waiting at the summit. It is the whole path &#8212; every opposition, every resolution, every stage you forged through &#8212; comprehended as a single movement. To reach the end is to understand the beginning for the first time.</p>\
     </div>\
-    <div class="hegel-wrap" style="margin-top:36px;">\
-      <p class="hegel-line">Every contradiction you forged through was a necessary moment. The Absolute is not found at the end &#8212; it is the whole path.</p>\
-      <p class="hegel-line">The method was the message.</p>\
+    <div class="ending-text" style="margin-top:36px;">\
+      <p>Georg Wilhelm Friedrich Hegel published the <em>Phenomenology of Spirit</em> in 1807, finishing the manuscript the night before Napoleon&#8217;s troops entered Jena. He called philosophy &#8220;its own time apprehended in thoughts,&#8221; and the system he built from it occupied the rest of his life.</p>\
+      <p>His method &#8212; often summarised as thesis, antithesis, synthesis, though he never used those words &#8212; remains one of the most influential frameworks in the history of thought. Marx inverted it. Kierkegaard revolted against it. Every generation since has had to reckon with it.</p>\
+      <p style="color:var(--dim);font-style:italic;margin-top:20px;">&#8220;The owl of Minerva spreads its wings only with the falling of the dusk.&#8221;</p>\
+      <p style="color:var(--dim);font-size:12px;">&#8212; Hegel, <em>Philosophy of Right</em>, 1820</p>\
     </div>\
     <div class="chain" style="margin-top:40px;">\
       <div class="chain-label">The Chain of Spirit</div>\
