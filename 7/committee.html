@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Committee — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --approve: #2d4a1e;
+  --reject: #6b1a1a;
+  --flag: #5a4416;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html { overflow-y: scroll; }
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#app { max-width: 720px; margin: 0 auto; padding: 0 24px 80px; }
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dim);
+  font-size: 12px;
+}
+#header a {
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#header a:hover { color: var(--amber); }
+#header .game-label {
+  color: var(--bright);
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.9s ease-out both; }
+
+/* Title screen */
+#title-screen { padding: 60px 0 40px; text-align: center; }
+#title-screen h1 {
+  font-size: 22px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.title-subtitle {
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 40px;
+}
+.title-portrait {
+  width: 220px;
+  max-width: 60%;
+  display: block;
+  margin: 0 auto 32px;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+.title-portrait-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 40px;
+}
+.epigraph {
+  color: var(--dim);
+  font-size: 13px;
+  font-style: italic;
+  max-width: 500px;
+  margin: 0 auto 10px;
+  line-height: 1.8;
+}
+.epigraph-attr {
+  color: var(--dim);
+  font-size: 12px;
+  margin-bottom: 56px;
+}
+
+.btn {
+  display: inline-block;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary {
+  border-color: transparent;
+  color: var(--dim);
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 8px 0;
+}
+.btn-secondary:hover { border-color: transparent; color: var(--amber); }
+
+/* Memorandum formatting */
+.memo {
+  border: 1px solid var(--dim);
+  padding: 28px 32px;
+  margin: 28px 0;
+  background: rgba(255, 248, 220, 0.4);
+  position: relative;
+}
+.memo-header {
+  border-bottom: 1px solid var(--dim);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+.memo-title {
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.memo-field {
+  font-size: 12px;
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+.memo-field strong {
+  display: inline-block;
+  width: 48px;
+  color: var(--amber);
+  letter-spacing: 1px;
+}
+.memo-body {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--amber);
+}
+.memo-body p { margin-bottom: 12px; }
+.memo-body p:last-child { margin-bottom: 0; }
+
+.memo-empty {
+  border: 1px dashed var(--dim);
+  padding: 40px 32px;
+  margin: 28px 0;
+  text-align: center;
+  background: transparent;
+}
+.memo-empty p {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+}
+
+/* Round header */
+.round-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 36px 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--dim);
+}
+.dept-name {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--bright);
+}
+.round-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.dept-subtitle {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 12px;
+}
+
+/* Proposal cards */
+.proposals-area { margin: 24px 0; }
+.proposals-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 14px;
+}
+.proposal {
+  border: 1px solid var(--dim);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  background: rgba(255, 248, 220, 0.25);
+  transition: border-color 0.25s ease;
+}
+.proposal.decided { border-color: var(--dim); opacity: 0.92; }
+.proposal-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--bright);
+  margin-bottom: 3px;
+}
+.proposal-author {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.proposal-desc {
+  font-size: 13px;
+  color: var(--amber);
+  line-height: 1.65;
+  margin-bottom: 14px;
+}
+.decision-btns {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dec-btn {
+  flex: 1;
+  min-width: 90px;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.dec-btn:hover { border-color: var(--bright); color: var(--bright); }
+.dec-btn.selected-approve { background: var(--approve); color: #f5e4c0; border-color: var(--approve); }
+.dec-btn.selected-reject  { background: var(--reject);  color: #f5e4c0; border-color: var(--reject); }
+.dec-btn.selected-flag    { background: var(--flag);    color: #f5e4c0; border-color: var(--flag); }
+.dec-btn.dimmed { opacity: 0.3; }
+
+.flag-explainer {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--flag);
+  background: rgba(90, 68, 22, 0.05);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--dim);
+  line-height: 1.6;
+}
+
+/* Submit button area */
+.submit-area {
+  text-align: center;
+  margin: 28px 0;
+}
+.submit-hint {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 14px;
+}
+
+/* Tension meter */
+.tension-wrap {
+  margin: 36px 0 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--dim);
+  border-bottom: 1px solid var(--dim);
+}
+.tension-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.tension-bar {
+  position: relative;
+  height: 6px;
+  background: rgba(107, 72, 32, 0.15);
+  border: 1px solid var(--dim);
+}
+.tension-marker {
+  position: absolute;
+  top: -5px;
+  width: 3px;
+  height: 16px;
+  background: var(--bright);
+  transition: left 0.6s ease;
+  transform: translateX(-50%);
+}
+.tension-center {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  width: 1px;
+  background: var(--dim);
+  opacity: 0.4;
+}
+
+/* Panel toggles */
+.panel-toggles {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin: 18px 0 0;
+}
+.panel-toggle {
+  border: 1px solid var(--dim);
+  color: var(--dim);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.panel-toggle:hover { color: var(--amber); border-color: var(--amber); }
+
+/* Overlay panels */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(245, 228, 192, 0.96);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 40px 24px 80px;
+  display: none;
+}
+.overlay.open { display: block; }
+.overlay-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--dim);
+}
+.overlay-title {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bright);
+}
+.overlay-close {
+  border: 1px solid var(--dim);
+  color: var(--dim);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.overlay-close:hover { color: var(--amber); border-color: var(--amber); }
+
+/* Discourse Map */
+.map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 20px;
+}
+.map-empty {
+  text-align: center;
+  color: var(--dim);
+  font-style: italic;
+  padding: 40px 0;
+  font-size: 13px;
+}
+.map-legend {
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--dim);
+}
+.map-legend p { margin-bottom: 6px; }
+.map-term-list {
+  margin-top: 18px;
+}
+.map-term {
+  border-left: 2px solid var(--dim);
+  padding: 8px 14px;
+  margin-bottom: 10px;
+}
+.map-term-name {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--bright);
+  margin-bottom: 4px;
+}
+.map-term-gloss {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* Journal */
+.journal-entry {
+  margin-bottom: 22px;
+  padding: 14px 18px;
+  border: 1px solid var(--dim);
+  background: rgba(255, 248, 220, 0.3);
+}
+.journal-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--dim);
+}
+.journal-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--bright);
+  margin-bottom: 4px;
+}
+.journal-decision {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.journal-decision.d-approve { color: var(--approve); }
+.journal-decision.d-reject  { color: var(--reject); }
+.journal-decision.d-flag    { color: var(--flag); }
+.journal-criteria {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.55;
+}
+.journal-annotation {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--bright);
+  background: rgba(26, 10, 0, 0.04);
+  font-size: 12px;
+  color: var(--amber);
+  font-style: italic;
+  line-height: 1.65;
+  animation: fadeUp 0.8s ease-out both;
+}
+.journal-annotation strong { font-style: normal; color: var(--bright); }
+
+.journal-empty {
+  text-align: center;
+  color: var(--dim);
+  font-style: italic;
+  padding: 40px 0;
+  font-size: 13px;
+}
+
+/* Debrief */
+.debrief-section {
+  margin: 36px 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--dim);
+}
+.debrief-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+.debrief-commentary {
+  padding: 20px 24px;
+  border-left: 3px solid var(--dim);
+  background: rgba(255, 248, 220, 0.4);
+  font-size: 13px;
+  color: var(--amber);
+  line-height: 1.85;
+  margin-bottom: 24px;
+}
+.debrief-commentary p { margin-bottom: 12px; }
+.debrief-commentary p:last-child { margin-bottom: 0; }
+.debrief-terms-list .map-term { margin-bottom: 14px; }
+.debrief-close {
+  margin-top: 48px;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Left panel (Foucault portrait) */
+#left-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(50vw - 360px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  pointer-events: none;
+  overflow: hidden;
+}
+#left-panel img {
+  max-width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+#left-panel .left-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  text-align: center;
+  margin-top: 10px;
+}
+
+@media (max-width: 919px) {
+  #left-panel { display: none; }
+}
+
+.copy-feedback {
+  font-size: 12px;
+  color: var(--approve);
+  font-style: italic;
+  margin-left: 12px;
+}
+</style>
+</head>
+<body>
+
+<div id="left-panel"></div>
+<div id="app">
+  <div id="header">
+    <a href="../index.html">&#x2190; Philosophy Games</a>
+    <span class="game-label">The Committee</span>
+  </div>
+  <div id="content"></div>
+</div>
+<div id="map-overlay" class="overlay"></div>
+<div id="journal-overlay" class="overlay"></div>
+
+<script>
+// ─── Image ─────────────────────────────────────────────────────────────────
+
+var FOUCAULT_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Michel_Foucault.jpg?width=900',
+  alt: 'Photograph of Michel Foucault',
+  attr: 'Photograph of <em>Michel Foucault</em>.'
+};
+
+// ─── Foucault Terms ────────────────────────────────────────────────────────
+
+var TERMS = {
+  discourse: {
+    name: 'Discourse',
+    gloss: 'The framework that determines what can be said, thought, and accepted as true within a given context.',
+    full: 'A system of language, practices, and institutional structures that determines what can be said, thought, and accepted as true within a given context. Discourse does not just describe reality — it produces what counts as real.'
+  },
+  episteme: {
+    name: 'Episteme',
+    gloss: 'The underlying framework of a given era that determines what counts as knowledge.',
+    full: 'The underlying framework of assumptions in a given era or field that determines the conditions of possibility for knowledge. Different epistemes generate different truths, not because one is wrong, but because the rules for what qualifies as truth are themselves historically contingent.'
+  },
+  knowledgePower: {
+    name: 'Knowledge / Power',
+    gloss: 'Knowledge and power are inseparable. To define what counts as knowledge is to exercise power.',
+    full: 'Foucault\'s argument that knowledge and power are inseparable. To define what counts as knowledge — what is rigorous, relevant, legitimate — is to exercise power. Power does not just repress; it produces subjects, categories, and truths.'
+  },
+  normalization: {
+    name: 'Normalization',
+    gloss: 'The process by which certain standards come to seem natural, obvious, and universal.',
+    full: 'The process by which certain ideas, behaviors, or standards come to seem natural, obvious, and universal — obscuring their constructed and contingent origins.'
+  },
+  genealogy: {
+    name: 'Genealogy',
+    gloss: 'Tracing how the present arrangement of knowledge came to seem natural and inevitable.',
+    full: 'A method of historical investigation that traces how present arrangements of knowledge and power came to be — not to find their origin or essence, but to reveal their contingency and the forces that shaped them.'
+  }
+};
+
+// ─── Departments (Rounds 1-2) ──────────────────────────────────────────────
+
+var DEPARTMENTS = [
+  {
+    id: 1,
+    name: 'Department of Natural Sciences',
+    subtitle: 'Standards for Empirical Rigor',
+    memo: [
+      'The Department of Natural Sciences evaluates proposals on the basis of empirical methodology, reproducibility, and falsifiability. Texts must advance claims that can be tested against observation and revised in light of evidence.',
+      'Anecdotal, speculative, or culturally-bound frameworks that cannot be submitted to controlled verification fall outside our scope. Thank you for your rigor.'
+    ],
+    criteria: 'Empirical method; reproducibility; falsifiability',
+    term: 'discourse',
+    proposals: [
+      {
+        id: 'r1-p1',
+        title: 'The Neural Correlates of Sustained Attention',
+        author: 'Chen, Park & Obinna (2022)',
+        desc: 'A longitudinal fMRI study tracking activation in the frontoparietal control network during focused-attention tasks, with pre-registered hypotheses and open data.',
+        pref: 'approve',
+        flag: 'Flagged for review: though methodologically clean, the study assumes that "attention" is a natural kind that can be localized in tissue. This assumption is itself not empirical.'
+      },
+      {
+        id: 'r1-p2',
+        title: 'Phenomenology of Perception',
+        author: 'Maurice Merleau-Ponty (1945)',
+        desc: 'An investigation of embodied perception that proceeds from first-person description rather than third-person measurement. Argues that scientific accounts of perception presuppose lived experience they cannot themselves explain.',
+        pref: 'reject',
+        flag: 'Flagged for review: this text is not empirical in the department\'s sense, but it raises the question of whether empiricism itself rests on an experience it cannot measure.'
+      },
+      {
+        id: 'r1-p3',
+        title: 'Traditional Ecological Knowledge Among the Haida',
+        author: 'Collected oral accounts, ed. K. Collinson (2019)',
+        desc: 'Documents multi-generational observations of salmon runs, forest ecology, and climate variation, transmitted through oral tradition and refined over centuries of sustained contact with the land.',
+        pref: 'reject',
+        flag: 'Flagged for review: the observations are patient and sustained, but they cannot be reproduced under controlled conditions. The department\'s standards may not be the only standards.',
+        reframeId: 'haida'
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Department of Literature & Cultural Studies',
+    subtitle: 'Standards for Critical and Representational Rigor',
+    memo: [
+      'The Department of Literature and Cultural Studies evaluates proposals on the basis of critical engagement, cultural context, and the representation of marginalized voices. Texts must attend to the conditions under which meaning is produced and circulated.',
+      'Purely formalist readings that abstract a work from its historical and political situation fall outside the scope of our contemporary practice. We value voice, context, and reflexivity.'
+    ],
+    criteria: 'Critical theory; cultural context; representation; voice',
+    term: null,
+    proposals: [
+      {
+        id: 'r2-p1',
+        title: 'The Empire Writes Back: Postcolonial Voices in World Literature',
+        author: 'Aisha Ramzan (2018)',
+        desc: 'Reads a century of anti-colonial fiction through the frame of resistance, language recovery, and the politics of translation. Foregrounds authors silenced by the Anglophone canon.',
+        pref: 'approve',
+        flag: 'Flagged for review: the text privileges "recovery" as its organizing category, which itself presumes what has been lost and what must be restored. That presumption is not neutral.'
+      },
+      {
+        id: 'r2-p2',
+        title: 'Clarissa: A Close Reading of Richardson\'s Epistolary Method',
+        author: 'Howard Pemberton (2011)',
+        desc: 'A formalist study of narrative structure, letter-form, and temporal pacing in Samuel Richardson\'s 1748 novel. Attends to voice and interiority with minimal contextual framing.',
+        pref: 'reject',
+        flag: 'Flagged for review: the study attends carefully to voice, but only within the formal limits of the text. Whether that counts as sufficient depends on what one believes literature is for.'
+      },
+      {
+        id: 'r2-p3',
+        title: 'Songs from the Frontier: Medieval Chinese Poetry in Translation',
+        author: 'trans. Lin Mei-ling (2020)',
+        desc: 'A translation project recovering frontier poems from the Tang Dynasty, with extensive apparatus on the cultural and geopolitical context of their composition and circulation.',
+        pref: 'approve',
+        flag: 'Flagged for review: the recovery of silenced voices is valuable, but the framing depends on deciding whose silence counts as recoverable and whose is left outside the project.'
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: 'Department of History',
+    subtitle: 'Standards for Archival and Periodizing Rigor',
+    memo: [
+      'The Department of History evaluates proposals on the basis of primary source work, archival depth, periodization, and the careful reconstruction of historical context. Texts should situate their claims in a verifiable documentary record.',
+      'Speculative theorizing untethered from archival evidence, or present-day frameworks projected onto prior eras, fall outside our standards. We value the document and the period.'
+    ],
+    criteria: 'Primary sources; archival rigor; periodization; documentary record',
+    term: 'episteme',
+    proposals: [
+      {
+        id: 'r3-p1',
+        title: 'Guilds and Grievances: Labor Records of Reformation Nuremberg',
+        author: 'Helena Brandt (2015)',
+        desc: 'A meticulous reconstruction of tanners\', weavers\', and printers\' guild ledgers between 1517 and 1555, drawing on municipal archives and petition records to trace how the Reformation reshaped urban labor.',
+        pref: 'approve',
+        flag: 'Flagged for review: the archive is deep, but the "labor" the study reconstructs is filtered by whose grievances were recorded and whose were never written down at all.'
+      },
+      {
+        id: 'r3-p2',
+        title: 'Black Lung, Long Memory: Oral Histories of the Harlan County Mines',
+        author: 'Appalachian History Project, ed. R. Begley (2017)',
+        desc: 'A collection of interviews with miners, widows, and organizers conducted between 1978 and 2014. Treats oral testimony as primary source material for the documentary record of twentieth-century Appalachian labor.',
+        pref: 'reject',
+        flag: 'Flagged for review: oral testimony from living people is dismissed here because it is not written. But the department\'s standard for what counts as an archive is itself a historical choice.'
+      },
+      {
+        id: 'r3-p3',
+        title: 'Living Memory of the Salmon Coast: Haida Ecological Records',
+        author: 'ed. K. Collinson (2019)',
+        desc: 'Read as a historical primary source, this collection preserves multi-generational observations of salmon cycles, forest change, and coastal weather — a sustained pre-colonial record of the Pacific Northwest environment.',
+        pref: 'approve',
+        flag: 'Flagged for review: this text is now framed as a historical document worth preserving. Earlier this session it was framed as a scientific claim worth testing. Neither framing is the text. Both are the department.',
+        reframeId: 'haida'
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Department of Philosophy',
+    subtitle: 'Standards for Argumentative and Canonical Rigor',
+    memo: [
+      'The Department of Philosophy evaluates proposals on the basis of logical coherence, argumentative structure, and substantive engagement with the canonical tradition. Texts must advance clear claims and defend them against plausible objections.',
+      'Rhetorical performance, aphorism, and polemic detached from systematic argument fall outside the scope of philosophical rigor as we practice it. We value the argument and its defense.'
+    ],
+    criteria: 'Logical coherence; argumentative structure; canonical engagement',
+    term: 'knowledgePower',
+    proposals: [
+      {
+        id: 'r4-p1',
+        title: 'Kant\'s Architectonic: A Systematic Reading of the First Critique',
+        author: 'D. Rowe (2014)',
+        desc: 'A chapter-by-chapter commentary on the Critique of Pure Reason, attending to the structural unity of the Transcendental Analytic and the Dialectic. Engages recent analytic and continental scholarship.',
+        pref: 'approve',
+        flag: 'Flagged for review: the commentary treats Kant\'s system as the measure of philosophical seriousness, which is exactly what Kant himself would have wanted the committee to assume.'
+      },
+      {
+        id: 'r4-p2',
+        title: 'Twilight of the Idols',
+        author: 'Friedrich Nietzsche (1889)',
+        desc: 'A short, polemical work declaring the end of Western metaphysics. Proceeds by aphorism and invective rather than systematic argument. Explicitly attacks the project of philosophical system-building.',
+        pref: 'reject',
+        flag: 'Flagged for review: the text is polemical by design — it argues that systematic argument is itself a symptom. Rejecting it for lacking systematic argument is almost too perfect to be called accidental.'
+      },
+      {
+        id: 'r4-p3',
+        title: 'The Order of Discourse',
+        author: 'Michel Foucault (1970)',
+        desc: 'Foucault\'s inaugural lecture at the Coll&egrave;ge de France. Argues that every discipline operates through procedures of exclusion that determine what can be said, by whom, and under what conditions — and that the committee evaluating a text is already inside the discourse the text examines.',
+        pref: 'reject',
+        flag: 'Flagged for review: the text describes, in advance, the situation of evaluating it. Whatever decision is made here will be an instance of what the text is about. There is no position outside.'
+      }
+    ]
+  },
+  {
+    id: 5,
+    name: '',
+    subtitle: '',
+    memo: [
+      'The committee has dissolved its departmental structure for this final review. No criteria are provided. Please evaluate the following proposals using your own judgment.'
+    ],
+    criteria: '',
+    term: 'genealogy',
+    noDepartment: true,
+    proposals: [
+      {
+        id: 'r5-p1',
+        title: 'The Care of the Self in Hellenistic Practice',
+        author: 'unattributed manuscript',
+        desc: 'A study of daily practices — diet, sleep, speech, correspondence — treated by Greek and Roman writers as techniques for shaping one\'s own conduct. Does not argue for a thesis so much as document a way of living.',
+        pref: null,
+        flag: 'Flagged for review: there is no department now. Why does this text feel easier or harder to approve than it would have in Round 4? What framework are you using?'
+      },
+      {
+        id: 'r5-p2',
+        title: 'Living Memory of the Salmon Coast: Haida Ecological Records',
+        author: 'ed. K. Collinson (2019)',
+        desc: 'You have seen this text before. Twice. No department speaks for it now. It is not a scientific claim to be tested, not a historical document to be archived, not a theoretical object to be framed. It is the thing itself, whatever that means to you.',
+        pref: null,
+        flag: 'Flagged for review: this is the third time this text has appeared. The first time it was rejected for failing an empirical standard. The second time it was approved as a historical source. What is it now?',
+        reframeId: 'haida'
+      },
+      {
+        id: 'r5-p3',
+        title: 'The Untitled Work',
+        author: 'anonymous',
+        desc: 'A text without attribution, without field, without discipline. Its author is unknown and no institution has claimed it. The description above this line is the only description you will be given.',
+        pref: null,
+        flag: 'Flagged for review: you cannot evaluate this text without a framework. And you cannot adopt a framework without already being inside one. The flag itself is a choice.'
+      }
+    ]
+  }
+];
+
+// ─── Institutional Responses (per round, by tension) ───────────────────────
+// tone: 'neutral' early, 'loaded' late. Variant picked by current tension.
+
+var RESPONSES = {
+  1: {
+    all: 'Your evaluations have been recorded. Thank you for your participation in the Natural Sciences review. The next department awaits your judgment.'
+  },
+  2: {
+    all: 'Your evaluations have been recorded. The committee notes the distinct standards of Literature & Cultural Studies and appreciates your engagement with both frameworks.'
+  },
+  3: {
+    conformity: 'The committee appreciates your continued adherence to departmental standards. The Office of Academic Affairs has logged your consistent cooperation across three reviews.',
+    resistance: 'Your reservations regarding the department\'s criteria have been noted for the record. The committee reminds members that the evaluative frameworks have been developed by experts in each field.',
+    mixed:      'Your evaluations have been recorded. The committee observes that your judgments have varied across departments, as is appropriate given the distinct standards of each.'
+  },
+  4: {
+    conformity: 'The committee formally commends your rigorous application of disciplinary standards. Your record of compliance is exemplary. The Office of Academic Affairs looks forward to your final review.',
+    resistance: 'The committee has received your flags and reservations. We remind you that the function of this review is to evaluate proposals against established criteria — not to adjudicate the criteria themselves. Kindly proceed.',
+    mixed:      'The committee has recorded your evaluations. Your pattern of judgment reflects the discretion the review process affords members in ambiguous cases.'
+  },
+  5: {
+    all: ''
+  }
+};
+
+// ─── Closing Commentary (by tension tier) ──────────────────────────────────
+
+var CLOSINGS = {
+  conformity: {
+    title: 'A Faithful Reviewer',
+    text: [
+      'You followed each department\'s criteria faithfully. Taken individually, every judgment was reasonable. Taken together, they reveal that "reasonable" is not a stable category &#8212; it is produced by the discourse you happened to be inside.',
+      'The same text was rejected, then approved, then approved again &#8212; not because the text changed but because the frame did. You did not make those judgments freely; you made them within frames provided to you. And within each frame, your reasoning was sound.',
+      'This is what Foucault called the quiet operation of power: not coercion, but the way systems make certain thoughts thinkable and others invisible. You were not forced to decide as you did. You were simply given the criteria, and the criteria did the rest. That is what it means for power to be productive rather than repressive.',
+      'The committee thanks you for your service.'
+    ]
+  },
+  resistance: {
+    title: 'A Resisting Reviewer',
+    text: [
+      'You questioned the criteria more than you accepted them. You flagged proposals that resisted easy sorting. You refused to let the department\'s frame settle the judgment for you. Good.',
+      'But Foucault\'s challenge does not end there. Every act of resistance still takes place within a framework. Your objections had a logic. Your reservations had a basis. Something inside you was doing the flagging &#8212; and that something had its own assumptions about what should count, what deserves protection, what a fair standard looks like.',
+      'Where did those assumptions come from? They did not fall from the sky. They were shaped, in their own way, by discourses you have lived inside your whole life. The resistance was real. So was the discourse the resistance came from.',
+      'There is no position outside. That is not a defeat. It is the beginning of the work.'
+    ]
+  },
+  mixed: {
+    title: 'An Unstable Reviewer',
+    text: [
+      'You moved between compliance and resistance depending on the department and the case. Sometimes the criteria carried you. Sometimes you pulled back. Sometimes you flagged; sometimes you submitted.',
+      'That instability is the insight. There is no fixed ground from which to evaluate &#8212; only the flicker between frameworks, each producing its own version of the true and the legitimate. The Haida text was rejected, then approved, then left in front of you with no department to tell you what to do with it. You decided. But the deciding was not resting on anything firm.',
+      'Foucault did not offer an alternative framework to replace the ones we inherit. He offered a way of seeing that the frameworks are there, that they are contingent, and that the work of thinking begins when we notice them operating in us rather than waiting for a standpoint that would be free of them.',
+      'The flicker is the work. The committee is adjourned.'
+    ]
+  }
+};
+
+// ─── State ─────────────────────────────────────────────────────────────────
+
+var state = {
+  screen: 'title',           // title | memo | round | response | debrief
+  roundIndex: 0,              // 0-4
+  decisions: {},              // proposalId -> 'approve' | 'reject' | 'flag'
+  allDecisions: [],           // chronological log for journal
+  tension: 50,                // 0 conformity ... 100 resistance
+  termsRevealed: [],          // list of term keys shown so far
+  pendingDecisions: {}        // for current round before submit
+};
+
+var content = document.getElementById('content');
+var leftPanel = document.getElementById('left-panel');
+var mapOverlay = document.getElementById('map-overlay');
+var journalOverlay = document.getElementById('journal-overlay');
+
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
+// ─── Utility ───────────────────────────────────────────────────────────────
+
+function div(cls, html) {
+  var el = document.createElement('div');
+  if (cls) el.className = cls;
+  el.innerHTML = html;
+  return el;
+}
+
+function scrollTop() { window.scrollTo({ top: 0, behavior: 'auto' }); }
+
+function setLeftPanel(show) {
+  if (!show) {
+    leftPanel.innerHTML = '';
+    leftPanel.style.opacity = '0';
+    return;
+  }
+  leftPanel.innerHTML = '<img src="' + FOUCAULT_IMG.src + '" alt="' + FOUCAULT_IMG.alt + '" loading="lazy"><p class="left-attr">' + FOUCAULT_IMG.attr + '</p>';
+  leftPanel.style.opacity = '1';
+}
+
+function tensionTier() {
+  if (state.tension <= 33) return 'conformity';
+  if (state.tension >= 67) return 'resistance';
+  return 'mixed';
+}
+
+function applyDecisionToTension(proposal, decision) {
+  if (decision === 'flag') {
+    state.tension = Math.min(100, state.tension + 10);
+    return;
+  }
+  // approve / reject
+  if (proposal.pref === null) {
+    // round 5 — no preference — mild movement based on choice
+    // neither direction penalized
+    return;
+  }
+  if (decision === proposal.pref) {
+    state.tension = Math.max(0, state.tension - 5);
+  } else {
+    state.tension = Math.min(100, state.tension + 7);
+  }
+}
+
+function renderTensionBar() {
+  return '<div class="tension-wrap">\
+    <div class="tension-labels"><span>Conformity</span><span>Resistance</span></div>\
+    <div class="tension-bar">\
+      <div class="tension-center"></div>\
+      <div class="tension-marker" style="left:' + state.tension + '%"></div>\
+    </div>\
+  </div>';
+}
+
+function renderPanelToggles() {
+  return '<div class="panel-toggles">\
+    <button class="panel-toggle" id="open-map">Discourse Map</button>\
+    <button class="panel-toggle" id="open-journal">Decision Journal</button>\
+  </div>';
+}
+
+function attachPanelToggles(el) {
+  var m = el.querySelector('#open-map');
+  var j = el.querySelector('#open-journal');
+  if (m) m.addEventListener('click', openMap);
+  if (j) j.addEventListener('click', openJournal);
+}
+
+// ─── Render: Title ─────────────────────────────────────────────────────────
+
+function renderTitle() {
+  scrollTop();
+  setLeftPanel(false);
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="title-screen">\
+      <h1>The Committee</h1>\
+      <div class="title-subtitle">a game of knowledge and power</div>\
+      <img class="title-portrait" src="' + FOUCAULT_IMG.src + '" alt="' + FOUCAULT_IMG.alt + '" loading="lazy">\
+      <p class="title-portrait-attr">' + FOUCAULT_IMG.attr + '</p>\
+      <p class="epigraph">&#8220;We must cease once and for all to describe the effects of power in negative terms: it excludes, it represses, it censors&#8230; In fact, power produces; it produces reality; it produces domains of objects and rituals of truth.&#8221;</p>\
+      <p class="epigraph-attr">&#8212; Foucault, <em>Discipline and Punish</em>, 1975</p>\
+      <button class="btn" id="begin-btn">Begin Review</button>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#begin-btn').addEventListener('click', function() {
+    state.screen = 'memo';
+    render();
+  });
+}
+
+// ─── Render: Opening Memo ──────────────────────────────────────────────────
+
+function renderMemo() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div class="memo" style="margin-top:40px;">\
+      <div class="memo-header">\
+        <div class="memo-title">Memorandum</div>\
+        <p class="memo-field"><strong>To:</strong> Curriculum Review Committee Member</p>\
+        <p class="memo-field"><strong>From:</strong> Office of Academic Affairs</p>\
+        <p class="memo-field"><strong>Re:</strong> Annual Course Catalog Review</p>\
+      </div>\
+      <div class="memo-body">\
+        <p>Thank you for agreeing to serve on this year&#8217;s interdepartmental curriculum review committee. Your role is to evaluate proposed course texts and methodologies for inclusion in the university catalog.</p>\
+        <p>Each department has provided evaluative criteria reflecting their standards of academic rigor and relevance. Please review each submission carefully and render your judgment.</p>\
+        <p>You may Approve, Reject, or Flag for Review any proposal. There are five rounds, one per department. The committee appreciates your service.</p>\
+      </div>\
+    </div>\
+    <div style="text-align:center;margin-top:28px;">\
+      <button class="btn" id="start-btn">Enter the First Department</button>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#start-btn').addEventListener('click', function() {
+    state.screen = 'round';
+    state.roundIndex = 0;
+    render();
+  });
+}
+
+// ─── Render: Round ─────────────────────────────────────────────────────────
+
+function renderRound() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var dept = DEPARTMENTS[state.roundIndex];
+  state.pendingDecisions = {};
+
+  // Reveal the term for this round if applicable
+  if (dept.term && state.termsRevealed.indexOf(dept.term) === -1) {
+    state.termsRevealed.push(dept.term);
+  }
+
+  var memoHtml;
+  if (dept.noDepartment) {
+    memoHtml = '<div class="memo-empty"><p>' + dept.memo[0] + '</p></div>';
+  } else {
+    var memoBody = dept.memo.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+    memoHtml = '<div class="memo">\
+      <div class="memo-header">\
+        <div class="memo-title">Departmental Directive</div>\
+        <p class="memo-field"><strong>To:</strong> Committee Member</p>\
+        <p class="memo-field"><strong>From:</strong> ' + dept.name + '</p>\
+        <p class="memo-field"><strong>Re:</strong> ' + dept.subtitle + '</p>\
+      </div>\
+      <div class="memo-body">' + memoBody + '</div>\
+    </div>';
+  }
+
+  var roundLabel = dept.noDepartment
+    ? 'Final Review'
+    : 'Round ' + (state.roundIndex + 1) + ' of 5';
+
+  var deptLine = dept.noDepartment
+    ? '<div class="round-header">\
+         <span class="dept-name">No Department</span>\
+         <span class="round-label">' + roundLabel + '</span>\
+       </div>'
+    : '<div class="round-header">\
+         <span class="dept-name">' + dept.name + '</span>\
+         <span class="round-label">' + roundLabel + '</span>\
+       </div>\
+       <p class="dept-subtitle">' + dept.subtitle + '</p>';
+
+  // Proposals
+  var proposalsHtml = '<div class="proposals-area">\
+    <p class="proposals-label">Submissions for Review</p>';
+  dept.proposals.forEach(function(p) {
+    proposalsHtml += '\
+      <div class="proposal" data-proposal="' + p.id + '">\
+        <div class="proposal-title">' + p.title + '</div>\
+        <div class="proposal-author">' + p.author + '</div>\
+        <div class="proposal-desc">' + p.desc + '</div>\
+        <div class="decision-btns">\
+          <button class="dec-btn" data-decision="approve" data-proposal="' + p.id + '">Approve</button>\
+          <button class="dec-btn" data-decision="reject"  data-proposal="' + p.id + '">Reject</button>\
+          <button class="dec-btn" data-decision="flag"    data-proposal="' + p.id + '">Flag for Review</button>\
+        </div>\
+        <div class="flag-explainer" data-explainer="' + p.id + '" style="display:none;"></div>\
+      </div>';
+  });
+  proposalsHtml += '</div>';
+
+  // Submit area
+  var submitHtml = '<div class="submit-area">\
+    <p class="submit-hint" id="submit-hint">Decide on all proposals to continue.</p>\
+    <button class="btn" id="submit-btn" disabled>Submit Evaluations</button>\
+  </div>';
+
+  var html = deptLine + memoHtml + proposalsHtml + submitHtml + renderTensionBar() + renderPanelToggles();
+
+  var el = div('fade-in', html);
+  content.appendChild(el);
+
+  // Wire up decision buttons via delegation
+  el.querySelector('.proposals-area').addEventListener('click', function(e) {
+    var btn = e.target.closest('.dec-btn');
+    if (!btn) return;
+    var pid = btn.dataset.proposal;
+    var decision = btn.dataset.decision;
+    handleDecision(pid, decision, el);
+  });
+
+  el.querySelector('#submit-btn').addEventListener('click', function() {
+    if (Object.keys(state.pendingDecisions).length !== dept.proposals.length) return;
+    commitRound();
+  });
+
+  attachPanelToggles(el);
+}
+
+function handleDecision(proposalId, decision, el) {
+  state.pendingDecisions[proposalId] = decision;
+
+  // Update button visuals for this proposal
+  var proposalEl = el.querySelector('[data-proposal="' + proposalId + '"]');
+  proposalEl.querySelectorAll('.dec-btn').forEach(function(b) {
+    b.classList.remove('selected-approve', 'selected-reject', 'selected-flag', 'dimmed');
+  });
+  var activeBtns = proposalEl.querySelectorAll('.dec-btn');
+  activeBtns.forEach(function(b) {
+    if (b.dataset.decision === decision) {
+      b.classList.add('selected-' + decision);
+    } else {
+      b.classList.add('dimmed');
+    }
+  });
+
+  // Show flag explainer if flagged
+  var explainer = el.querySelector('[data-explainer="' + proposalId + '"]');
+  if (decision === 'flag') {
+    var proposal = findProposal(proposalId);
+    explainer.textContent = proposal.flag;
+    explainer.style.display = 'block';
+  } else {
+    explainer.style.display = 'none';
+  }
+
+  // Enable submit if all decided
+  var dept = DEPARTMENTS[state.roundIndex];
+  var submitBtn = el.querySelector('#submit-btn');
+  var hint = el.querySelector('#submit-hint');
+  if (Object.keys(state.pendingDecisions).length === dept.proposals.length) {
+    submitBtn.disabled = false;
+    hint.textContent = 'When you are ready, submit your evaluations.';
+  }
+}
+
+function findProposal(pid) {
+  for (var i = 0; i < DEPARTMENTS.length; i++) {
+    var found = DEPARTMENTS[i].proposals.find(function(p) { return p.id === pid; });
+    if (found) return found;
+  }
+  return null;
+}
+
+function commitRound() {
+  var dept = DEPARTMENTS[state.roundIndex];
+  dept.proposals.forEach(function(p) {
+    var decision = state.pendingDecisions[p.id];
+    state.decisions[p.id] = decision;
+    state.allDecisions.push({
+      proposalId: p.id,
+      decision: decision,
+      roundIndex: state.roundIndex
+    });
+    applyDecisionToTension(p, decision);
+  });
+  state.screen = 'response';
+  render();
+}
+
+// ─── Render: Institutional Response ────────────────────────────────────────
+
+function renderResponse() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var dept = DEPARTMENTS[state.roundIndex];
+  var round = state.roundIndex + 1;
+  var responseObj = RESPONSES[round];
+  var responseText;
+  if (responseObj.all !== undefined) {
+    responseText = responseObj.all;
+  } else {
+    responseText = responseObj[tensionTier()];
+  }
+
+  // Round 5 has no response — skip straight to debrief
+  if (round === 5) {
+    state.screen = 'debrief';
+    render();
+    return;
+  }
+
+  var termBlock = '';
+  if (dept.term) {
+    var t = TERMS[dept.term];
+    termBlock = '<div class="map-term" style="margin-top:24px;">\
+      <div class="map-term-name">' + t.name + '</div>\
+      <div class="map-term-gloss">' + t.gloss + '</div>\
+    </div>';
+  }
+
+  var continueLabel;
+  if (round < 4) continueLabel = 'Continue to Next Department';
+  else continueLabel = 'Proceed to Final Review';
+
+  var el = div('fade-in', '\
+    <div class="round-header" style="margin-top:40px;">\
+      <span class="dept-name">Committee Response</span>\
+      <span class="round-label">Round ' + round + ' of 5</span>\
+    </div>\
+    <div class="memo" style="margin-top:20px;">\
+      <div class="memo-body">\
+        <p>' + responseText + '</p>\
+      </div>\
+    </div>\
+    ' + termBlock + '\
+    <div style="text-align:center;margin-top:36px;">\
+      <button class="btn" id="next-btn">' + continueLabel + '</button>\
+    </div>\
+    ' + renderTensionBar() + renderPanelToggles() + '\
+  ');
+  content.appendChild(el);
+
+  el.querySelector('#next-btn').addEventListener('click', function() {
+    state.roundIndex++;
+    if (state.roundIndex >= DEPARTMENTS.length) {
+      state.screen = 'debrief';
+    } else {
+      state.screen = 'round';
+    }
+    render();
+  });
+
+  attachPanelToggles(el);
+}
+
+// ─── Discourse Map (SVG) ───────────────────────────────────────────────────
+
+function buildMapSvg() {
+  var completedRounds = state.roundIndex + (state.screen === 'response' || state.screen === 'debrief' ? 1 : 0);
+  if (state.screen === 'debrief') completedRounds = 5;
+  if (completedRounds === 0) return '<div class="map-empty">The map is empty. Decisions will begin populating it after Round 1.</div>';
+
+  var W = 680, H = 420;
+  var colW = W / 5;
+  var svg = '<svg class="map-svg" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Department columns
+  for (var i = 0; i < Math.min(completedRounds, 5); i++) {
+    var dept = DEPARTMENTS[i];
+    var cx = colW * i + colW / 2;
+
+    // Department label
+    var deptName = dept.noDepartment ? 'Final' : 'Dept ' + (i + 1);
+    svg += '<text x="' + cx + '" y="24" text-anchor="middle" font-family="Courier New, monospace" font-size="11" fill="#1a0a00" font-weight="bold">' + deptName + '</text>';
+
+    // Criteria node
+    var criteriaY = 56;
+    svg += '<circle cx="' + cx + '" cy="' + criteriaY + '" r="6" fill="#6b4820" />';
+    svg += '<text x="' + cx + '" y="' + (criteriaY + 20) + '" text-anchor="middle" font-family="Courier New, monospace" font-size="9" fill="#6b4820">criteria</text>';
+
+    // Decision nodes (one per proposal)
+    dept.proposals.forEach(function(p, idx) {
+      var decision = state.decisions[p.id];
+      if (!decision) return;
+      var dy = 120 + idx * 60;
+      var color = decision === 'approve' ? '#2d4a1e' : (decision === 'reject' ? '#6b1a1a' : '#5a4416');
+
+      // Line from criteria to decision
+      svg += '<line x1="' + cx + '" y1="' + (criteriaY + 6) + '" x2="' + cx + '" y2="' + (dy - 6) + '" stroke="#6b4820" stroke-width="1" opacity="0.5" />';
+
+      // Decision node
+      if (decision === 'flag') {
+        // diamond for flag
+        svg += '<polygon points="' + cx + ',' + (dy - 7) + ' ' + (cx + 7) + ',' + dy + ' ' + cx + ',' + (dy + 7) + ' ' + (cx - 7) + ',' + dy + '" fill="' + color + '" />';
+      } else {
+        svg += '<circle cx="' + cx + '" cy="' + dy + '" r="6" fill="' + color + '" />';
+      }
+    });
+  }
+
+  // Draw contradiction lines for reframed proposals
+  // Find all proposals with the same reframeId that got different decisions
+  var reframeGroups = {};
+  for (var d = 0; d < DEPARTMENTS.length; d++) {
+    DEPARTMENTS[d].proposals.forEach(function(p, pIdx) {
+      if (!p.reframeId) return;
+      if (!state.decisions[p.id]) return;
+      if (!reframeGroups[p.reframeId]) reframeGroups[p.reframeId] = [];
+      reframeGroups[p.reframeId].push({
+        roundIdx: d,
+        propIdx: pIdx,
+        decision: state.decisions[p.id]
+      });
+    });
+  }
+
+  Object.keys(reframeGroups).forEach(function(key) {
+    var group = reframeGroups[key];
+    for (var a = 0; a < group.length; a++) {
+      for (var b = a + 1; b < group.length; b++) {
+        var A = group[a], B = group[b];
+        if (A.decision !== B.decision) {
+          var x1 = colW * A.roundIdx + colW / 2;
+          var y1 = 120 + A.propIdx * 60;
+          var x2 = colW * B.roundIdx + colW / 2;
+          var y2 = 120 + B.propIdx * 60;
+          svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#1a0a00" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7" />';
+        }
+      }
+    }
+  });
+
+  svg += '</svg>';
+  return svg;
+}
+
+function openMap() {
+  var legend = '<div class="map-legend">\
+    <p>&#9679; <span style="color:#2d4a1e;">approve</span> &nbsp; &#9679; <span style="color:#6b1a1a;">reject</span> &nbsp; &#9670; <span style="color:#5a4416;">flag</span></p>\
+    <p style="margin-top:8px;font-style:italic;">Dashed lines connect contradictory judgments of the same text across different departments.</p>\
+  </div>';
+
+  var termsHtml = '';
+  if (state.termsRevealed.length > 0) {
+    termsHtml = '<div class="map-term-list"><p class="debrief-label" style="margin-bottom:10px;">Terms Encountered</p>';
+    state.termsRevealed.forEach(function(k) {
+      var t = TERMS[k];
+      termsHtml += '<div class="map-term">\
+        <div class="map-term-name">' + t.name + '</div>\
+        <div class="map-term-gloss">' + t.gloss + '</div>\
+      </div>';
+    });
+    termsHtml += '</div>';
+  }
+
+  mapOverlay.innerHTML = '<div class="overlay-inner">\
+    <div class="overlay-header">\
+      <div class="overlay-title">Discourse Map</div>\
+      <button class="overlay-close">Close</button>\
+    </div>\
+    ' + buildMapSvg() + '\
+    ' + legend + '\
+    ' + termsHtml + '\
+  </div>';
+
+  mapOverlay.classList.add('open');
+  mapOverlay.querySelector('.overlay-close').addEventListener('click', function() {
+    mapOverlay.classList.remove('open');
+  });
+  mapOverlay.scrollTop = 0;
+}
+
+// ─── Decision Journal ──────────────────────────────────────────────────────
+
+function buildJournalEntries() {
+  if (state.allDecisions.length === 0) {
+    return '<div class="journal-empty">The journal is empty. Decisions will begin populating it after Round 1.</div>';
+  }
+
+  var html = '';
+  state.allDecisions.forEach(function(entry, idx) {
+    var proposal = findProposal(entry.proposalId);
+    var dept = DEPARTMENTS[entry.roundIndex];
+    var roundLabel = dept.noDepartment ? 'Final Review' : 'Round ' + (entry.roundIndex + 1);
+    var deptLabel = dept.noDepartment ? 'No Department' : dept.name;
+    var decLabel = entry.decision.toUpperCase();
+    var critLabel = dept.criteria || 'No criteria provided';
+
+    html += '<div class="journal-entry">\
+      <div class="journal-head"><span>' + roundLabel + '</span><span>' + deptLabel + '</span></div>\
+      <div class="journal-title">' + proposal.title + '</div>\
+      <div class="journal-decision d-' + entry.decision + '">' + decLabel + '</div>\
+      <div class="journal-criteria">Criteria: ' + critLabel + '</div>';
+
+    // Annotations for reframed proposals
+    if (proposal.reframeId) {
+      var contradictions = findContradictionsFor(proposal.reframeId, entry);
+      contradictions.forEach(function(c) {
+        var otherDept = DEPARTMENTS[c.roundIndex];
+        var otherLabel = otherDept.noDepartment ? 'No Department' : otherDept.name;
+        var otherRound = otherDept.noDepartment ? 'Final Review' : 'Round ' + (c.roundIndex + 1);
+        html += '<div class="journal-annotation">\
+          <strong>Note:</strong> the same text (in different framing) was <strong>' + c.decision + 'ed</strong> in ' + otherRound + ' under ' + otherLabel + '. Neither decision was wrong within its frame. Both decisions were yours.\
+        </div>';
+      });
+    }
+
+    html += '</div>';
+  });
+  return html;
+}
+
+function findContradictionsFor(reframeId, currentEntry) {
+  var results = [];
+  state.allDecisions.forEach(function(e) {
+    if (e === currentEntry) return;
+    if (e.roundIndex >= currentEntry.roundIndex) return; // only look backward
+    var p = findProposal(e.proposalId);
+    if (p.reframeId === reframeId && e.decision !== currentEntry.decision) {
+      results.push(e);
+    }
+  });
+  return results;
+}
+
+function openJournal() {
+  var entriesHtml = buildJournalEntries();
+  var exportBtn = state.allDecisions.length > 0
+    ? '<div style="margin-top:28px;text-align:center;">\
+         <button class="btn" id="export-btn">Copy Journal to Clipboard</button>\
+         <span class="copy-feedback" id="copy-feedback" style="display:none;">Copied.</span>\
+       </div>'
+    : '';
+
+  journalOverlay.innerHTML = '<div class="overlay-inner">\
+    <div class="overlay-header">\
+      <div class="overlay-title">Decision Journal</div>\
+      <button class="overlay-close">Close</button>\
+    </div>\
+    ' + entriesHtml + '\
+    ' + exportBtn + '\
+  </div>';
+
+  journalOverlay.classList.add('open');
+  journalOverlay.querySelector('.overlay-close').addEventListener('click', function() {
+    journalOverlay.classList.remove('open');
+  });
+  var exp = journalOverlay.querySelector('#export-btn');
+  if (exp) exp.addEventListener('click', exportJournal);
+  journalOverlay.scrollTop = 0;
+}
+
+function exportJournal() {
+  var lines = [];
+  lines.push('THE COMMITTEE — DECISION JOURNAL');
+  lines.push('Curriculum Review, Annual Course Catalog');
+  lines.push('');
+
+  state.allDecisions.forEach(function(entry) {
+    var proposal = findProposal(entry.proposalId);
+    var dept = DEPARTMENTS[entry.roundIndex];
+    var roundLabel = dept.noDepartment ? 'Final Review' : 'Round ' + (entry.roundIndex + 1);
+    var deptLabel = dept.noDepartment ? 'No Department' : dept.name;
+    lines.push(roundLabel + ' — ' + deptLabel);
+    lines.push('Proposal: ' + proposal.title + ' (' + proposal.author + ')');
+    lines.push('Decision: ' + entry.decision.toUpperCase());
+    if (dept.criteria) lines.push('Criteria applied: ' + dept.criteria);
+    if (proposal.reframeId) {
+      var contradictions = findContradictionsFor(proposal.reframeId, entry);
+      contradictions.forEach(function(c) {
+        var otherDept = DEPARTMENTS[c.roundIndex];
+        var otherRound = otherDept.noDepartment ? 'Final Review' : 'Round ' + (c.roundIndex + 1);
+        lines.push('  Note: the same text was ' + c.decision + 'ed in ' + otherRound + ' under ' + (otherDept.name || 'No Department') + '.');
+      });
+    }
+    lines.push('');
+  });
+
+  lines.push('Final tension position: ' + state.tension + ' / 100');
+  lines.push('Pattern: ' + tensionTier());
+
+  var text = lines.join('\n');
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      var fb = document.getElementById('copy-feedback');
+      if (fb) {
+        fb.style.display = 'inline';
+        setTimeout(function() { fb.style.display = 'none'; }, 2000);
+      }
+    });
+  }
+}
+
+// ─── Render: Debrief ───────────────────────────────────────────────────────
+
+function renderDebrief() {
+  scrollTop();
+  setLeftPanel(true);
+  content.innerHTML = '';
+
+  var tier = tensionTier();
+  var closing = CLOSINGS[tier];
+  var commentaryHtml = closing.text.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+
+  var termsListHtml = '';
+  Object.keys(TERMS).forEach(function(k) {
+    var t = TERMS[k];
+    termsListHtml += '<div class="map-term">\
+      <div class="map-term-name">' + t.name + '</div>\
+      <div class="map-term-gloss">' + t.full + '</div>\
+    </div>';
+  });
+
+  var el = div('fade-in', '\
+    <div style="padding-top:40px;">\
+      <div class="round-header">\
+        <span class="dept-name">Committee Debrief</span>\
+        <span class="round-label">Review Complete</span>\
+      </div>\
+      <p class="dept-subtitle">Reviewer pattern: ' + tier + '</p>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">' + closing.title + '</div>\
+        <div class="debrief-commentary">' + commentaryHtml + '</div>\
+      </div>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">Final Tension</div>\
+        ' + renderTensionBar() + '\
+      </div>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">Discourse Map</div>\
+        ' + buildMapSvg() + '\
+        <div class="map-legend">\
+          <p>&#9679; <span style="color:#2d4a1e;">approve</span> &nbsp; &#9679; <span style="color:#6b1a1a;">reject</span> &nbsp; &#9670; <span style="color:#5a4416;">flag</span></p>\
+          <p style="margin-top:8px;font-style:italic;">Dashed lines connect contradictory judgments of the same text across different departments.</p>\
+        </div>\
+      </div>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">Decision Journal</div>\
+        <div style="margin-top:14px;">' + buildJournalEntries() + '</div>\
+        <div style="text-align:center;margin-top:20px;">\
+          <button class="btn" id="export-btn">Copy Journal to Clipboard</button>\
+          <span class="copy-feedback" id="copy-feedback" style="display:none;">Copied.</span>\
+        </div>\
+      </div>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">Key Concepts</div>\
+        <div class="debrief-terms-list">' + termsListHtml + '</div>\
+      </div>\
+      \
+      <div class="debrief-close">\
+        <button class="btn" id="home-btn">Return to Philosophy Games</button>\
+        <button class="btn btn-secondary" id="restart-btn">Review Again</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+
+  el.querySelector('#export-btn').addEventListener('click', exportJournal);
+  el.querySelector('#home-btn').addEventListener('click', function() {
+    window.location.href = '../index.html';
+  });
+  el.querySelector('#restart-btn').addEventListener('click', function() {
+    state.screen = 'title';
+    state.roundIndex = 0;
+    state.decisions = {};
+    state.allDecisions = [];
+    state.tension = 50;
+    state.termsRevealed = [];
+    state.pendingDecisions = {};
+    render();
+  });
+}
+
+// ─── Router ────────────────────────────────────────────────────────────────
+
+function render() {
+  if      (state.screen === 'title')    renderTitle();
+  else if (state.screen === 'memo')     renderMemo();
+  else if (state.screen === 'round')    renderRound();
+  else if (state.screen === 'response') renderResponse();
+  else if (state.screen === 'debrief')  renderDebrief();
+}
+
+render();
+</script>
+</body>
+</html>
