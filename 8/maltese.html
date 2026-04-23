@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Maltese Essence — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --strike: #8a3a1e;
+  --confirm: #2d4a1e;
+  --witt: #5a2c52;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html { overflow-y: scroll; }
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#app { max-width: 1120px; margin: 0 auto; padding: 0 24px 80px; }
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dim);
+  font-size: 12px;
+}
+#header a {
+  color: var(--dim);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#header a:hover { color: var(--amber); }
+#header .game-label {
+  color: var(--bright);
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.9s ease-out both; }
+
+@keyframes strikeIn {
+  from { text-decoration-color: transparent; }
+  to   { text-decoration-color: var(--strike); }
+}
+
+/* Title / opening */
+#title-screen { padding: 70px 0 40px; text-align: center; max-width: 680px; margin: 0 auto; }
+#title-screen h1 {
+  font-size: 24px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.title-sub {
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 36px;
+}
+.title-portrait {
+  width: 220px;
+  max-width: 60%;
+  display: block;
+  margin: 0 auto 28px;
+  filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06);
+}
+.title-portrait-attr {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-bottom: 40px;
+}
+.epigraph {
+  color: var(--dim);
+  font-size: 13px;
+  font-style: italic;
+  max-width: 520px;
+  margin: 0 auto 10px;
+  line-height: 1.85;
+}
+.epigraph-attr {
+  color: var(--dim);
+  font-size: 12px;
+  margin-bottom: 48px;
+}
+
+.btn {
+  display: inline-block;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 12px 32px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-secondary {
+  border-color: transparent;
+  color: var(--dim);
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 8px 0;
+}
+.btn-secondary:hover { border-color: transparent; color: var(--amber); }
+.btn-close {
+  border-color: var(--strike);
+  color: var(--strike);
+}
+.btn-close:hover { border-color: var(--strike); color: var(--bright); background: rgba(138, 58, 30, 0.08); }
+
+/* Opening cutscene */
+#opening-screen { padding: 60px 0 40px; max-width: 640px; margin: 0 auto; }
+.cutscene-beat {
+  margin-bottom: 22px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--amber);
+}
+.cutscene-beat.spade { font-style: italic; color: var(--bright); }
+.cutscene-beat.speech {
+  padding-left: 18px;
+  border-left: 2px solid var(--dim);
+  color: var(--amber);
+}
+
+/* Case selection */
+#case-select-screen { padding: 48px 0; }
+.case-select-title {
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.case-select-sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  text-align: center;
+  font-style: italic;
+  margin-bottom: 40px;
+}
+.case-folders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+.case-folder {
+  border: 1px solid var(--dim);
+  background: rgba(255, 248, 220, 0.4);
+  padding: 22px 22px 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  position: relative;
+}
+.case-folder:hover {
+  border-color: var(--bright);
+  background: rgba(255, 248, 220, 0.7);
+}
+.case-folder-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.case-folder-name {
+  font-size: 22px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.case-folder-desc {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+/* Interrogation three-panel layout */
+.interrogation-wrap {
+  display: grid;
+  grid-template-columns: 240px 1fr 260px;
+  gap: 20px;
+  margin-top: 28px;
+}
+
+@media (max-width: 879px) {
+  .interrogation-wrap {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+.panel {
+  border: 1px solid var(--dim);
+  padding: 16px 18px;
+  background: rgba(255, 248, 220, 0.3);
+}
+.panel-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--dim);
+}
+
+/* Dossier panel */
+.dossier-case {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.dossier-count {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  margin-bottom: 14px;
+}
+.suspect-portrait {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  background: rgba(107, 72, 32, 0.06);
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.suspect-portrait::before {
+  content: '';
+  position: absolute;
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border: 1px dashed var(--dim);
+  opacity: 0.4;
+}
+.suspect-portrait-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  position: relative;
+  z-index: 1;
+}
+.suspect-name {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--bright);
+  margin-bottom: 4px;
+}
+.suspect-desc {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.dossier-features-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--dim);
+}
+.dossier-feature {
+  font-size: 12px;
+  color: var(--amber);
+  padding: 2px 0;
+  line-height: 1.5;
+}
+.dossier-feature.yes::before { content: '+ '; color: var(--confirm); font-weight: bold; }
+.dossier-feature.no::before  { content: '- '; color: var(--strike); font-weight: bold; }
+.dossier-feature-empty {
+  font-size: 11px;
+  color: var(--dim);
+  font-style: italic;
+}
+
+/* Center panel — Interrogation */
+.monologue {
+  font-style: italic;
+  color: var(--bright);
+  font-size: 14px;
+  line-height: 1.75;
+  padding: 10px 0 18px;
+  border-bottom: 1px dashed var(--dim);
+  margin-bottom: 16px;
+}
+.testimony-area {
+  min-height: 80px;
+  padding: 14px 16px;
+  border-left: 2px solid var(--amber);
+  background: rgba(107, 72, 32, 0.04);
+  margin-bottom: 20px;
+}
+.testimony-head {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.testimony-answer {
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.testimony-answer.yes { color: var(--confirm); }
+.testimony-answer.no  { color: var(--strike); }
+.testimony-line {
+  font-size: 14px;
+  color: var(--amber);
+  line-height: 1.7;
+  font-style: italic;
+}
+.testimony-placeholder {
+  font-size: 13px;
+  color: var(--dim);
+  font-style: italic;
+  padding: 14px 0;
+}
+
+.questions-label {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+.question-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--dim);
+  color: var(--amber);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.question-btn:hover { border-color: var(--bright); color: var(--bright); background: rgba(255, 248, 220, 0.5); }
+.question-btn.asked { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; text-decoration-color: var(--dim); }
+.question-btn.asked:hover { border-color: var(--dim); color: var(--amber); background: transparent; }
+
+.interrogation-actions {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dim);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.question-counter {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--dim);
+}
+
+/* Essence Profile panel */
+.confidence-wrap {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--dim);
+}
+.confidence-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 6px;
+}
+.confidence-value {
+  color: var(--bright);
+  font-weight: bold;
+}
+.confidence-bar {
+  height: 6px;
+  background: rgba(107, 72, 32, 0.15);
+  border: 1px solid var(--dim);
+  position: relative;
+  overflow: hidden;
+}
+.confidence-fill {
+  height: 100%;
+  background: var(--amber);
+  transition: width 0.6s ease, background 0.4s;
+}
+.confidence-fill.low { background: var(--strike); }
+
+.essence-empty {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  line-height: 1.65;
+  padding: 16px 0;
+  text-align: center;
+}
+.essence-feature {
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(107, 72, 32, 0.4);
+  animation: fadeUp 0.6s ease-out both;
+}
+.essence-feature:last-child { border-bottom: none; }
+.essence-feature.confirmed {
+  color: var(--amber);
+}
+.essence-feature.contradicted {
+  color: var(--dim);
+  text-decoration: line-through;
+  text-decoration-color: var(--strike);
+  text-decoration-thickness: 1.5px;
+}
+.essence-feature-note {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--strike);
+  font-style: italic;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.close-case-wrap {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--dim);
+}
+.close-case-btn {
+  width: 100%;
+  border: 1px solid var(--strike);
+  color: var(--strike);
+  background: transparent;
+  font-family: var(--font);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+.close-case-btn:hover { background: rgba(138, 58, 30, 0.08); color: var(--bright); }
+
+/* Wittgenstein interlude */
+.witt-overlay {
+  margin: 28px 0;
+  padding: 28px 32px;
+  border: 1px solid var(--witt);
+  background: rgba(90, 44, 82, 0.04);
+  animation: fadeUp 1.1s ease-out both;
+}
+.witt-speaker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--witt);
+  margin-bottom: 12px;
+}
+.witt-line {
+  font-size: 15px;
+  color: var(--bright);
+  font-style: italic;
+  line-height: 1.9;
+  margin-bottom: 10px;
+}
+.witt-source {
+  font-size: 11px;
+  color: var(--witt);
+  margin-top: 8px;
+  letter-spacing: 1px;
+}
+
+/* Debrief */
+#debrief-screen { padding-top: 30px; }
+.debrief-title {
+  font-size: 18px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+}
+.debrief-sub {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  text-align: center;
+  font-style: italic;
+  margin-bottom: 36px;
+}
+.debrief-monologue {
+  padding: 22px 28px;
+  border-left: 3px solid var(--dim);
+  background: rgba(255, 248, 220, 0.4);
+  margin-bottom: 36px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--amber);
+  font-style: italic;
+}
+.debrief-monologue p { margin-bottom: 12px; }
+.debrief-monologue p:last-child { margin-bottom: 0; }
+.debrief-section {
+  margin-bottom: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--dim);
+}
+.debrief-label {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--bright);
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+.debrief-close {
+  margin-top: 48px;
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Resemblance web */
+.web-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 16px 0;
+}
+.web-legend {
+  font-size: 12px;
+  color: var(--dim);
+  font-style: italic;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--dim);
+}
+
+/* Final report export */
+.report-area {
+  padding: 16px 20px;
+  border: 1px solid var(--dim);
+  background: rgba(255, 248, 220, 0.4);
+  font-size: 12px;
+  color: var(--amber);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+}
+.copy-feedback {
+  font-size: 12px;
+  color: var(--confirm);
+  font-style: italic;
+  margin-left: 12px;
+}
+
+.suspect-portrait-initial {
+  font-size: 44px;
+  letter-spacing: 8px;
+  color: var(--dim);
+  font-weight: bold;
+  position: relative;
+  z-index: 1;
+  opacity: 0.55;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="header">
+    <a href="../index.html">&#x2190; Philosophy Games</a>
+    <span class="game-label">The Maltese Essence</span>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ─── Image ─────────────────────────────────────────────────────────────────
+
+var WITT_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Ludwig_Wittgenstein.jpg?width=900',
+  alt: 'Photograph of Ludwig Wittgenstein',
+  attr: '<em>Ludwig Wittgenstein</em>, photograph.'
+};
+
+// ─── Opening cutscene beats ────────────────────────────────────────────────
+
+var OPENING_BEATS = [
+  { kind: 'spade', text: 'Rain on the window. The kind of night where every concept in the city gets to looking a little shifty. I was nursing a cup of something bitter and halfway through a file that didn\'t add up when the door opened.' },
+  { kind: 'spade', text: 'She came in dressed like a question nobody had ever asked me before. Said she was a philosopher. Said she had a problem.' },
+  { kind: 'speech', speaker: 'Client', text: '&#8220;I need to know what something <em>really is</em>, Mr. Spade. I need its essence. What makes it that thing and not some other thing. I don\'t care what it takes. I don\'t care who you have to shake down.&#8221;' },
+  { kind: 'spade', text: 'Every concept\'s got a heart, lady. I told her. You give me a name and I\'ll find the thing underneath the name. That\'s what I do.' },
+  { kind: 'speech', speaker: 'Client', text: '&#8220;I\'ll pay double your rate. Just get me an answer.&#8221;' },
+  { kind: 'spade', text: 'She slid a folder across the desk. Four cases. Four concepts waiting to be cracked. I lit a metaphorical cigarette. Picked up the folder. Picked a case.' }
+];
+
+// ─── Wittgenstein interjections (triggered by contradiction count) ─────────
+
+var WITT_LINES = [
+  {
+    threshold: 3,
+    lines: [
+      'Don\'t say: &#8220;There <em>must</em> be something common, or they would not be called the same name&#8221; &#8212; but look and see whether there is anything common to all.',
+      'For if you look at them, you will not see something that is common to all, but similarities, relationships, and a whole series of them at that.'
+    ],
+    source: 'Philosophical Investigations §66'
+  },
+  {
+    threshold: 6,
+    lines: [
+      'I can think of no better expression to characterize these similarities than &#8220;family resemblances.&#8221;',
+      'For the various resemblances between members of a family &#8212; build, features, colour of eyes, gait, temperament, and so on &#8212; overlap and criss-cross in the same way.'
+    ],
+    source: 'Philosophical Investigations §67'
+  },
+  {
+    threshold: 9,
+    lines: [
+      'The result of this examination is: we see a complicated network of similarities overlapping and criss-crossing.',
+      'And I shall say: &#8220;games&#8221; form a family.'
+    ],
+    source: 'Philosophical Investigations §66&#8211;67'
+  }
+];
+
+// Final line at debrief
+var WITT_FINAL = {
+  lines: [
+    'You were looking for what they all share. You found what they share in pairs, in trios, in odd groupings. Overlapping fibres. No single thread running the length of the rope.',
+    'That is what there is. And that is enough.'
+  ],
+  source: 'Philosophical Investigations §67'
+};
+
+// ─── Case: GAME ────────────────────────────────────────────────────────────
+
+var CASES = {};
+
+CASES.game = {
+  id: 'game',
+  name: 'GAME',
+  description: 'A common word. Used a thousand times a day. Should be easy.',
+  features: [
+    { id: 'rules',       text: 'Does it have rules?' },
+    { id: 'winner',      text: 'Is there a winner?' },
+    { id: 'competitive', text: 'Is it competitive?' },
+    { id: 'skill',       text: 'Does it require skill?' },
+    { id: 'fun',         text: 'Is it supposed to be fun?' },
+    { id: 'players',     text: 'Does it need two or more players?' },
+    { id: 'end',         text: 'Does it have an end state?' }
+  ],
+  suspects: [
+    {
+      id: 'chess', name: 'CHESS',
+      description: 'Wooden pieces. A rulebook thick as a phonebook. Looked like a game to me.',
+      introMonologue: 'First one through the door. Dressed in black and white. Didn\'t waste my time. If chess wasn\'t a game, nothing was.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Buddy, I <em>am</em> rules. Sixty-four squares. Everything in writing.&#8221;' },
+        winner:      { yes: true,  line: '&#8220;Somebody\'s king goes down. That\'s a winner.&#8221;' },
+        competitive: { yes: true,  line: '&#8220;Two people sit down. One walks away happy.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;Grandmasters train for decades. What do you think?&#8221;' },
+        fun:         { yes: true,  line: '&#8220;Depends who you ask. But yeah. For somebody.&#8221;' },
+        players:     { yes: true,  line: '&#8220;Takes two. Always takes two.&#8221;' },
+        end:         { yes: true,  line: '&#8220;Checkmate, stalemate, or resignation. It always ends.&#8221;' }
+      }
+    },
+    {
+      id: 'checkers', name: 'CHECKERS',
+      description: 'Red and black discs. Same essential shape as the one before. The profile was holding.',
+      introMonologue: 'Second suspect. Same tailor as the first, different suit. I felt good. Two confirmations in a row and I\'d be halfway to a case.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Move diagonally. Jump to capture. King me when I reach the end.&#8221;' },
+        winner:      { yes: true,  line: '&#8220;Whoever still has pieces left.&#8221;' },
+        competitive: { yes: true,  line: '&#8220;Head to head. Always.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;Some skill. Some luck. Mostly skill.&#8221;' },
+        fun:         { yes: true,  line: '&#8220;Fun enough for a rainy afternoon.&#8221;' },
+        players:     { yes: true,  line: '&#8220;Two. Just two.&#8221;' },
+        end:         { yes: true,  line: '&#8220;When one of us has nothing left to move.&#8221;' }
+      }
+    },
+    {
+      id: 'solitaire', name: 'SOLITAIRE',
+      description: 'Came in alone. Said it played by itself. I should have seen trouble coming.',
+      introMonologue: 'Pack of cards on the table, nobody across from it. I asked who the opponent was. It just looked at me.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Rules? Sure. Red on black, king to an empty column.&#8221;' },
+        winner:      { yes: false, line: '&#8220;Nobody wins. I either get the cards out or I don\'t. Doesn\'t really matter.&#8221;' },
+        competitive: { yes: false, line: '&#8220;Against who, detective? The deck? The deck doesn\'t care.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;Some. Mostly patience. But some.&#8221;' },
+        fun:         { yes: true,  line: '&#8220;Keeps the hands busy. That\'s its own kind of fun.&#8221;' },
+        players:     { yes: false, line: '&#8220;Just me. Always just me.&#8221;' },
+        end:         { yes: true,  line: '&#8220;Sure. When the cards run out or I give up.&#8221;' }
+      }
+    },
+    {
+      id: 'ring', name: 'RING-A-RING-A-ROSES',
+      description: 'Six kids in a circle, holding hands, falling down laughing. Nobody looked worried about anybody\'s king.',
+      introMonologue: 'Kids. Half a dozen of them. Singing. I tried to be patient. Games, I reminded myself, come in all sizes.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Hold hands. Walk around. Fall down when the song says so.&#8221;' },
+        winner:      { yes: false, line: '&#8220;Winner? There\'s no winner, mister. We all fall down.&#8221;' },
+        competitive: { yes: false, line: '&#8220;We\'re all on the same side. We\'re <em>all</em> the side.&#8221;' },
+        skill:       { yes: false, line: '&#8220;You just have to know the song.&#8221;' },
+        fun:         { yes: true,  line: '&#8220;It\'s the most fun. That\'s the whole point.&#8221;' },
+        players:     { yes: true,  line: '&#8220;More is better. But you need at least two.&#8221;' },
+        end:         { yes: false, line: '&#8220;We just keep doing it until someone gets tired or called home for supper.&#8221;' }
+      }
+    },
+    {
+      id: 'olympics', name: 'THE OLYMPIC GAMES',
+      description: 'A whole parade came in. Athletes, flags, judges, doves. Said it was one suspect. Could have fooled me.',
+      introMonologue: 'A thousand events in a coat. I asked what <em>it</em> was. It gestured at a pile of medals and a schedule the size of a novel. &#8220;I\'m the Games,&#8221; it said. I needed a drink.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Every event has its own rules. Thousands of pages of them. Don\'t ask me to recite.&#8221;' },
+        winner:      { yes: true,  line: '&#8220;Lots of winners. Hundreds. And I\'m also the thing that contains them.&#8221;' },
+        competitive: { yes: true,  line: '&#8220;Sure. But also ceremonies, a torch, anthems. It\'s not <em>only</em> competition.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;Every kind of skill there is. And some that don\'t have names.&#8221;' },
+        fun:         { yes: true,  line: '&#8220;Depends who\'s watching. Depends who\'s competing.&#8221;' },
+        players:     { yes: true,  line: '&#8220;Thousands of them. But am I <em>played</em>? You tell me.&#8221;' },
+        end:         { yes: true,  line: '&#8220;Closing ceremony. Every four years. Then we come back.&#8221;' }
+      }
+    },
+    {
+      id: 'catch', name: 'CATCH',
+      description: 'Kid in one hand, dog in the other. A ball between them. Said he\'d been playing for an hour. Asked me if I wanted to join.',
+      introMonologue: 'A ball. That\'s all they needed. I asked about rules. They looked at me like I was the strange one.',
+      answers: {
+        rules:       { yes: false, line: '&#8220;Rules? I throw it, he catches it. He throws it, I catch it. That\'s not rules.&#8221;' },
+        winner:      { yes: false, line: '&#8220;Winner? We\'re just throwing a ball.&#8221;' },
+        competitive: { yes: false, line: '&#8220;Nah. He misses, I pick it up. He throws, I catch. We\'re not against each other.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;Little bit, sure. Gotta time it right.&#8221;' },
+        fun:         { yes: true,  line: '&#8220;That\'s the only reason we\'re doing it.&#8221;' },
+        players:     { yes: true,  line: '&#8220;At least two. Can\'t play catch by yourself. Well. You can. But it\'s sad.&#8221;' },
+        end:         { yes: false, line: '&#8220;We stop when dinner\'s ready. That\'s not an end state. That\'s dinner.&#8221;' }
+      }
+    },
+    {
+      id: 'wargames', name: 'WAR GAMES',
+      description: 'Camouflage, maps, simulated fire. The training officer did not laugh when I asked if it was fun.',
+      introMonologue: 'The officer stood at attention when I came in. Looked at me like I\'d asked whether funerals had cake. But they called them <em>games</em>. They even printed it on the side of the crate.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Extensive. Field manuals. Rules of engagement. Every detail.&#8221;' },
+        winner:      { yes: true,  line: '&#8220;Objectives are captured or defended. Sides are decided. We know who won.&#8221;' },
+        competitive: { yes: true,  line: '&#8220;Two forces. Opposing objectives. Yes.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;We train for years. That\'s the whole point.&#8221;' },
+        fun:         { yes: false, line: '&#8220;This is not fun, detective. This is preparation. People die if we get this wrong.&#8221;' },
+        players:     { yes: true,  line: '&#8220;Hundreds of personnel. Divisions on each side.&#8221;' },
+        end:         { yes: true,  line: '&#8220;When the exercise concludes, according to the briefing.&#8221;' }
+      }
+    },
+    {
+      id: 'language', name: 'LANGUAGE-GAME',
+      description: 'Last suspect. Small guy in wire-rim glasses. Didn\'t look like much. Said he\'d been sent by Mr. Wittgenstein.',
+      introMonologue: 'When I asked what he was, he said he was a <em>language-game</em>. I asked if he was supposed to be kidding. He wasn\'t kidding.',
+      answers: {
+        rules:       { yes: true,  line: '&#8220;Grammar is rules of a sort. Some of them.&#8221;' },
+        winner:      { yes: false, line: '&#8220;Winner? Are you serious? Language has no winner. Except maybe in an argument.&#8221;' },
+        competitive: { yes: false, line: '&#8220;No. Though you <em>can</em> compete with words. You can also ask directions.&#8221;' },
+        skill:       { yes: true,  line: '&#8220;Sure. Some people do it better than others.&#8221;' },
+        fun:         { yes: false, line: '&#8220;Is it <em>fun</em> to ask for the salt? It\'s not fun. It\'s not not-fun. It\'s just what we do.&#8221;' },
+        players:     { yes: true,  line: '&#8220;At least one speaker. Usually a listener too. But I talk to myself in the shower.&#8221;' },
+        end:         { yes: false, line: '&#8220;End state? It\'s still going. It\'s been going a long time.&#8221;' }
+      }
+    }
+  ]
+};
+
+// ─── Case: ART ─────────────────────────────────────────────────────────────
+
+CASES.art = {
+  id: 'art',
+  name: 'ART',
+  description: 'They say you know it when you see it. I had my doubts.',
+  features: [
+    { id: 'beautiful',   text: 'Is it beautiful?' },
+    { id: 'intentional', text: 'Is it intentional?' },
+    { id: 'human',       text: 'Was it made by a human?' },
+    { id: 'emotion',     text: 'Does it express emotion?' },
+    { id: 'called-art',  text: 'Does its creator call it art?' },
+    { id: 'gallery',     text: 'Is it in a museum or gallery?' },
+    { id: 'physical',    text: 'Is it a physical object?' }
+  ],
+  suspects: [
+    {
+      id: 'renaissance', name: 'A RENAISSANCE OIL',
+      description: 'Gilt frame, Madonna, blue robe. Came in looking like it had been on a wall since 1505.',
+      introMonologue: 'Textbook suspect. The kind that makes an essence look easy. I started the profile.',
+      answers: {
+        beautiful:   { yes: true,  line: '&#8220;I was painted to be beautiful. That is my entire reason for existing.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;Every brushstroke was chosen. The composition was planned on paper before a drop of oil was mixed.&#8221;' },
+        human:       { yes: true,  line: '&#8220;A workshop. A master. Apprentices for the drapery. All human.&#8221;' },
+        emotion:     { yes: true,  line: '&#8220;Sorrow. Reverence. That was the instruction.&#8221;' },
+        'called-art':{ yes: true,  line: '&#8220;The painter\'s guild said so. Patrons paid for it as such.&#8221;' },
+        gallery:     { yes: true,  line: '&#8220;Louvre, third gallery on the left. Climate controlled.&#8221;' },
+        physical:    { yes: true,  line: '&#8220;Oil on panel. Fifty-seven pounds. Very physical.&#8221;' }
+      }
+    },
+    {
+      id: 'modernist', name: 'A MODERNIST SCULPTURE',
+      description: 'Bronze. Curved. Looked like a woman from one angle, like nothing I could name from the other.',
+      introMonologue: 'Second one in. Different century, same neighborhood. I kept the profile open.',
+      answers: {
+        beautiful:   { yes: true,  line: '&#8220;People call me beautiful. Some of them find me unsettling. Both, I think.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;Every curve is plotted. Brancusi didn\'t miss.&#8221;' },
+        human:       { yes: true,  line: '&#8220;A human sculpted me. Then a foundry cast me. All hands.&#8221;' },
+        emotion:     { yes: true,  line: '&#8220;If you sit with me long enough, yes. A kind of quiet.&#8221;' },
+        'called-art':{ yes: true,  line: '&#8220;The sculptor called me art. The collector called me art. The insurer definitely calls me art.&#8221;' },
+        gallery:     { yes: true,  line: '&#8220;MoMA, second floor. Been there a while.&#8221;' },
+        physical:    { yes: true,  line: '&#8220;Bronze. Heavy. Leave a mark on your foot if you dropped me.&#8221;' }
+      }
+    },
+    {
+      id: 'fountain', name: 'DUCHAMP\'S FOUNTAIN',
+      description: 'A urinal signed R. Mutt. Sitting on a pedestal like it had earned the right.',
+      introMonologue: 'I looked at the pedestal. I looked at the object. I looked at my list. Something was about to change.',
+      answers: {
+        beautiful:   { yes: false, line: '&#8220;Beautiful? I\'m a urinal. Do I look beautiful to you? That\'s the point.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;Oh, it was intentional. That was the <em>only</em> thing that was intentional.&#8221;' },
+        human:       { yes: false, line: '&#8220;I was manufactured in a porcelain factory. Duchamp didn\'t make me. He <em>chose</em> me. That\'s different.&#8221;' },
+        emotion:     { yes: false, line: '&#8220;Emotion? I provoke argument. That\'s not the same thing.&#8221;' },
+        'called-art':{ yes: true,  line: '&#8220;Duchamp called me art. Most of the committee at the time called me a joke. Guess who won.&#8221;' },
+        gallery:     { yes: true,  line: '&#8220;Replicas in galleries all over. Original lost. You\'ll have to make do.&#8221;' },
+        physical:    { yes: true,  line: '&#8220;Porcelain. Yes. Very physical. Very mundane.&#8221;' }
+      }
+    },
+    {
+      id: 'cage', name: 'CAGE\'S 4\'33"',
+      description: 'Came in wearing a tuxedo, sat down at a piano, didn\'t play a note. Four minutes and thirty-three seconds of nothing.',
+      introMonologue: 'The silence in the room was louder than my objections. I waited. Nothing happened. Nothing kept happening.',
+      answers: {
+        beautiful:   { yes: true,  line: '&#8220;The ambient sound of the room. The cough. The chair. Cage thought it was beautiful. I agree.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;Extremely. Every second is specified. Silence is an <em>instruction</em>.&#8221;' },
+        human:       { yes: true,  line: '&#8220;A composer composed me. A pianist performs me. Or doesn\'t perform me. Depending.&#8221;' },
+        emotion:     { yes: false, line: '&#8220;Emotion is not the point. Attention is the point. Different thing entirely.&#8221;' },
+        'called-art':{ yes: true,  line: '&#8220;Cage called me art. His publisher called me art. Concert halls program me as art.&#8221;' },
+        gallery:     { yes: false, line: '&#8220;I live in concert halls, not galleries. There\'s nothing to hang.&#8221;' },
+        physical:    { yes: false, line: '&#8220;Physical object? I\'m a score, detective. I\'m a duration. What would you even put in a case?&#8221;' }
+      }
+    },
+    {
+      id: 'mask', name: 'AN INDIGENOUS RITUAL MASK',
+      description: 'Carved wood, ochre, horsehair. Older than most countries. Didn\'t come in. It was already here.',
+      introMonologue: 'I watched the mask for a while before I started writing. It had been watched before.',
+      answers: {
+        beautiful:   { yes: true,  line: '&#8220;Many people have said so. That was not the reason for making me.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;The carver worked through a month of nights. Each line has a meaning.&#8221;' },
+        human:       { yes: true,  line: '&#8220;A person made me. A community held me. Yes.&#8221;' },
+        emotion:     { yes: true,  line: '&#8220;I am used in ceremonies where emotion is the medicine. Yes.&#8221;' },
+        'called-art':{ yes: false, line: '&#8220;The one who carved me did not use that word. The word for what I am is older than that word.&#8221;' },
+        gallery:     { yes: true,  line: '&#8220;Some of my kin are behind glass now. I am here because I was taken.&#8221;' },
+        physical:    { yes: true,  line: '&#8220;Wood and pigment. Yes.&#8221;' }
+      }
+    },
+    {
+      id: 'fridge', name: 'A CHILD\'S DRAWING',
+      description: 'Stick-figure mom, crayon sun, a house with a door bigger than the house. Taped to a refrigerator with a magnet shaped like a strawberry.',
+      introMonologue: 'I recognized the genre. I\'d made worse. I wrote it down anyway.',
+      answers: {
+        beautiful:   { yes: true,  line: '&#8220;My mom says I\'m the most beautiful thing she has.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;I meant every line. I only had so many crayons.&#8221;' },
+        human:       { yes: true,  line: '&#8220;A small human. Six years old. Very human.&#8221;' },
+        emotion:     { yes: true,  line: '&#8220;I love my mom. That\'s why I drew her bigger than the house.&#8221;' },
+        'called-art':{ yes: false, line: '&#8220;The kid didn\'t call it art. He called it &#8216;mommy.&#8217; That\'s a different thing.&#8221;' },
+        gallery:     { yes: false, line: '&#8220;I\'m on a refrigerator, detective. That\'s not a gallery.&#8221;' },
+        physical:    { yes: true,  line: '&#8220;Paper. Crayon. Very smudgeable.&#8221;' }
+      }
+    },
+    {
+      id: 'rock', name: 'A NATURAL ROCK FORMATION',
+      description: 'Someone put a frame around it and wrote a placard. The rock didn\'t ask for any of it.',
+      introMonologue: 'The rock had been on the beach for millions of years. Then a curator walked by. Now I was looking at it.',
+      answers: {
+        beautiful:   { yes: true,  line: '&#8220;The curator thought so. Twelve thousand visitors a year agree.&#8221;' },
+        intentional: { yes: false, line: '&#8220;Nothing about me was intentional. Wind and water for a million years. No plan involved.&#8221;' },
+        human:       { yes: false, line: '&#8220;No human made me. A human <em>framed</em> me. That\'s a different claim.&#8221;' },
+        emotion:     { yes: true,  line: '&#8220;People cry when they see me. Whether I <em>express</em> emotion or just cause it is your problem.&#8221;' },
+        'called-art':{ yes: true,  line: '&#8220;The curator called me art. The grant foundation agreed. Here we are.&#8221;' },
+        gallery:     { yes: true,  line: '&#8220;Main exhibition, south wing. The frame weighs more than I do.&#8221;' },
+        physical:    { yes: true,  line: '&#8220;Rock. Very physical. Not going anywhere.&#8221;' }
+      }
+    },
+    {
+      id: 'performance', name: 'PERFORMANCE / CONCEPTUAL ART',
+      description: 'Last one in. Told me it was a series of gestures performed once in 1972 and never recorded. All I had was its reputation.',
+      introMonologue: 'It wasn\'t really in the room. But it was definitely the suspect I was interviewing.',
+      answers: {
+        beautiful:   { yes: false, line: '&#8220;Beauty was beside the point. If anything, I was against beauty.&#8221;' },
+        intentional: { yes: true,  line: '&#8220;Every gesture was planned. The <em>point</em> was the planning.&#8221;' },
+        human:       { yes: true,  line: '&#8220;A human performed me. That was the medium.&#8221;' },
+        emotion:     { yes: true,  line: '&#8220;Some witnesses wept. Some left. I produced reactions.&#8221;' },
+        'called-art':{ yes: true,  line: '&#8220;The artist called me art. The catalog said so. The catalog is the only thing left.&#8221;' },
+        gallery:     { yes: false, line: '&#8220;There\'s nothing to display. The <em>catalog</em> is in galleries. Not me.&#8221;' },
+        physical:    { yes: false, line: '&#8220;I happened. I ended. Nothing of me is physical. That was deliberate.&#8221;' }
+      }
+    }
+  ]
+};
+
+// ─── Case: NUMBER ──────────────────────────────────────────────────────────
+
+CASES.number = {
+  id: 'number',
+  name: 'NUMBER',
+  description: 'The most precise concept in the city. What could possibly go wrong?',
+  features: [
+    { id: 'counting',  text: 'Is it a counting number?' },
+    { id: 'fraction',  text: 'Can it be written as a fraction?' },
+    { id: 'numline',   text: 'Is it on the number line?' },
+    { id: 'measure',   text: 'Can it be used to measure?' },
+    { id: 'real',      text: 'Is it real?' },
+    { id: 'successor', text: 'Does it have a successor?' },
+    { id: 'arith',     text: 'Can you add and multiply with it?' }
+  ],
+  suspects: [
+    {
+      id: 'three', name: 'THE NUMBER 3',
+      description: 'Small, solid, clean-cut. Didn\'t say much. Didn\'t have to.',
+      introMonologue: 'Three came through the door and I wrote the word <em>number</em> at the top of the page. If three wasn\'t one, we had bigger problems.',
+      answers: {
+        counting:  { yes: true,  line: '&#8220;One, two, three. That\'s me.&#8221;' },
+        fraction:  { yes: true,  line: '&#8220;Three over one. Still three.&#8221;' },
+        numline:   { yes: true,  line: '&#8220;Left of four, right of two. Can\'t miss me.&#8221;' },
+        measure:   { yes: true,  line: '&#8220;Three apples. Three inches. Three anything.&#8221;' },
+        real:      { yes: true,  line: '&#8220;Real as it gets.&#8221;' },
+        successor: { yes: true,  line: '&#8220;Four\'s right behind me.&#8221;' },
+        arith:     { yes: true,  line: '&#8220;Add, subtract, multiply, divide. I\'m the easiest date you\'ll ever have.&#8221;' }
+      }
+    },
+    {
+      id: 'half', name: 'THE NUMBER 1/2',
+      description: 'Came in sideways. Said it was exactly between things. I had no reason to doubt it.',
+      introMonologue: 'Still early. Still felt good. A fraction wasn\'t a counting number, sure, but close enough. Two confirmations, one small wrinkle.',
+      answers: {
+        counting:  { yes: false, line: '&#8220;You can\'t count to me. I\'m <em>between</em> counting.&#8221;' },
+        fraction:  { yes: true,  line: '&#8220;It\'s in the name.&#8221;' },
+        numline:   { yes: true,  line: '&#8220;Dead center between zero and one.&#8221;' },
+        measure:   { yes: true,  line: '&#8220;Half a pound. Half an hour. Half of anything.&#8221;' },
+        real:      { yes: true,  line: '&#8220;Real enough to pay taxes.&#8221;' },
+        successor: { yes: false, line: '&#8220;What\'s my successor? 1/2 plus a what? There\'s always something between.&#8221;' },
+        arith:     { yes: true,  line: '&#8220;Add me to anything. Doubles up nice.&#8221;' }
+      }
+    },
+    {
+      id: 'pi', name: 'THE NUMBER π',
+      description: 'Greek letter, Greek attitude. Walked in and said it never ended. I believed it.',
+      introMonologue: 'Pi sat down and started reciting digits. It was still going when I interrupted.',
+      answers: {
+        counting:  { yes: false, line: '&#8220;I\'m not even close to a counting number. I\'m irrational.&#8221;' },
+        fraction:  { yes: false, line: '&#8220;You cannot write me as a fraction of integers. That\'s the whole thing about me.&#8221;' },
+        numline:   { yes: true,  line: '&#8220;Somewhere between three-point-one-four and three-point-one-five. I\'m right there.&#8221;' },
+        measure:   { yes: true,  line: '&#8220;Any circle you\'ve ever seen has me in it.&#8221;' },
+        real:      { yes: true,  line: '&#8220;I\'m a real number, detective. In the mathematical sense.&#8221;' },
+        successor: { yes: false, line: '&#8220;Successor? What would that even mean for me?&#8221;' },
+        arith:     { yes: true,  line: '&#8220;You can add me to things. You won\'t like the decimal.&#8221;' }
+      }
+    },
+    {
+      id: 'i', name: 'THE NUMBER i',
+      description: 'The suspect that didn\'t exist until somebody needed it to. Very imaginary, very present.',
+      introMonologue: 'The square root of negative one. I asked what that meant. It smiled and said it meant whatever made the equation work.',
+      answers: {
+        counting:  { yes: false, line: '&#8220;Count to me? How? In what direction?&#8221;' },
+        fraction:  { yes: false, line: '&#8220;Not as a fraction of real numbers. No.&#8221;' },
+        numline:   { yes: false, line: '&#8220;I\'m not on <em>the</em> line. I\'m on a different axis entirely.&#8221;' },
+        measure:   { yes: false, line: '&#8220;Measure what? An imaginary length? Tell your tailor.&#8221;' },
+        real:      { yes: false, line: '&#8220;Real? The word for me is literally <em>imaginary</em>, detective.&#8221;' },
+        successor: { yes: false, line: '&#8220;No successor. Well &#8212; 2i maybe. But that\'s not a step.&#8221;' },
+        arith:     { yes: true,  line: '&#8220;Add and multiply? Absolutely. That\'s the only reason I was invented.&#8221;' }
+      }
+    },
+    {
+      id: 'infinity', name: 'INFINITY',
+      description: 'Bigger than whatever you were going to say. Came in, took up the whole room, and somehow the room was still the same size.',
+      introMonologue: 'I asked how it got in. It said it had always been in. I let it go.',
+      answers: {
+        counting:  { yes: false, line: '&#8220;I\'m what counting fails to reach.&#8221;' },
+        fraction:  { yes: false, line: '&#8220;I\'m not a fraction. I\'m not a number in the everyday sense. I\'m a limit.&#8221;' },
+        numline:   { yes: false, line: '&#8220;I\'m the direction the line goes. I\'m not <em>on</em> it.&#8221;' },
+        measure:   { yes: false, line: '&#8220;You can\'t measure anything with infinity. You can only say things are unbounded.&#8221;' },
+        real:      { yes: false, line: '&#8220;Depends which mathematician you ask. Some days yes. Most days, it\'s complicated.&#8221;' },
+        successor: { yes: false, line: '&#8220;Successor of infinity? Now you\'re asking the real questions.&#8221;' },
+        arith:     { yes: false, line: '&#8220;Add one to infinity and you still get infinity. That\'s not addition working normally.&#8221;' }
+      }
+    },
+    {
+      id: 'zero', name: 'ZERO',
+      description: 'Showed up late. Said it had been here the whole time. Nobody had noticed it before.',
+      introMonologue: 'Zero walked in and I thought, finally, an easy one. I was wrong about that too.',
+      answers: {
+        counting:  { yes: false, line: '&#8220;You don\'t count to zero. Zero is where you start <em>before</em> counting.&#8221;' },
+        fraction:  { yes: true,  line: '&#8220;Zero over anything. Zero.&#8221;' },
+        numline:   { yes: true,  line: '&#8220;I\'m the origin. The line runs through me.&#8221;' },
+        measure:   { yes: true,  line: '&#8220;Zero inches is a measurement. Just a boring one.&#8221;' },
+        real:      { yes: true,  line: '&#8220;Real number. Just also a very weird one.&#8221;' },
+        successor: { yes: true,  line: '&#8220;One comes after me. That\'s the whole idea.&#8221;' },
+        arith:     { yes: true,  line: '&#8220;You can add me to anything. Just don\'t try to divide by me.&#8221;' }
+      }
+    },
+    {
+      id: 'aleph', name: 'ℵ₀ (ALEPH-NULL)',
+      description: 'The cardinal of the natural numbers. Came in on behalf of the whole set. I didn\'t know we were meeting the whole set.',
+      introMonologue: 'Cantor\'s suspect. Bigger than any number, in some sense. The same size as itself plus one. I underlined the word <em>number</em> on my page and put a question mark beside it.',
+      answers: {
+        counting:  { yes: false, line: '&#8220;I\'m the <em>size</em> of all counting numbers. I\'m not one of them.&#8221;' },
+        fraction:  { yes: false, line: '&#8220;No.&#8221;' },
+        numline:   { yes: false, line: '&#8220;Number line? I\'m not on it. I describe how many points it could have.&#8221;' },
+        measure:   { yes: false, line: '&#8220;I measure sets, not lengths.&#8221;' },
+        real:      { yes: false, line: '&#8220;I\'m not a real number. I\'m a cardinal. Different branch of the family.&#8221;' },
+        successor: { yes: true,  line: '&#8220;Aleph-one. Sort of. The continuum hypothesis is unresolved.&#8221;' },
+        arith:     { yes: true,  line: '&#8220;Cardinal arithmetic exists. It\'s weird. Aleph-null plus one is still aleph-null.&#8221;' }
+      }
+    },
+    {
+      id: 'mod', name: '4 IN MOD 7',
+      description: 'Looked like a four from the outside. On the inside, it said there were only seven numbers in the universe.',
+      introMonologue: 'A number that pretended seven plus one was zero. I reread my page of features and started scratching things out.',
+      answers: {
+        counting:  { yes: true,  line: '&#8220;I\'m a counting number. I\'m just &#8212; bounded.&#8221;' },
+        fraction:  { yes: false, line: '&#8220;Fractions don\'t work in my world. There\'s only seven of us. No in-between.&#8221;' },
+        numline:   { yes: false, line: '&#8220;I\'m on a circle. Seven points. Then it loops.&#8221;' },
+        measure:   { yes: false, line: '&#8220;You don\'t measure lengths with me. I track remainders.&#8221;' },
+        real:      { yes: false, line: '&#8220;Am I a real number? In a technical sense, no. I\'m a residue class.&#8221;' },
+        successor: { yes: true,  line: '&#8220;Five comes after me. Then six. Then zero. Then one. Then we loop.&#8221;' },
+        arith:     { yes: true,  line: '&#8220;We add, we multiply. It just looks weird. Five plus five is three, in my world.&#8221;' }
+      }
+    }
+  ]
+};
+
+// ─── Case: TOOL ────────────────────────────────────────────────────────────
+
+CASES.tool = {
+  id: 'tool',
+  name: 'TOOL',
+  description: 'You use them. They have a purpose. Or so you thought.',
+  features: [
+    { id: 'hard',        text: 'Is it made of metal or hard material?' },
+    { id: 'handheld',    text: 'Is it held in the hand?' },
+    { id: 'purpose',     text: 'Does it have a specific purpose?' },
+    { id: 'manufactured',text: 'Was it manufactured?' },
+    { id: 'physical-work',text: 'Is it used for physical work?' },
+    { id: 'with-others', text: 'Is it used together with other tools?' },
+    { id: 'on-body',     text: 'Can it be used on a body?' }
+  ],
+  suspects: [
+    {
+      id: 'hammer', name: 'A HAMMER',
+      description: 'Steel head, wooden handle. Knew what it was for. Said so without being asked.',
+      introMonologue: 'Classic suspect. If a hammer wasn\'t a tool, my job didn\'t exist. I started the profile.',
+      answers: {
+        hard:           { yes: true,  line: '&#8220;Steel head. Wooden handle, but the business end is hard.&#8221;' },
+        handheld:       { yes: true,  line: '&#8220;You grip the handle. That\'s the point.&#8221;' },
+        purpose:        { yes: true,  line: '&#8220;I drive nails. That\'s it. Occasionally I pull them out.&#8221;' },
+        manufactured:   { yes: true,  line: '&#8220;Forged in a factory. Thousands of me a day.&#8221;' },
+        'physical-work':{ yes: true,  line: '&#8220;Physical is what I do.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;Used me with nails, with saws, with measuring tapes. All the time.&#8221;' },
+        'on-body':      { yes: true,  line: '&#8220;Not the way you want. But yes, if you hit your thumb.&#8221;' }
+      }
+    },
+    {
+      id: 'screwdriver', name: 'A SCREWDRIVER',
+      description: 'Thinner than the last guy, same neighborhood. Everything lined up.',
+      introMonologue: 'Same shop as the hammer. Same rules. The profile was holding.',
+      answers: {
+        hard:           { yes: true,  line: '&#8220;Hardened steel shaft. Plastic grip on top. The working end is metal.&#8221;' },
+        handheld:       { yes: true,  line: '&#8220;One hand job. Usually.&#8221;' },
+        purpose:        { yes: true,  line: '&#8220;Turn screws. Phillips or flat. That\'s my whole deal.&#8221;' },
+        manufactured:   { yes: true,  line: '&#8220;Assembly line. Boxed by the dozen.&#8221;' },
+        'physical-work':{ yes: true,  line: '&#8220;Torque. Pressure. Yes.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;Screws need me. Drills sometimes work with me. Yeah.&#8221;' },
+        'on-body':      { yes: true,  line: '&#8220;A surgeon might use one to remove a cast screw. Unusual case.&#8221;' }
+      }
+    },
+    {
+      id: 'computer', name: 'A COMPUTER',
+      description: 'Showed up on a cart. Blinking lights. Said it was a tool. I wasn\'t sure anymore.',
+      introMonologue: 'I asked what it did. It listed thirty things and then said it did more. I wrote smaller.',
+      answers: {
+        hard:           { yes: true,  line: '&#8220;Silicon, aluminum, glass. Hard enough.&#8221;' },
+        handheld:       { yes: false, line: '&#8220;This one sits on a desk. Your phone is the handheld cousin.&#8221;' },
+        purpose:        { yes: false, line: '&#8220;I have ten thousand purposes. A specific one? Depends on the app.&#8221;' },
+        manufactured:   { yes: true,  line: '&#8220;Factory assembled. Of course.&#8221;' },
+        'physical-work':{ yes: false, line: '&#8220;I do cognitive work. The physical part is button-pressing. Barely.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;Keyboards. Mice. Printers. Other computers. Always.&#8221;' },
+        'on-body':      { yes: false, line: '&#8220;Not on a body. In an office.&#8221;' }
+      }
+    },
+    {
+      id: 'spatula', name: 'A KITCHEN SPATULA',
+      description: 'Silicone head, plastic handle. Came in dripping pancake batter. Didn\'t try to hide it.',
+      introMonologue: 'The profile said metal. This one wasn\'t metal. I made a note. Then another note. Then I crossed one out.',
+      answers: {
+        hard:           { yes: false, line: '&#8220;I\'m silicone, detective. I flex. That\'s my whole advantage.&#8221;' },
+        handheld:       { yes: true,  line: '&#8220;One hand. Always.&#8221;' },
+        purpose:        { yes: true,  line: '&#8220;Flip things. Scrape things. Fold batter. I have a job.&#8221;' },
+        manufactured:   { yes: true,  line: '&#8220;Yes.&#8221;' },
+        'physical-work':{ yes: true,  line: '&#8220;Cooking is physical work. My arm gets tired.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;Pans, bowls, burners. All of them.&#8221;' },
+        'on-body':      { yes: false, line: '&#8220;Don\'t use me on a body. Please.&#8221;' }
+      }
+    },
+    {
+      id: 'language', name: 'A LANGUAGE',
+      description: 'Wittgenstein sent this one. Said it was a tool. Said I\'d have to take it on faith.',
+      introMonologue: 'Language walked in the door &#8212; or rather, the word <em>tool</em> did, when I wasn\'t looking. I tried to remember how a hammer was like a word. Nothing came.',
+      answers: {
+        hard:           { yes: false, line: '&#8220;I\'m sounds and marks. Nothing about me is hard.&#8221;' },
+        handheld:       { yes: false, line: '&#8220;You don\'t hold me. You use me.&#8221;' },
+        purpose:        { yes: true,  line: '&#8220;Many purposes. Name, describe, warn, ask, promise. Many jobs.&#8221;' },
+        manufactured:   { yes: false, line: '&#8220;I wasn\'t manufactured. I grew.&#8221;' },
+        'physical-work':{ yes: false, line: '&#8220;I work on thought. On social things. Not on walls.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;I\'m used with everything. Pens, phones, people, other languages.&#8221;' },
+        'on-body':      { yes: false, line: '&#8220;Words can hurt. But they\'re not used <em>on</em> a body the way a scalpel is.&#8221;' }
+      }
+    },
+    {
+      id: 'stick', name: 'A STICK FROM THE GROUND',
+      description: 'A kid picked it up on a walk. Said it was a tool. Now it was in my office.',
+      introMonologue: 'Nobody made this one. It fell off a tree. A six-year-old promoted it to the role of <em>tool</em>. I wrote that down.',
+      answers: {
+        hard:           { yes: true,  line: '&#8220;Wood. Hard enough.&#8221;' },
+        handheld:       { yes: true,  line: '&#8220;The whole point is you hold me.&#8221;' },
+        purpose:        { yes: true,  line: '&#8220;I\'m poking leaves. I\'m drawing in the dirt. Whatever the kid needs.&#8221;' },
+        manufactured:   { yes: false, line: '&#8220;Nobody made me. I fell off a tree. Ready-made.&#8221;' },
+        'physical-work':{ yes: true,  line: '&#8220;Poking, digging, reaching. Sure.&#8221;' },
+        'with-others':  { yes: false, line: '&#8220;Not really. I\'m the whole kit for most of what I do.&#8221;' },
+        'on-body':      { yes: false, line: '&#8220;I\'m not for that. Usually.&#8221;' }
+      }
+    },
+    {
+      id: 'hand', name: 'A HUMAN HAND',
+      description: 'The detective\'s own hand. Or somebody\'s. Didn\'t say whose. Said it was a tool. I had trouble with that one.',
+      introMonologue: 'A hand. Is a hand a tool? The word <em>handy</em> exists. But a hand isn\'t <em>a</em> hammer.',
+      answers: {
+        hard:           { yes: false, line: '&#8220;Bone under soft tissue. Not what you\'d call hard.&#8221;' },
+        handheld:       { yes: false, line: '&#8220;I <em>am</em> the hand. I\'m not <em>held by</em> a hand.&#8221;' },
+        purpose:        { yes: false, line: '&#8220;A specific purpose? No. I have thousands.&#8221;' },
+        manufactured:   { yes: false, line: '&#8220;Grown. Not manufactured. Though biology is complicated.&#8221;' },
+        'physical-work':{ yes: true,  line: '&#8220;That\'s most of what I do.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;With every other tool in existence. That\'s how tools work.&#8221;' },
+        'on-body':      { yes: true,  line: '&#8220;Yes. Dressings, medicine, touch. Yes.&#8221;' }
+      }
+    },
+    {
+      id: 'proof', name: 'A MATHEMATICAL PROOF',
+      description: 'Wittgenstein sent this too. Said it was a tool. Said I\'d have to sit with that for a minute.',
+      introMonologue: 'A proof. Not a hammer. Not a shovel. A piece of reasoning someone called <em>a tool</em>. The case was past saving.',
+      answers: {
+        hard:           { yes: false, line: '&#8220;I\'m not physical. Hard isn\'t the word for me.&#8221;' },
+        handheld:       { yes: false, line: '&#8220;You hold me in the mind. Not in the hand.&#8221;' },
+        purpose:        { yes: true,  line: '&#8220;I establish a result. That\'s a purpose.&#8221;' },
+        manufactured:   { yes: false, line: '&#8220;I was constructed. Is that manufactured? Depends on your definition.&#8221;' },
+        'physical-work':{ yes: false, line: '&#8220;Intellectual work. The hands stay still.&#8221;' },
+        'with-others':  { yes: true,  line: '&#8220;With definitions, axioms, other proofs. I\'m never alone.&#8221;' },
+        'on-body':      { yes: false, line: '&#8220;On a body? You\'ve got the wrong kind of tool, detective.&#8221;' }
+      }
+    }
+  ]
+};
+
+// ─── Ending flavor variants ────────────────────────────────────────────────
+// chosen by number of suspects interrogated before close
+
+var ENDINGS = [
+  {
+    min: 2, max: 3,
+    label: 'The Quick Close',
+    spade: [
+      'I closed the file after three. Could\'ve been five. Could\'ve been eight. Didn\'t need to be.',
+      'Three was enough to see the shape. The second one matched the first. The third one broke both. That was the whole case, right there in a scatter of strikethroughs.',
+      'You don\'t always need to finish a case to know it was never solvable the way it was framed. Sometimes you just need to notice what you\'re doing.'
+    ],
+    wittNote: 'Wittgenstein looked mildly surprised. &#8220;You stopped early,&#8221; he said. &#8220;That is what seeing is.&#8221;'
+  },
+  {
+    min: 4, max: 7,
+    label: 'The Thorough Close',
+    spade: [
+      'Worked it through. Not all of them. Enough to know the pattern wasn\'t showing up.',
+      'Every suspect brought something. Every suspect took something else away. By the time I closed the file the Essence Profile was mostly lines through things I\'d once written in ink.',
+      'I\'d been asking the wrong question the whole time. The right question wasn\'t <em>what do they all share</em>. The right question was <em>why did I assume they had to share anything</em>.'
+    ],
+    wittNote: 'Wittgenstein nodded once. He\'d seen this happen before.'
+  },
+  {
+    min: 8, max: 8,
+    label: 'The Stuck Close',
+    spade: [
+      'Interrogated every suspect on the list. Three days without sleep. Every feature I wrote down got crossed out by somebody.',
+      'I could have closed the case at the second contradiction. Didn\'t. Maybe I thought if I stayed thorough enough, something would cohere. Nothing did. Which is its own kind of answer.',
+      'Walked the whole field before I put a name to it. That\'s a long way to walk just to end up where the question was always pointing. But here we are.'
+    ],
+    wittNote: 'Wittgenstein\'s voice was warmer than before. &#8220;You looked at all of them. That was honest work. It was also, in its own way, the only way you were going to see it.&#8221;'
+  }
+];
+
+// ─── State ─────────────────────────────────────────────────────────────────
+
+var state = {
+  screen: 'title',              // title | opening | caseSelect | interrogation | wittInterlude | debrief
+  caseId: null,                 // 'game' | 'art' | 'number' | 'tool'
+  suspectIndex: 0,              // 0-7
+  questionsAsked: {},           // suspectId -> Set of featureIds (tracked as plain obj)
+  essenceProfile: {},           // featureId -> {state, firstSuspect, contradictedBy}
+  testimony: null,              // current testimony object {featureId, yes, line, contradiction}
+  confidence: 100,
+  contradictionCount: 0,
+  pendingInterludeIndex: -1,    // index into WITT_LINES queue
+  wittTriggered: [],            // thresholds already fired
+  interrogationHistory: []      // list of {suspectId, featureId, yes, contradicted}
+};
+
+var content = document.getElementById('content');
+
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
+// ─── Utility ───────────────────────────────────────────────────────────────
+
+function div(cls, html) {
+  var el = document.createElement('div');
+  if (cls) el.className = cls;
+  el.innerHTML = html;
+  return el;
+}
+
+function scrollTop() { window.scrollTo({ top: 0, behavior: 'auto' }); }
+
+function currentCase() { return CASES[state.caseId]; }
+function currentSuspect() {
+  var c = currentCase();
+  return c.suspects[state.suspectIndex];
+}
+function featureById(fid) {
+  var c = currentCase();
+  for (var i = 0; i < c.features.length; i++) if (c.features[i].id === fid) return c.features[i];
+  return null;
+}
+function interrogatedCount() {
+  var seen = {};
+  state.interrogationHistory.forEach(function(h) { seen[h.suspectId] = true; });
+  return Object.keys(seen).length;
+}
+function suspectsAskedAnyQuestion() {
+  return interrogatedCount();
+}
+
+function canCloseCase() {
+  // after 2nd contradiction OR after all 8 suspects interrogated
+  return state.contradictionCount >= 2 || interrogatedCount() >= 8;
+}
+
+function endingForSuspectCount(n) {
+  for (var i = 0; i < ENDINGS.length; i++) {
+    var e = ENDINGS[i];
+    if (n >= e.min && n <= e.max) return e;
+  }
+  // fallback for n=1 (shouldn't happen since close-case gated)
+  return ENDINGS[0];
+}
+
+// ─── Render: Title ─────────────────────────────────────────────────────────
+
+function renderTitle() {
+  scrollTop();
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="title-screen">\
+      <h1>The Maltese Essence</h1>\
+      <div class="title-sub">a sam spade investigation</div>\
+      <img class="title-portrait" src="' + WITT_IMG.src + '" alt="' + WITT_IMG.alt + '" loading="lazy">\
+      <p class="title-portrait-attr">' + WITT_IMG.attr + '</p>\
+      <p class="epigraph">&#8220;Don\'t say: <em>there must be something common, or they would not all be called by the same name</em> &#8212; but look and see whether there is anything common to all.&#8221;</p>\
+      <p class="epigraph-attr">&#8212; Wittgenstein, <em>Philosophical Investigations</em> §66, 1953</p>\
+      <button class="btn" id="begin-btn">Open the Case</button>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#begin-btn').addEventListener('click', function() {
+    state.screen = 'opening';
+    render();
+  });
+}
+
+// ─── Render: Opening cutscene ──────────────────────────────────────────────
+
+function renderOpening() {
+  scrollTop();
+  content.innerHTML = '';
+  var beatsHtml = OPENING_BEATS.map(function(b) {
+    if (b.kind === 'spade') {
+      return '<p class="cutscene-beat spade">' + b.text + '</p>';
+    } else if (b.kind === 'speech') {
+      return '<p class="cutscene-beat speech">' + b.text + '</p>';
+    }
+    return '<p class="cutscene-beat">' + b.text + '</p>';
+  }).join('');
+  var el = div('fade-in', '\
+    <div id="opening-screen">\
+      ' + beatsHtml + '\
+      <div style="text-align:center; margin-top: 36px;">\
+        <button class="btn" id="pick-case-btn">Pick a Case</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#pick-case-btn').addEventListener('click', function() {
+    state.screen = 'caseSelect';
+    render();
+  });
+}
+
+// ─── Render: Case Selection ────────────────────────────────────────────────
+
+function renderCaseSelect() {
+  scrollTop();
+  content.innerHTML = '';
+  var ids = ['game', 'art', 'number', 'tool'];
+  var cards = ids.map(function(id) {
+    var c = CASES[id];
+    return '<div class="case-folder" data-case="' + id + '">\
+      <div class="case-folder-label">Case File</div>\
+      <div class="case-folder-name">' + c.name + '</div>\
+      <div class="case-folder-desc">' + c.description + '</div>\
+    </div>';
+  }).join('');
+  var el = div('fade-in', '\
+    <div id="case-select-screen">\
+      <div class="case-select-title">Four Cases</div>\
+      <div class="case-select-sub">&#8220;Pick one. I\'ll find its essence.&#8221;</div>\
+      <div class="case-folders">' + cards + '</div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('.case-folders').addEventListener('click', function(e) {
+    var folder = e.target.closest('.case-folder');
+    if (!folder) return;
+    state.caseId = folder.dataset.case;
+    state.suspectIndex = 0;
+    state.questionsAsked = {};
+    state.essenceProfile = {};
+    state.testimony = null;
+    state.confidence = 100;
+    state.contradictionCount = 0;
+    state.wittTriggered = [];
+    state.interrogationHistory = [];
+    state.screen = 'interrogation';
+    render();
+  });
+}
+// ─── Render: Interrogation ─────────────────────────────────────────────────
+
+function renderInterrogation() {
+  scrollTop();
+  content.innerHTML = '';
+  var c = currentCase();
+  var s = currentSuspect();
+
+  // Initialize per-suspect question tracking
+  if (!state.questionsAsked[s.id]) state.questionsAsked[s.id] = {};
+  var asked = state.questionsAsked[s.id];
+  var askedCount = Object.keys(asked).length;
+  var maxQuestions = 3;
+
+  // Build dossier panel
+  var knownFeaturesHtml = '';
+  var knownKeys = Object.keys(asked);
+  if (knownKeys.length === 0) {
+    knownFeaturesHtml = '<div class="dossier-feature-empty">No features on record yet.</div>';
+  } else {
+    knownFeaturesHtml = knownKeys.map(function(fid) {
+      var f = featureById(fid);
+      var yes = asked[fid];
+      return '<div class="dossier-feature ' + (yes ? 'yes' : 'no') + '">' + f.text + '</div>';
+    }).join('');
+  }
+
+  var initial = s.name.charAt(0);
+
+  var dossierHtml = '\
+    <div class="panel">\
+      <div class="panel-title">Dossier</div>\
+      <div class="dossier-case">Case File: ' + c.name + '</div>\
+      <div class="dossier-count">Suspect ' + (state.suspectIndex + 1) + ' of ' + c.suspects.length + '</div>\
+      <div class="suspect-portrait">\
+        <div class="suspect-portrait-initial">' + initial + '</div>\
+      </div>\
+      <div class="suspect-name">' + s.name + '</div>\
+      <div class="suspect-desc">' + s.description + '</div>\
+      <div class="dossier-features-label">Features on record</div>\
+      ' + knownFeaturesHtml + '\
+    </div>';
+
+  // Build interrogation center panel
+  var testimonyHtml;
+  if (state.testimony) {
+    var t = state.testimony;
+    var f = featureById(t.featureId);
+    testimonyHtml = '\
+      <div class="testimony-area">\
+        <div class="testimony-head">On the record</div>\
+        <div class="testimony-answer ' + (t.yes ? 'yes' : 'no') + '">' + (t.yes ? 'Yes' : 'No') + '</div>\
+        <div class="testimony-line">' + t.line + '</div>\
+      </div>';
+  } else {
+    testimonyHtml = '\
+      <div class="testimony-area">\
+        <div class="testimony-head">Waiting for testimony</div>\
+        <div class="testimony-placeholder">Ask the suspect a question.</div>\
+      </div>';
+  }
+
+  var questionsHtml = c.features.map(function(f) {
+    var isAsked = asked.hasOwnProperty(f.id);
+    var cls = 'question-btn' + (isAsked ? ' asked' : '');
+    var attrs = isAsked || askedCount >= maxQuestions ? 'disabled' : '';
+    return '<button class="' + cls + '" data-feature="' + f.id + '" ' + attrs + '>' + f.text + '</button>';
+  }).join('');
+
+  var introMonologueHtml = askedCount === 0
+    ? '<div class="monologue">' + s.introMonologue + '</div>'
+    : '';
+
+  var nextLabel = state.suspectIndex === c.suspects.length - 1
+    ? 'No more suspects.'
+    : 'Bring In Next Suspect &rarr;';
+
+  var canAdvance = askedCount > 0;
+  var canBringNext = canAdvance && state.suspectIndex < c.suspects.length - 1;
+
+  var nextBtnHtml = canBringNext
+    ? '<button class="btn" id="next-suspect-btn">' + nextLabel + '</button>'
+    : (state.suspectIndex === c.suspects.length - 1 && askedCount > 0
+        ? '<span style="font-size:11px;color:var(--dim);letter-spacing:1px;">All suspects interrogated.</span>'
+        : '<span style="font-size:11px;color:var(--dim);letter-spacing:1px;">Ask at least one question first.</span>');
+
+  var centerHtml = '\
+    <div class="panel">\
+      <div class="panel-title">Interrogation</div>\
+      ' + introMonologueHtml + '\
+      ' + testimonyHtml + '\
+      <div class="questions-label">Ask a Question ( ' + askedCount + ' / ' + maxQuestions + ' )</div>\
+      ' + questionsHtml + '\
+      <div class="interrogation-actions">\
+        <div class="question-counter">' + (maxQuestions - askedCount) + ' questions left for this suspect</div>\
+        ' + nextBtnHtml + '\
+      </div>\
+    </div>';
+
+  // Essence Profile panel
+  var profileHtml = buildEssenceProfileHtml();
+  var closeCaseHtml = canCloseCase()
+    ? '<div class="close-case-wrap">\
+         <button class="close-case-btn" id="close-case-btn">Close the Case &#8212; No Essence Found</button>\
+       </div>'
+    : '';
+
+  var confidencePct = Math.max(0, state.confidence);
+  var fillCls = confidencePct < 40 ? 'confidence-fill low' : 'confidence-fill';
+  var profilePanelHtml = '\
+    <div class="panel">\
+      <div class="panel-title">Essence Profile</div>\
+      <div class="confidence-wrap">\
+        <div class="confidence-head"><span>Confidence</span><span class="confidence-value">' + confidencePct + '%</span></div>\
+        <div class="confidence-bar"><div class="' + fillCls + '" style="width:' + confidencePct + '%"></div></div>\
+      </div>\
+      ' + profileHtml + '\
+      ' + closeCaseHtml + '\
+    </div>';
+
+  var el = div('fade-in', '\
+    <div class="interrogation-wrap">\
+      ' + dossierHtml + '\
+      ' + centerHtml + '\
+      ' + profilePanelHtml + '\
+    </div>\
+  ');
+  content.appendChild(el);
+
+  // Wire up question buttons
+  el.querySelectorAll('.question-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (btn.disabled) return;
+      var fid = btn.dataset.feature;
+      handleQuestion(fid);
+    });
+  });
+
+  // Wire up next suspect
+  var nextBtn = el.querySelector('#next-suspect-btn');
+  if (nextBtn) nextBtn.addEventListener('click', function() {
+    state.suspectIndex++;
+    state.testimony = null;
+    render();
+  });
+
+  // Wire up close case
+  var closeBtn = el.querySelector('#close-case-btn');
+  if (closeBtn) closeBtn.addEventListener('click', function() {
+    state.screen = 'debrief';
+    render();
+  });
+}
+
+function buildEssenceProfileHtml() {
+  var c = currentCase();
+  var entries = [];
+  c.features.forEach(function(f) {
+    var rec = state.essenceProfile[f.id];
+    if (!rec) return;
+    entries.push({ feature: f, rec: rec });
+  });
+  if (entries.length === 0) {
+    return '<div class="essence-empty">No features yet. Ask a question.</div>';
+  }
+  return entries.map(function(e) {
+    var f = e.feature, rec = e.rec;
+    var yesPart = rec.firstAnswer ? f.text : 'Not: ' + f.text;
+    var cls = rec.contradictedBy ? 'contradicted' : 'confirmed';
+    var note = rec.contradictedBy
+      ? '<span class="essence-feature-note">Contradicted by ' + rec.contradictedBy + '</span>'
+      : '';
+    return '<div class="essence-feature ' + cls + '">' + yesPart + note + '</div>';
+  }).join('');
+}
+
+function handleQuestion(featureId) {
+  var s = currentSuspect();
+  var c = currentCase();
+  var answer = s.answers[featureId];
+  if (!answer) return;
+
+  // Record in per-suspect tracking
+  state.questionsAsked[s.id][featureId] = answer.yes;
+
+  // Check essence profile: is this a confirmation, a first-entry, or a contradiction?
+  var rec = state.essenceProfile[featureId];
+  var contradiction = false;
+
+  if (!rec) {
+    // First time this feature is probed — add to profile
+    state.essenceProfile[featureId] = {
+      firstAnswer: answer.yes,
+      firstSuspect: s.name,
+      contradictedBy: null
+    };
+  } else if (rec.firstAnswer !== answer.yes && !rec.contradictedBy) {
+    // New answer contradicts the first
+    rec.contradictedBy = s.name;
+    contradiction = true;
+    state.contradictionCount++;
+  }
+  // else: same answer as before (confirmation) or already contradicted (no new strike)
+
+  // Update confidence
+  if (contradiction) {
+    state.confidence = Math.max(0, state.confidence - 12);
+  } else {
+    state.confidence = Math.max(0, state.confidence - 3);
+  }
+
+  // Record testimony for display
+  state.testimony = {
+    featureId: featureId,
+    yes: answer.yes,
+    line: answer.line,
+    contradiction: contradiction
+  };
+
+  // Record in history for export/web
+  state.interrogationHistory.push({
+    suspectId: s.id,
+    suspectName: s.name,
+    featureId: featureId,
+    yes: answer.yes,
+    contradicted: contradiction
+  });
+
+  // Check for Wittgenstein interlude trigger
+  var trigger = null;
+  for (var i = 0; i < WITT_LINES.length; i++) {
+    var w = WITT_LINES[i];
+    if (state.contradictionCount >= w.threshold && state.wittTriggered.indexOf(w.threshold) === -1) {
+      trigger = i;
+      state.wittTriggered.push(w.threshold);
+      break;
+    }
+  }
+
+  if (trigger !== null) {
+    state.pendingInterludeIndex = trigger;
+    state.screen = 'wittInterlude';
+    render();
+  } else {
+    render();
+  }
+}
+
+// ─── Render: Wittgenstein interlude ────────────────────────────────────────
+
+function renderWittInterlude() {
+  scrollTop();
+  content.innerHTML = '';
+  var w = WITT_LINES[state.pendingInterludeIndex];
+  var linesHtml = w.lines.map(function(l) { return '<p class="witt-line">' + l + '</p>'; }).join('');
+  var el = div('fade-in', '\
+    <div style="padding-top: 40px;">\
+      <div class="witt-overlay">\
+        <div class="witt-speaker">A voice at the door</div>\
+        ' + linesHtml + '\
+        <p class="witt-source">&#8212; ' + w.source + '</p>\
+      </div>\
+      <div style="text-align:center; margin-top: 28px;">\
+        <button class="btn" id="continue-btn">Back to the Interrogation</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#continue-btn').addEventListener('click', function() {
+    state.screen = 'interrogation';
+    state.pendingInterludeIndex = -1;
+    render();
+  });
+}
+// ─── Resemblance Web ───────────────────────────────────────────────────────
+// Build from interrogation history: each interrogated suspect is a node.
+// Edges drawn between pairs that gave the same answer to a shared feature.
+
+function buildResemblanceWebSvg() {
+  // Gather suspects actually interrogated (distinct)
+  var suspectMap = {};
+  state.interrogationHistory.forEach(function(h) {
+    if (!suspectMap[h.suspectId]) {
+      suspectMap[h.suspectId] = { id: h.suspectId, name: h.suspectName, answers: {} };
+    }
+    suspectMap[h.suspectId].answers[h.featureId] = h.yes;
+  });
+  var suspects = Object.keys(suspectMap).map(function(k) { return suspectMap[k]; });
+  var n = suspects.length;
+  if (n === 0) return '<div class="essence-empty">No suspects interrogated.</div>';
+
+  // Layout in a circle
+  var W = 680, H = 420;
+  var cx = W / 2, cy = H / 2;
+  var r = Math.min(W, H) / 2 - 70;
+  var positions = suspects.map(function(s, i) {
+    var angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    return { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
+  });
+
+  // Compute edges: for every pair of suspects, count shared features (same answer)
+  var edges = [];
+  for (var i = 0; i < n; i++) {
+    for (var j = i + 1; j < n; j++) {
+      var a = suspects[i].answers, b = suspects[j].answers;
+      var shared = 0;
+      Object.keys(a).forEach(function(fid) {
+        if (b.hasOwnProperty(fid) && a[fid] === b[fid]) shared++;
+      });
+      if (shared > 0) edges.push({ from: i, to: j, shared: shared });
+    }
+  }
+
+  var svg = '<svg class="web-svg" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Draw edges first
+  edges.forEach(function(e) {
+    var p1 = positions[e.from], p2 = positions[e.to];
+    var opacity = Math.min(1, 0.15 + 0.25 * e.shared);
+    var thickness = 0.8 + 0.6 * e.shared;
+    svg += '<line x1="' + p1.x + '" y1="' + p1.y + '" x2="' + p2.x + '" y2="' + p2.y + '" stroke="#6b4820" stroke-width="' + thickness + '" opacity="' + opacity + '" />';
+  });
+
+  // Draw nodes on top
+  positions.forEach(function(p, i) {
+    var s = suspects[i];
+    svg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="6" fill="#3d2005" />';
+    // Place label outside the circle
+    var angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    var lx = cx + (r + 30) * Math.cos(angle);
+    var ly = cy + (r + 30) * Math.sin(angle);
+    var anchor = Math.abs(Math.cos(angle)) < 0.3 ? 'middle' : (Math.cos(angle) > 0 ? 'start' : 'end');
+    // Shorten long names
+    var label = s.name.length > 18 ? s.name.substring(0, 16) + '...' : s.name;
+    svg += '<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" alignment-baseline="middle" font-family="Courier New, monospace" font-size="11" fill="#1a0a00" font-weight="bold">' + label + '</text>';
+  });
+
+  svg += '</svg>';
+  return svg;
+}
+
+// ─── Export: Spade's Final Report ──────────────────────────────────────────
+
+function buildReportText() {
+  var c = currentCase();
+  var lines = [];
+  lines.push('SPADE\'S FINAL REPORT');
+  lines.push('Case: THE MALTESE ESSENCE — ' + c.name);
+  lines.push('Timestamp: ' + new Date().toLocaleString());
+  lines.push('');
+  lines.push('Suspects interrogated: ' + interrogatedCount() + ' of ' + c.suspects.length);
+  lines.push('Final confidence: ' + state.confidence + '%');
+  lines.push('Contradictions recorded: ' + state.contradictionCount);
+  lines.push('');
+  lines.push('ESSENCE PROFILE');
+  lines.push('---------------');
+  c.features.forEach(function(f) {
+    var rec = state.essenceProfile[f.id];
+    if (!rec) {
+      lines.push('  [ ] ' + f.text + '   (not probed)');
+      return;
+    }
+    var str = (rec.firstAnswer ? f.text : 'Not: ' + f.text);
+    if (rec.contradictedBy) {
+      lines.push('  [X] ' + str + '   — CONTRADICTED by ' + rec.contradictedBy);
+    } else {
+      lines.push('  [.] ' + str + '   — confirmed by ' + rec.firstSuspect);
+    }
+  });
+  lines.push('');
+  lines.push('INTERROGATION LOG');
+  lines.push('-----------------');
+  state.interrogationHistory.forEach(function(h) {
+    var f = featureById(h.featureId);
+    lines.push('  ' + h.suspectName + ' — "' + f.text + '" — ' + (h.yes ? 'YES' : 'NO') + (h.contradicted ? '   (contradiction)' : ''));
+  });
+  lines.push('');
+  lines.push('RESEMBLANCE WEB (text form)');
+  lines.push('---------------------------');
+  var suspectMap = {};
+  state.interrogationHistory.forEach(function(h) {
+    if (!suspectMap[h.suspectId]) suspectMap[h.suspectId] = { name: h.suspectName, answers: {} };
+    suspectMap[h.suspectId].answers[h.featureId] = h.yes;
+  });
+  var ids = Object.keys(suspectMap);
+  for (var i = 0; i < ids.length; i++) {
+    for (var j = i + 1; j < ids.length; j++) {
+      var A = suspectMap[ids[i]], B = suspectMap[ids[j]];
+      var shared = [];
+      Object.keys(A.answers).forEach(function(fid) {
+        if (B.answers.hasOwnProperty(fid) && A.answers[fid] === B.answers[fid]) {
+          var f = featureById(fid);
+          shared.push((A.answers[fid] ? '' : 'not-') + fid);
+        }
+      });
+      if (shared.length > 0) {
+        lines.push('  ' + A.name + ' <--> ' + B.name + '  (shared: ' + shared.join(', ') + ')');
+      }
+    }
+  }
+  lines.push('');
+  lines.push('—');
+  lines.push('The stuff cases are made of.');
+  return lines.join('\n');
+}
+
+function copyReport() {
+  var text = buildReportText();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      var fb = document.getElementById('copy-feedback');
+      if (fb) {
+        fb.style.display = 'inline';
+        setTimeout(function() { fb.style.display = 'none'; }, 2200);
+      }
+    });
+  }
+}
+
+// ─── Render: Debrief ───────────────────────────────────────────────────────
+
+function renderDebrief() {
+  scrollTop();
+  content.innerHTML = '';
+  var count = interrogatedCount();
+  var ending = endingForSuspectCount(count);
+  var spadeHtml = ending.spade.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+  var wittFinalHtml = WITT_FINAL.lines.map(function(l) { return '<p class="witt-line">' + l + '</p>'; }).join('');
+  var webSvg = buildResemblanceWebSvg();
+  var report = buildReportText();
+
+  var el = div('fade-in', '\
+    <div id="debrief-screen">\
+      <div class="debrief-title">The Recognition</div>\
+      <div class="debrief-sub">' + ending.label + ' &#8212; ' + count + ' suspects interrogated</div>\
+      \
+      <div class="debrief-monologue">\
+        ' + spadeHtml + '\
+      </div>\
+      \
+      <div class="witt-overlay">\
+        <div class="witt-speaker">Wittgenstein, one last time</div>\
+        ' + wittFinalHtml + '\
+        <p class="witt-source">&#8212; ' + WITT_FINAL.source + '</p>\
+      </div>\
+      \
+      <p style="text-align:center;font-size:13px;color:var(--dim);font-style:italic;margin:28px 0;">' + ending.wittNote + '</p>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">The Resemblance Web</div>\
+        ' + webSvg + '\
+        <div class="web-legend">Each suspect connected to others by the features they actually shared. No central node. The mess is the picture.</div>\
+      </div>\
+      \
+      <div class="debrief-section">\
+        <div class="debrief-label">Spade\'s Final Report</div>\
+        <div class="report-area" id="report-area">' + report + '</div>\
+        <div style="text-align:center;">\
+          <button class="btn" id="copy-btn">Copy Report to Clipboard</button>\
+          <span class="copy-feedback" id="copy-feedback" style="display:none;">Copied.</span>\
+        </div>\
+      </div>\
+      \
+      <p style="text-align:center;font-size:14px;font-style:italic;color:var(--bright);margin:36px 0 8px;">&#8220;The stuff cases are made of.&#8221;</p>\
+      <p style="text-align:center;font-size:12px;color:var(--dim);letter-spacing:2px;">&#8212; SAM SPADE</p>\
+      \
+      <div class="debrief-close">\
+        <button class="btn" id="home-btn">Return to Philosophy Games</button>\
+        <button class="btn btn-secondary" id="new-case-btn">Take Another Case</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+
+  el.querySelector('#copy-btn').addEventListener('click', copyReport);
+  el.querySelector('#home-btn').addEventListener('click', function() {
+    window.location.href = '../index.html';
+  });
+  el.querySelector('#new-case-btn').addEventListener('click', function() {
+    state.screen = 'caseSelect';
+    state.caseId = null;
+    state.suspectIndex = 0;
+    state.questionsAsked = {};
+    state.essenceProfile = {};
+    state.testimony = null;
+    state.confidence = 100;
+    state.contradictionCount = 0;
+    state.wittTriggered = [];
+    state.interrogationHistory = [];
+    render();
+  });
+}
+// ─── Router ────────────────────────────────────────────────────────────────
+
+function render() {
+  if      (state.screen === 'title')          renderTitle();
+  else if (state.screen === 'opening')        renderOpening();
+  else if (state.screen === 'caseSelect')     renderCaseSelect();
+  else if (state.screen === 'interrogation')  renderInterrogation();
+  else if (state.screen === 'wittInterlude')  renderWittInterlude();
+  else if (state.screen === 'debrief')        renderDebrief();
+}
+
+render();
+</script>
+</body>
+</html>
