@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Downstream — Philosophy Games</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5e4c0;
+  --amber: #3d2005;
+  --dim: #6b4820;
+  --bright: #1a0a00;
+  --unaware: #b09a78;
+  --aware: #8a6a2e;
+  --connected: #2d5a1e;
+  --dewey: #2a4a5a;
+  --font: 'Courier New', Courier, monospace;
+}
+
+html { overflow-y: scroll; }
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#app { max-width: 960px; margin: 0 auto; padding: 0 24px 80px; }
+
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--dim);
+  font-size: 12px;
+}
+#header a { color: var(--dim); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; }
+#header a:hover { color: var(--amber); }
+#header .game-label { color: var(--bright); font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 12px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 0.9s ease-out both; }
+
+/* Title */
+#title-screen { padding: 60px 0 40px; text-align: center; max-width: 680px; margin: 0 auto; }
+#title-screen h1 { font-size: 24px; letter-spacing: 5px; text-transform: uppercase; color: var(--bright); font-weight: bold; margin-bottom: 10px; }
+.title-sub { font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: var(--dim); margin-bottom: 36px; }
+.title-portrait { width: 220px; max-width: 60%; display: block; margin: 0 auto 28px; filter: grayscale(25%) sepia(45%) brightness(0.88) contrast(1.06); }
+.title-portrait-attr { font-size: 12px; color: var(--dim); font-style: italic; margin-bottom: 40px; }
+.epigraph { color: var(--dim); font-size: 13px; font-style: italic; max-width: 520px; margin: 0 auto 10px; line-height: 1.85; }
+.epigraph-attr { color: var(--dim); font-size: 12px; margin-bottom: 48px; }
+
+.btn { display: inline-block; border: 1px solid var(--dim); color: var(--amber); background: transparent; font-family: var(--font); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 12px 32px; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+.btn:hover { border-color: var(--bright); color: var(--bright); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-secondary { border-color: transparent; color: var(--dim); font-size: 12px; letter-spacing: 2px; padding: 8px 0; }
+.btn-secondary:hover { border-color: transparent; color: var(--amber); }
+.btn-close { border-color: var(--dewey); color: var(--dewey); }
+.btn-close:hover { border-color: var(--dewey); color: var(--bright); background: rgba(42, 74, 90, 0.08); }
+
+/* Opening */
+#opening-screen { padding: 50px 0 40px; max-width: 640px; margin: 0 auto; }
+.opening-beat { margin-bottom: 18px; font-size: 15px; line-height: 1.8; color: var(--amber); }
+.opening-beat.quiet { color: var(--dim); font-style: italic; }
+
+/* Scenario select */
+.scenario-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 700px; margin: 0 auto; }
+@media (max-width: 579px) { .scenario-cards { grid-template-columns: 1fr; } }
+.scenario-card { border: 1px solid var(--dim); padding: 22px; cursor: pointer; transition: all 0.2s; background: rgba(255,248,220,0.4); }
+.scenario-card:hover { border-color: var(--bright); background: rgba(255,248,220,0.7); }
+.scenario-card.locked { opacity: 0.45; cursor: default; }
+.scenario-card.locked:hover { border-color: var(--dim); background: rgba(255,248,220,0.4); }
+.scenario-card-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dim); margin-bottom: 6px; }
+.scenario-card-name { font-size: 18px; letter-spacing: 3px; text-transform: uppercase; color: var(--bright); font-weight: bold; margin-bottom: 10px; }
+.scenario-card-desc { font-size: 13px; color: var(--dim); font-style: italic; line-height: 1.55; }
+
+/* Game bar */
+.game-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--dim); margin-bottom: 6px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); }
+.game-bar-btns { display: flex; gap: 10px; }
+.game-bar-btn { border: 1px solid var(--dim); background: transparent; color: var(--dim); font-family: var(--font); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all 0.2s; }
+.game-bar-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+/* Consequence web */
+.web-area { border: 1px solid var(--dim); background: rgba(255,248,220,0.25); padding: 10px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.web-svg { width: 100%; height: auto; display: block; cursor: default; }
+.web-svg.select-mode { cursor: crosshair; }
+.web-node { cursor: pointer; transition: opacity 0.3s; }
+.web-node:hover { opacity: 0.85; }
+.web-node.selectable { cursor: crosshair; }
+.web-node.selected circle { stroke: var(--bright); stroke-width: 3; }
+.web-hint { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dewey); background: rgba(245,228,192,0.9); padding: 4px 14px; }
+
+/* Bottom panels */
+.bottom-panels { display: grid; grid-template-columns: 200px 1fr 220px; gap: 14px; }
+@media (max-width: 799px) { .bottom-panels { grid-template-columns: 1fr; } }
+
+.panel { border: 1px solid var(--dim); padding: 14px 16px; background: rgba(255,248,220,0.3); }
+.panel-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--bright); font-weight: bold; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1px solid var(--dim); }
+
+/* Meters */
+.meter-row { margin-bottom: 12px; }
+.meter-label { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 1px; color: var(--dim); margin-bottom: 4px; }
+.meter-label .meter-val { color: var(--bright); font-weight: bold; }
+.meter-bar { height: 6px; background: rgba(107,72,32,0.15); border: 1px solid var(--dim); position: relative; overflow: hidden; }
+.meter-fill { height: 100%; transition: width 0.5s ease; }
+.meter-fill.awareness { background: var(--aware); }
+.meter-fill.recognition { background: var(--connected); }
+.meter-fill.organization { background: var(--dewey); }
+
+/* Flavor text */
+.flavor-area { min-height: 100px; }
+.flavor-text { font-size: 13px; color: var(--amber); line-height: 1.75; }
+.flavor-text.character { font-style: italic; border-left: 2px solid var(--amber); padding-left: 14px; }
+.flavor-text.dewey { color: var(--dewey); font-style: italic; border-left: 2px solid var(--dewey); padding-left: 14px; }
+.flavor-text.facilitator { color: var(--dim); }
+
+/* Intervention menu */
+.intervention-list { list-style: none; }
+.intervention-item { border: 1px solid var(--dim); padding: 8px 12px; margin-bottom: 4px; cursor: pointer; font-family: var(--font); font-size: 12px; color: var(--amber); background: transparent; transition: all 0.2s; display: block; width: 100%; text-align: left; }
+.intervention-item:hover { border-color: var(--bright); color: var(--bright); background: rgba(255,248,220,0.5); }
+.intervention-item.gated { opacity: 0.35; cursor: not-allowed; }
+.intervention-item.gated:hover { border-color: var(--dim); color: var(--amber); background: transparent; }
+.intervention-num { display: inline-block; width: 20px; color: var(--dim); }
+
+/* Character info popup */
+.char-popup { position: absolute; background: var(--bg); border: 1px solid var(--bright); padding: 14px 18px; max-width: 260px; z-index: 50; font-size: 12px; line-height: 1.6; pointer-events: auto; }
+.char-popup-name { font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: var(--bright); margin-bottom: 4px; }
+.char-popup-state { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.char-popup-state.unaware { color: var(--unaware); }
+.char-popup-state.aware { color: var(--aware); }
+.char-popup-state.connected { color: var(--connected); }
+.char-popup-desc { color: var(--dim); font-style: italic; margin-bottom: 4px; }
+.char-popup-stake { color: var(--amber); }
+.char-popup-close { float: right; cursor: pointer; color: var(--dim); font-size: 14px; line-height: 1; }
+
+/* Dewey interlude */
+.dewey-wrap { margin: 14px 0; padding: 16px 20px; border: 1px solid var(--dewey); background: rgba(42,74,90,0.04); }
+.dewey-speaker { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dewey); margin-bottom: 8px; }
+.dewey-line { font-size: 14px; color: var(--bright); font-style: italic; line-height: 1.85; margin-bottom: 8px; }
+.dewey-source { font-size: 11px; color: var(--dewey); letter-spacing: 1px; }
+
+/* Log overlay */
+.log-overlay { position: fixed; inset: 0; background: rgba(245,228,192,0.96); z-index: 100; overflow-y: auto; padding: 40px 24px 80px; display: none; }
+.log-overlay.open { display: block; }
+.log-inner { max-width: 700px; margin: 0 auto; }
+.log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--dim); }
+.log-title { font-size: 14px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; color: var(--bright); }
+.log-close { border: 1px solid var(--dim); color: var(--dim); background: transparent; font-family: var(--font); font-size: 11px; letter-spacing: 2px; padding: 6px 14px; cursor: pointer; }
+.log-close:hover { color: var(--amber); border-color: var(--amber); }
+.log-entry { padding: 8px 0; border-bottom: 1px dashed var(--dim); font-size: 12px; color: var(--amber); line-height: 1.6; }
+.log-round { color: var(--dim); font-size: 11px; letter-spacing: 2px; }
+
+/* Debrief */
+.debrief-section { margin: 32px 0; padding-top: 18px; border-top: 1px solid var(--dim); }
+.debrief-label { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--bright); font-weight: bold; margin-bottom: 14px; }
+.debrief-passage { padding: 18px 22px; border-left: 3px solid var(--dim); background: rgba(255,248,220,0.4); font-size: 13px; line-height: 1.85; color: var(--amber); margin-bottom: 20px; }
+.debrief-passage p { margin-bottom: 10px; }
+.debrief-passage p:last-child { margin-bottom: 0; }
+.debrief-roster-item { font-size: 12px; padding: 4px 0; border-bottom: 1px dashed rgba(107,72,32,0.3); }
+.debrief-roster-state { display: inline-block; width: 80px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.debrief-close { margin-top: 48px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+.report-area { padding: 14px 18px; border: 1px solid var(--dim); background: rgba(255,248,220,0.4); font-size: 12px; line-height: 1.7; white-space: pre-wrap; max-height: 260px; overflow-y: auto; margin-bottom: 14px; color: var(--amber); }
+.copy-feedback { font-size: 12px; color: var(--connected); font-style: italic; margin-left: 12px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="header">
+    <a href="../index.html">&#x2190; Philosophy Games</a>
+    <span class="game-label">Downstream</span>
+  </div>
+  <div id="content"></div>
+</div>
+<div id="log-overlay" class="log-overlay"></div>
+
+<script>
+// ─── Image ─────────────────────────────────────────────────────────────────
+
+var DEWEY_IMG = {
+  src: 'https://commons.wikimedia.org/wiki/Special:FilePath/John_Dewey_in_1902.jpg?width=900',
+  alt: 'Photograph of John Dewey',
+  attr: '<em>John Dewey</em>, c.&#8201;1902.'
+};
+
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG') e.target.style.display = 'none';
+}, true);
+
+// ─── Interventions (shared across scenarios) ───────────────────────────────
+
+var INTERVENTIONS = [
+  { id: 'newspaper',    name: 'Newspaper piece',          num: 1,  gateCheck: function() { return true; }, targetMode: null },
+  { id: 'townmeeting',  name: 'Town meeting',             num: 2,  gateCheck: function() { return countByState('aware') + countByState('connected') >= 3; }, targetMode: null, gateHint: 'Needs 3+ aware characters' },
+  { id: 'expert',       name: 'Expert report',            num: 3,  gateCheck: function() { return true; }, targetMode: null },
+  { id: 'connect',      name: 'Connect two people',       num: 4,  gateCheck: function() { return countByState('aware') + countByState('connected') >= 2; }, targetMode: 'pair', gateHint: 'Needs 2+ aware characters' },
+  { id: 'values',       name: 'Values forum',             num: 5,  gateCheck: function() { return state.recognition >= 20; }, targetMode: null, gateHint: 'Needs Recognition above 20' },
+  { id: 'constudy',     name: 'Consequence study',        num: 6,  gateCheck: function() { return state.awareness >= 20; }, targetMode: null, gateHint: 'Needs Awareness above 20' },
+  { id: 'organizer',    name: 'Support an organizer',     num: 7,  gateCheck: function() { return hasOrganizerCandidate(); }, targetMode: 'single', gateHint: 'Needs an aware character with organizer potential' },
+  { id: 'publicbody',   name: 'Ask at a public body',     num: 8,  gateCheck: function() { return true; }, targetMode: null },
+  { id: 'testimony',    name: 'Personal testimony',       num: 9,  gateCheck: function() { return countByState('connected') >= 1; }, targetMode: 'single', gateHint: 'Needs 1+ connected character' },
+  { id: 'crossgroup',   name: 'Cross-group dialogue',     num: 10, gateCheck: function() { return hasTwoConnectedGroups(); }, targetMode: null, gateHint: 'Needs connected pairs in 2+ groups' }
+];
+
+// ─── Dewey commentary (triggered at thresholds) ───────────────────────────
+
+var DEWEY_LINES = [
+  {
+    trigger: 'firstConnection',
+    lines: ['Two people who did not know they shared a fate now know it. That is the seed. A public begins when the indirect consequences of action are recognized by those who bear them.'],
+    source: 'cf. The Public and Its Problems, Ch. 1'
+  },
+  {
+    trigger: 'threeConnected',
+    lines: ['A group of three. Still fragile. But a public is not a crowd — it is a body of persons having a common interest in the consequences of a transaction in which each is involved.'],
+    source: 'cf. The Public and Its Problems, Ch. 1'
+  },
+  {
+    trigger: 'recognitionThreshold',
+    lines: ['They are beginning to recognize each other. Recognition is not the same as knowledge — an expert can know without recognizing. Recognition means seeing yourself in someone else\'s situation, and being seen in return.'],
+    source: 'cf. The Public and Its Problems, Ch. 5'
+  },
+  {
+    trigger: 'expertWarning',
+    lines: ['A report. Credible. Authoritative. But notice: the people affected have receded behind the data. The expert has spoken. The public has been spoken for. This is the displacement I warned about.'],
+    source: 'cf. The Public and Its Problems, Ch. 6'
+  },
+  {
+    trigger: 'organizationThreshold',
+    lines: ['They are beginning to organize. Not because someone told them to, but because the weight of shared stakes made the effort necessary. This is the formation of a public. It is always precarious.'],
+    source: 'cf. The Public and Its Problems, Ch. 2'
+  }
+];
+
+// ─── Scenario: The Watershed ───────────────────────────────────────────────
+
+var SCENARIOS = {};
+
+SCENARIOS.watershed = {
+  id: 'watershed',
+  name: 'The Watershed',
+  brief: 'Hartwell Industries has opened a chemical plant on the Little Carroll River, six miles upstream of Carroll Bend and eight miles upstream of Aquifer Meadows. The discharge is within permitted limits — but the permit was written for a different kind of effluent, and the actual discharge interacts with the local geology in ways no one anticipated.',
+  groups: ['hartwell', 'carrollbend', 'aquifer', 'peripheral'],
+  groupNames: { hartwell: 'Hartwell / Employed', carrollbend: 'Carroll Bend', aquifer: 'Aquifer Meadows', peripheral: 'Peripheral' },
+  characters: [
+    {
+      id: 'dan', name: 'Dan Shapiro', group: 'hartwell',
+      desc: 'Plant manager at Hartwell Industries. Believes the permit is being followed.',
+      stake: 'Not affected in Dewey\'s sense — relevant as someone the public may need to reach.',
+      x: 140, y: 40, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'marcia', name: 'Marcia Ellis', group: 'hartwell',
+      desc: 'Hartwell employee, lives in Carroll Bend. Smells something odd on her walks but hasn\'t connected it.',
+      stake: 'Caught between employer and neighborhood. The smell nags at her.',
+      x: 280, y: 55, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'tom', name: 'Tom Reyes', group: 'carrollbend',
+      desc: 'Diner owner. Noticed the creek smell in week two. Mentioned it to one customer. Nobody followed up.',
+      stake: 'The creek runs behind his property. His outdoor seating has gone quiet.',
+      x: 80, y: 145, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'lenore', name: 'Lenore Williams', group: 'carrollbend',
+      desc: 'Retired teacher. Walks her dog by the creek. Has a private list of days the smell was worst.',
+      stake: 'She has been documenting without knowing she was documenting.',
+      x: 200, y: 130, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'marco', name: 'Marco Alves', group: 'carrollbend',
+      desc: 'Contractor. Noticed rust patterns on a client\'s plumbing he hadn\'t seen before. Thinks it\'s old pipes.',
+      stake: 'His clients are affected; he is seeing symptoms without a diagnosis.',
+      x: 330, y: 150, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'rita', name: 'Rita Chen', group: 'carrollbend',
+      desc: 'Nurse, Marco\'s neighbor. Two unusual rashes at the clinic in a month. Hasn\'t connected them.',
+      stake: 'Clinical evidence she doesn\'t yet know is evidence.',
+      x: 440, y: 130, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'james', name: 'Pastor James Okafor', group: 'carrollbend',
+      desc: 'Runs the community church. Several congregants have mentioned small complaints privately.',
+      stake: 'A potential hub — fragments from multiple people, not yet assembled into a pattern.',
+      x: 550, y: 145, startState: 'unaware', organizer: true
+    },
+    {
+      id: 'gloria', name: 'Gloria Washington', group: 'carrollbend',
+      desc: 'Works at Hartwell in accounting. Lives in Carroll Bend. Conflict of interest complicates any recognition.',
+      stake: 'She knows both sides. That knowledge is a weight, not a bridge.',
+      x: 660, y: 130, startState: 'unaware', organizer: false
+    }
+  ],
+  // continuation of watershed characters
+  charactersMore: [
+    {
+      id: 'kenji', name: 'Kenji Park', group: 'carrollbend',
+      desc: 'High school science teacher. If he notices, he\'ll know exactly what to look for.',
+      stake: 'Has the training to interpret what others only sense. Currently unaware.',
+      x: 320, y: 210, startState: 'unaware', organizer: true
+    },
+    {
+      id: 'hazel', name: 'Hazel Morton', group: 'aquifer',
+      desc: 'Runs a small horse farm. One of her horses has been off. She thinks it\'s old age.',
+      stake: 'The aquifer feeds her wells. She doesn\'t know it\'s shared water.',
+      x: 100, y: 310, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'fishers', name: 'Ray & Donna Fisher', group: 'aquifer',
+      desc: 'Retirees. Ray has new headaches. Donna has started filtering their water, more out of habit than suspicion.',
+      stake: 'Low-grade symptoms neither of them has named.',
+      x: 280, y: 320, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'isaac', name: 'Isaac Begay', group: 'aquifer',
+      desc: 'Grows vegetables for a farmers\' market. His tomatoes aren\'t setting right this season.',
+      stake: 'The land he waters from the aquifer is his livelihood.',
+      x: 440, y: 310, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'lucia', name: 'Lucia Reyes', group: 'aquifer',
+      desc: 'Tom\'s cousin. Lives in Aquifer Meadows. Doesn\'t speak to Tom much.',
+      stake: 'Her water comes from the same aquifer. She has no connection to the Carroll Bend conversation.',
+      x: 600, y: 320, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'haverford', name: 'Ms. Haverford', group: 'peripheral',
+      desc: 'County commissioner. Will become relevant if the public forms. Currently unaware.',
+      stake: 'Holds institutional power. Will listen if there is a public to listen to.',
+      x: 730, y: 60, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'evelyn', name: 'Evelyn Tran', group: 'peripheral',
+      desc: 'Local newspaper reporter. Covers the county beat. Hasn\'t received a tip yet.',
+      stake: 'A channel, not a stakeholder. But channels matter.',
+      x: 730, y: 230, startState: 'unaware', organizer: false
+    }
+  ],
+  cascades: [
+    { trigger: ['tom', 'lenore'], target: 'kenji', delay: 1, flavor: 'Lenore showed Tom her list. Tom told Kenji at the diner. Now the science teacher is looking at the creek.' },
+    { trigger: ['marco', 'rita'], target: 'james', delay: 1, flavor: 'Marco and Rita talked to Pastor James after service. He is beginning to see the pattern in the fragments.' },
+    { trigger: ['james', 'kenji'], target: 'gloria', delay: 2, flavor: 'Kenji and the Pastor brought evidence to Gloria. She listened. She hasn\'t decided what to do.' },
+    { trigger: ['hazel', 'fishers'], target: 'isaac', delay: 1, flavor: 'Hazel mentioned the horse to Donna at the market. Isaac overheard. Three well-water families, one table.' },
+    { trigger: ['tom', 'lucia'], target: 'fishers', delay: 1, flavor: 'Lucia called Tom for the first time in years. She mentioned the water. Tom mentioned the creek. A downstream connection.' },
+    { trigger: ['kenji', 'evelyn'], target: 'haverford', delay: 2, flavor: 'Kenji gave Evelyn the data. Evelyn wrote a piece. Ms. Haverford read it over coffee and picked up the phone.' }
+  ],
+  interventionFlavor: {
+    newspaper:   { flavor: 'Evelyn Tran runs a piece in the Carroll County Herald. Broad circulation. Some people read it; most skim the headline.' },
+    townmeeting: { flavor: 'Pastor James opens the church hall. Folding chairs, a handwritten agenda, bad coffee. Twelve people show. They learn they are not alone.' },
+    expert:      { flavor: 'A water quality report is commissioned. The data is clear, the language is technical, and the affected families see their experience translated into numbers they didn\'t produce.' },
+    connect:     { flavor: 'Two people who had been separately aware now sit across a kitchen table and compare notes.' },
+    values:      { flavor: 'A conversation not about data but about what this place means to the people who live in it. The creek. The wells. The gardens. The children.' },
+    constudy:    { flavor: 'A downstream study maps the aquifer path from the river to the wells. Hazel\'s horse, Isaac\'s tomatoes, and the Fishers\' headaches are all on the same page now.' },
+    organizer:   { flavor: 'You noticed someone was already doing the work. You gave them room.' },
+    publicbody:  { flavor: 'A resident stands at a county commission meeting and says, in the public record, that something is wrong. Ms. Haverford takes note.' },
+    testimony:   { flavor: 'One person tells a room what happened to their family. The room is quiet after. That kind of quiet.' },
+    crossgroup:  { flavor: 'Carroll Bend and Aquifer Meadows in the same room for the first time. Different symptoms. Same cause. The map clicks into place.' }
+  }
+};
+
+// Merge watershed characters
+SCENARIOS.watershed.characters = SCENARIOS.watershed.characters.concat(SCENARIOS.watershed.charactersMore);
+delete SCENARIOS.watershed.charactersMore;
+
+// ─── Scenario: The School ──────────────────────────────────────────────────
+
+SCENARIOS.school = {
+  id: 'school',
+  name: 'The School',
+  brief: 'The school board has voted to close Harriet Beecher Stowe Elementary at the end of the academic year, consolidating students into two larger schools across town. The vote happened quickly. Public comment was technically held but lightly attended. The consequences have not yet arrived.',
+  groups: ['staff', 'families', 'community', 'peripheral'],
+  groupNames: { staff: 'School Staff', families: 'Families', community: 'Community Users', peripheral: 'Peripheral' },
+  characters: [
+    {
+      id: 'diane', name: 'Mrs. Diane Powell', group: 'staff',
+      desc: '4th grade teacher, 22 years at Stowe. Her professional identity lives inside this building.',
+      stake: 'Will be reassigned. The new school has a different culture, different families, different walls.',
+      x: 250, y: 50, startState: 'aware', organizer: true
+    },
+    {
+      id: 'angela', name: 'Angela Torres', group: 'staff',
+      desc: 'Crossing guard. Her job disappears when the school closes. Nobody has told her yet.',
+      stake: 'Loses her income and her daily reason to know every child on the block by name.',
+      x: 420, y: 40, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'robert', name: 'Mr. Robert Kim', group: 'staff',
+      desc: 'School janitor, 15 years. Knows every family. Will be reassigned to a building where nobody knows his name.',
+      stake: 'His community is the hallways. Reassignment means starting over at 58.',
+      x: 580, y: 55, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'sandra', name: 'Sandra Osei', group: 'families',
+      desc: 'Single mother, two kids at Stowe. The new school is 3 miles farther. She doesn\'t have a car.',
+      stake: 'Three miles without a car is a different kind of distance.',
+      x: 100, y: 165, startState: 'aware', organizer: false
+    },
+    {
+      id: 'jamal', name: 'Jamal & Priya Washington', group: 'families',
+      desc: 'Their youngest has an IEP. The new school\'s special ed program is currently unstaffed.',
+      stake: 'Their child\'s support plan has no receiving end.',
+      x: 300, y: 170, startState: 'aware', organizer: false
+    },
+    {
+      id: 'linda', name: 'Linda Herrera', group: 'families',
+      desc: 'Grandmother raising her grandson. Walks him to school every morning. Cannot walk three miles.',
+      stake: 'The walk is not exercise; it is the only way she gets him there.',
+      x: 500, y: 165, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'elijah', name: 'Pastor Elijah Watts', group: 'community',
+      desc: 'His church rents the gym on Sundays. Has no alternative space.',
+      stake: 'A congregation without a room. The church doesn\'t own a building.',
+      x: 100, y: 290, startState: 'unaware', organizer: true
+    }
+  ],
+  // continuation of school characters
+  charactersMore: [
+    {
+      id: 'denise', name: 'Denise Faulkner', group: 'community',
+      desc: 'Runs the after-school tutoring nonprofit in the building. Her lease ends with the closure.',
+      stake: 'Sixty kids lose afternoon tutoring. She loses the space she built for a decade.',
+      x: 280, y: 300, startState: 'aware', organizer: true
+    },
+    {
+      id: 'gene', name: 'Gene Sullivan', group: 'community',
+      desc: 'Runs the food pantry that partners with the school for distribution.',
+      stake: 'Without the school as a distribution point, three hundred families lose easy access to food.',
+      x: 440, y: 295, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'helen', name: 'Helen Park', group: 'community',
+      desc: 'Owns the bookstore across the street. 40% of her foot traffic is school parents.',
+      stake: 'She will notice in the register before she notices in the street.',
+      x: 600, y: 300, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'martin', name: 'Martin Reese', group: 'community',
+      desc: 'Retired. Organizes Sunday morning coffee in the school parking lot for elderly residents.',
+      stake: 'Their social anchor is the parking lot of a building about to be locked.',
+      x: 720, y: 285, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'joanne', name: 'Councilwoman Vega', group: 'peripheral',
+      desc: 'Represents the district on the city council. Voted for the closure. Hasn\'t heard back from constituents.',
+      stake: 'She has institutional power and a vote she has already cast. Reversal is possible but not easy.',
+      x: 720, y: 100, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'marcus', name: 'Marcus Cole', group: 'peripheral',
+      desc: 'High school junior who attended Stowe as a kid. Volunteers there now. Nobody asked him.',
+      stake: 'The school is a piece of his story. Losing it is losing a place that remembers him.',
+      x: 720, y: 190, startState: 'unaware', organizer: false
+    },
+    {
+      id: 'nora', name: 'Nora Blake', group: 'peripheral',
+      desc: 'Local newspaper reporter, education beat. Hasn\'t received a tip yet.',
+      stake: 'A channel, not a stakeholder. But channels matter.',
+      x: 100, y: 395, startState: 'unaware', organizer: false
+    }
+  ],
+  cascades: [
+    { trigger: ['diane', 'sandra'], target: 'linda', delay: 1, flavor: 'Mrs. Powell mentioned the closure at pickup. Sandra told Linda on the walk home. Now the grandmother knows.' },
+    { trigger: ['diane', 'denise'], target: 'robert', delay: 1, flavor: 'Mrs. Powell and Denise compared notes in the hallway. Mr. Kim overheard. He\'d been wondering why nobody told him.' },
+    { trigger: ['elijah', 'martin'], target: 'gene', delay: 1, flavor: 'The pastor and the retiree talked in the parking lot. Gene passed by with a crate of canned goods. Three community users, one closing.' },
+    { trigger: ['sandra', 'jamal'], target: 'marcus', delay: 2, flavor: 'Sandra posted in the parent group. Jamal shared it. Marcus saw it and felt something he couldn\'t name.' },
+    { trigger: ['denise', 'nora'], target: 'joanne', delay: 2, flavor: 'Denise gave Nora the numbers. Nora wrote a column. Councilwoman Vega read it and cleared her afternoon.' },
+    { trigger: ['helen', 'gene'], target: 'elijah', delay: 1, flavor: 'Helen and Gene talked about losing foot traffic and distribution. The pastor heard a third kind of loss in their voices.' }
+  ],
+  interventionFlavor: {
+    newspaper:   { flavor: 'Nora Blake runs a piece in the local paper about the closure\'s ripple effects. Some parents see it. Some community members notice for the first time.' },
+    townmeeting: { flavor: 'Someone books the library meeting room. Plastic chairs, a sign-up sheet. Fifteen people come who\'d never been in a room together before.' },
+    expert:      { flavor: 'An education policy brief is published: consolidation outcomes, transportation burden, impact on low-income families. The data is solid. The families don\'t recognize themselves in it.' },
+    connect:     { flavor: 'Two people who share a stake but not a routine sit down and discover they\'re losing the same thing.' },
+    values:      { flavor: 'A conversation about what the school means. Not the test scores. The hallways. The walk. The parking lot on Sunday morning.' },
+    constudy:    { flavor: 'A study maps the school\'s uses — not just classrooms but the gym, the lot, the distribution point, the tutoring hours. The building was more than a school.' },
+    organizer:   { flavor: 'You noticed someone was already organizing. You made room.' },
+    publicbody:  { flavor: 'Someone stands at the school board meeting and reads a prepared statement. The board listens. The record now includes a voice.' },
+    testimony:   { flavor: 'One person tells a room what this school has meant to their family. The room is different afterward.' },
+    crossgroup:  { flavor: 'Staff, families, and community users in one room. They learn they\'re not three groups but one public with different entrances to the same problem.' }
+  }
+};
+
+SCENARIOS.school.characters = SCENARIOS.school.characters.concat(SCENARIOS.school.charactersMore);
+delete SCENARIOS.school.charactersMore;
+
+// ─── Endings (shared structure, per-scenario flavor) ───────────────────────
+
+var ENDINGS = {
+  fullPublic: {
+    threshold: function() { return state.awareness >= 65 && state.recognition >= 55 && state.organization >= 40; },
+    label: 'Full Public',
+    passage: {
+      watershed: [
+        'Hazel Morton is at a microphone she did not expect to be at. Behind her, twenty people she did not know six weeks ago. The county commissioner is listening. The reporter is writing.',
+        'Pastor James organized the room. Kenji brought the data. Rita brought the clinical notes. Tom brought the smell log Lenore had been keeping in a spiral notebook since April.',
+        'Nobody solved the problem tonight. That was not the point. The point was that the people bearing the consequences of an action they did not choose now stand together and say: this is ours to address. Not the expert\'s alone. Not the commissioner\'s alone. Ours.'
+      ],
+      school: [
+        'The school board chambers are full for the first time in a year. Mrs. Powell is there, and Sandra, and Linda in the third row. Denise has a folder. Gene has a petition. Helen closed the bookstore early.',
+        'Marcus is standing near the back. He didn\'t expect to speak. He speaks anyway.',
+        'The board has not reversed its vote. But the board is no longer speaking to an empty room. A public has formed around a school that was more than a school, and that public has a voice now, and the voice is not going away quietly.'
+      ]
+    },
+    dewey: 'A public has come into being. It will not stay. Publics form and dissolve. What matters is that for this matter, at this time, it was. And having been, it leaves a trace — a capacity for the next formation, the next recognition, the next time consequences ripple outward and someone says: this is ours.'
+  },
+  partialPublic: {
+    threshold: function() { return (state.awareness >= 50 && state.recognition >= 35) || (state.awareness >= 40 && state.organization >= 25); },
+    label: 'Partial Public',
+    passage: {
+      watershed: [
+        'Tom and Lenore and Kenji have formed a kind of committee — informal, no bylaws, but they meet at the diner on Tuesdays. They have Evelyn\'s number. They have data. They have each other.',
+        'But Hazel Morton still thinks her horse is just old. Isaac Begay still blames the weather. The aquifer families are downstream in more than geography — they are downstream in information, in connection, in the chance to be part of this.',
+        'A public formed. Not the whole one. The one that could form given the bridges that existed and the ones that didn\'t.'
+      ],
+      school: [
+        'The families organized. Sandra, Jamal, Linda — they wrote letters, attended a meeting, spoke on the record. The board acknowledged them.',
+        'But the food pantry closes its school distribution route next month. Martin\'s Sunday coffee group hasn\'t found a new lot. Helen\'s bookstore traffic has dropped, and she didn\'t know why until she read Nora\'s article.',
+        'Parts of the public formed. Other parts remained strangers to each other, sharing a loss without sharing a room.'
+      ]
+    },
+    dewey: 'This is how it usually is. Inchoate, partial, incomplete. A public partly formed is not nothing. It is most of what democracies actually have. The work is never finished. It was never meant to be finished. It was meant to be taken up.'
+  },
+  eclipse: {
+    threshold: function() { return true; },
+    label: 'Eclipse',
+    passage: {
+      watershed: [
+        'The discharge continues. Within permitted limits, the reports say. The permit was never updated.',
+        'Lenore still walks by the creek. She still keeps her list. She has shown it to no one. Tom sold the diner. Marco moved two counties over. Rita sees a third rash case and files it under "dermatology — misc."',
+        'Hazel\'s second horse went down in November. The Fishers installed a water filter. Isaac had a bad season and switched to a different crop. Lucia Reyes will learn about the discharge in three years, from a regional news story she reads on her phone at a laundromat.',
+        'They were a public that never knew it was one.'
+      ],
+      school: [
+        'Stowe Elementary closed in June. The movers came on a Saturday. Mr. Kim watched from the parking lot.',
+        'Sandra found a carpool. Linda\'s grandson transferred to a school she cannot walk to. Denise moved the tutoring program to a church basement that floods in spring. Gene found a new distribution point, but fewer people come.',
+        'Helen Park closed the bookstore in October. Martin\'s coffee group stopped meeting. Nobody decided to stop. They just stopped.',
+        'The people who used that school were a public that never recognized itself. The consequences fell on each of them, one by one, as if they had nothing to do with each other.'
+      ]
+    },
+    dewey: 'The public is eclipsed. Not absent — eclipsed. It was there, in potential, and never came into view. This is the condition we are trying to understand. Not a failure of will but a failure of perception — the inability of those affected to see that they are affected together.'
+  }
+};
+
+// ─── State ─────────────────────────────────────────────────────────────────
+
+var state = {
+  screen: 'title',
+  scenarioId: null,
+  round: 0,
+  awareness: 0,
+  recognition: 0,
+  organization: 0,
+  charStates: {},       // charId -> 'unaware' | 'aware' | 'connected'
+  connections: [],      // [{a, b}]
+  log: [],              // [{round, action, flavor}]
+  pendingCascades: [],  // [{target, delay, flavor, roundTriggered}]
+  deweyTriggered: [],   // trigger keys already fired
+  selectMode: null,     // null | 'pair' | 'single'
+  selectedNode: null,   // charId of first selected node in pair mode
+  selectAction: null,   // intervention id waiting for target
+  expertSuppression: 0, // rounds of recognition suppression remaining
+  flavorText: '',
+  flavorKind: 'facilitator'
+};
+
+var content = document.getElementById('content');
+var logOverlay = document.getElementById('log-overlay');
+
+// ─── Utility ───────────────────────────────────────────────────────────────
+
+function div(cls, html) {
+  var el = document.createElement('div');
+  if (cls) el.className = cls;
+  el.innerHTML = html;
+  return el;
+}
+function scrollTop() { window.scrollTo({ top: 0, behavior: 'auto' }); }
+
+function scenario() { return SCENARIOS[state.scenarioId]; }
+function allChars() { return scenario().characters; }
+function charById(id) { return allChars().find(function(c) { return c.id === id; }); }
+function charState(id) { return state.charStates[id] || 'unaware'; }
+function countByState(s) {
+  var n = 0;
+  allChars().forEach(function(c) { if (charState(c.id) === s) n++; });
+  return n;
+}
+function hasOrganizerCandidate() {
+  return allChars().some(function(c) { return c.organizer && charState(c.id) === 'aware'; });
+}
+function hasTwoConnectedGroups() {
+  var groups = {};
+  state.connections.forEach(function(conn) {
+    var ca = charById(conn.a), cb = charById(conn.b);
+    if (ca) groups[ca.group] = true;
+    if (cb) groups[cb.group] = true;
+  });
+  return Object.keys(groups).length >= 2;
+}
+function areConnected(a, b) {
+  return state.connections.some(function(c) {
+    return (c.a === a && c.b === b) || (c.a === b && c.b === a);
+  });
+}
+function isScenarioUnlocked(id) {
+  if (id === 'watershed') return true;
+  try { return localStorage.getItem('downstream_watershed_done') === '1'; } catch(e) { return false; }
+}
+function markScenarioDone(id) {
+  try { localStorage.setItem('downstream_' + id + '_done', '1'); } catch(e) {}
+}
+
+function initScenario() {
+  var sc = scenario();
+  state.round = 0;
+  state.awareness = 0;
+  state.recognition = 0;
+  state.organization = 0;
+  state.charStates = {};
+  state.connections = [];
+  state.log = [];
+  state.pendingCascades = [];
+  state.deweyTriggered = [];
+  state.selectMode = null;
+  state.selectedNode = null;
+  state.selectAction = null;
+  state.expertSuppression = 0;
+  state.flavorText = sc.brief;
+  state.flavorKind = 'facilitator';
+  sc.characters.forEach(function(c) {
+    state.charStates[c.id] = c.startState || 'unaware';
+  });
+  // Count initial awareness
+  sc.characters.forEach(function(c) {
+    if (c.startState === 'aware') state.awareness = Math.min(100, state.awareness + 5);
+  });
+}
+
+// ─── Render: Title ─────────────────────────────────────────────────────────
+
+function renderTitle() {
+  scrollTop();
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="title-screen">\
+      <h1>Downstream</h1>\
+      <div class="title-sub">a facilitation</div>\
+      <img class="title-portrait" src="' + DEWEY_IMG.src + '" alt="' + DEWEY_IMG.alt + '" loading="lazy">\
+      <p class="title-portrait-attr">' + DEWEY_IMG.attr + '</p>\
+      <p class="epigraph">&#8220;The public is not given. It emerges &#8212; if it emerges &#8212; through inquiry, communication, and the recognition of shared stakes.&#8221;</p>\
+      <p class="epigraph-attr">&#8212; cf. John Dewey, <em>The Public and Its Problems</em>, 1927</p>\
+      <button class="btn" id="begin-btn">Begin</button>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#begin-btn').addEventListener('click', function() {
+    state.screen = 'opening';
+    render();
+  });
+}
+
+function renderOpening() {
+  scrollTop();
+  content.innerHTML = '';
+  var el = div('fade-in', '\
+    <div id="opening-screen">\
+      <p class="opening-beat">An action is about to ripple outward. The people it will affect do not yet know each other. Some of them do not yet know they will be affected.</p>\
+      <p class="opening-beat quiet">You can see what they cannot.</p>\
+      <p class="opening-beat">Your role is not to solve the problem. It is to help the affected people recognize each other as affected, and then to recognize themselves as a group capable of acting together.</p>\
+      <p class="opening-beat quiet">This is John Dewey\'s definition of a public &#8212; not a pre-existing group of citizens, but a body that forms when the indirect consequences of action become serious enough to demand collective response.</p>\
+      <p class="opening-beat">Publics often fail to form. The game lets this happen.</p>\
+      <div style="text-align:center;margin-top:36px;">\
+        <button class="btn" id="select-btn">Select a Scenario</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelector('#select-btn').addEventListener('click', function() {
+    state.screen = 'scenarioSelect';
+    render();
+  });
+}
+
+function renderScenarioSelect() {
+  scrollTop();
+  content.innerHTML = '';
+  var schoolUnlocked = isScenarioUnlocked('school');
+  var schoolCls = schoolUnlocked ? 'scenario-card' : 'scenario-card locked';
+  var schoolNote = schoolUnlocked ? '' : '<p style="margin-top:8px;font-size:11px;color:var(--dim);letter-spacing:1px;">Unlocks after completing The Watershed</p>';
+  var el = div('fade-in', '\
+    <div style="padding:48px 0;text-align:center;">\
+      <div style="font-size:14px;letter-spacing:4px;text-transform:uppercase;color:var(--bright);font-weight:bold;margin-bottom:32px;">Select a Scenario</div>\
+      <div class="scenario-cards">\
+        <div class="scenario-card" data-scenario="watershed">\
+          <div class="scenario-card-label">Scenario 1</div>\
+          <div class="scenario-card-name">The Watershed</div>\
+          <div class="scenario-card-desc">A chemical plant. A river. A town. A community on well water eight miles downstream.</div>\
+        </div>\
+        <div class="' + schoolCls + '" data-scenario="school">\
+          <div class="scenario-card-label">Scenario 2</div>\
+          <div class="scenario-card-name">The School</div>\
+          <div class="scenario-card-desc">A school board vote. A building that was more than a school. The consequences radiate.</div>\
+          ' + schoolNote + '\
+        </div>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+  el.querySelectorAll('.scenario-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var sid = card.dataset.scenario;
+      if (sid === 'school' && !schoolUnlocked) return;
+      state.scenarioId = sid;
+      initScenario();
+      state.screen = 'game';
+      render();
+    });
+  });
+}
+// ─── Web SVG ───────────────────────────────────────────────────────────────
+
+function buildWebSvg() {
+  var sc = scenario();
+  var chars = sc.characters;
+  var W = 800, H = 400;
+  var svg = '<svg class="web-svg' + (state.selectMode ? ' select-mode' : '') + '" viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Draw connections
+  state.connections.forEach(function(conn) {
+    var a = charById(conn.a), b = charById(conn.b);
+    if (!a || !b) return;
+    svg += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" stroke="#2d5a1e" stroke-width="2" opacity="0.6" />';
+  });
+
+  // Draw nodes
+  chars.forEach(function(c) {
+    var st = charState(c.id);
+    var fill = st === 'connected' ? '#2d5a1e' : (st === 'aware' ? '#8a6a2e' : '#b09a78');
+    var r = st === 'connected' ? 8 : (st === 'aware' ? 7 : 6);
+    var opacity = st === 'unaware' ? '0.5' : '1';
+    var selCls = '';
+    if (state.selectMode && (st === 'aware' || st === 'connected')) selCls = ' selectable';
+    if (state.selectedNode === c.id) selCls += ' selected';
+    svg += '<g class="web-node' + selCls + '" data-char="' + c.id + '" opacity="' + opacity + '">';
+    svg += '<circle cx="' + c.x + '" cy="' + c.y + '" r="' + r + '" fill="' + fill + '" stroke="' + fill + '" stroke-width="1" />';
+    // Label
+    var labelY = c.y - r - 6;
+    svg += '<text x="' + c.x + '" y="' + labelY + '" text-anchor="middle" font-family="Courier New, monospace" font-size="10" fill="' + (st === 'unaware' ? '#b09a78' : '#3d2005') + '">' + c.name.split(' ')[0] + '</text>';
+    svg += '</g>';
+  });
+
+  svg += '</svg>';
+  return svg;
+}
+
+// ─── Main Game Screen ──────────────────────────────────────────────────────
+
+function renderGame() {
+  scrollTop();
+  content.innerHTML = '';
+  var sc = scenario();
+
+  // Game bar
+  var closeBtnHtml = state.round >= 6
+    ? '<button class="game-bar-btn btn-close" id="close-case-btn">Close the Case</button>'
+    : '';
+  var barHtml = '<div class="game-bar">\
+    <span>' + sc.name + ' &#8212; Round ' + state.round + '</span>\
+    <div class="game-bar-btns">\
+      <button class="game-bar-btn" id="log-btn">Log</button>\
+      ' + closeBtnHtml + '\
+    </div>\
+  </div>';
+
+  // Web area
+  var hintHtml = '';
+  if (state.selectMode === 'pair') {
+    hintHtml = state.selectedNode
+      ? '<div class="web-hint">Click a second person to connect them. <button class="game-bar-btn" id="cancel-select">Cancel</button></div>'
+      : '<div class="web-hint">Click an aware person to select them. <button class="game-bar-btn" id="cancel-select">Cancel</button></div>';
+  } else if (state.selectMode === 'single') {
+    hintHtml = '<div class="web-hint">Click a person to target. <button class="game-bar-btn" id="cancel-select">Cancel</button></div>';
+  }
+  var webHtml = '<div class="web-area">' + buildWebSvg() + hintHtml + '</div>';
+
+  // Meters
+  var metersHtml = '<div class="panel">\
+    <div class="panel-title">Meters</div>\
+    <div class="meter-row"><div class="meter-label"><span>Awareness</span><span class="meter-val">' + state.awareness + '</span></div><div class="meter-bar"><div class="meter-fill awareness" style="width:' + state.awareness + '%"></div></div></div>\
+    <div class="meter-row"><div class="meter-label"><span>Recognition</span><span class="meter-val">' + state.recognition + '</span></div><div class="meter-bar"><div class="meter-fill recognition" style="width:' + state.recognition + '%"></div></div></div>\
+    <div class="meter-row"><div class="meter-label"><span>Organization</span><span class="meter-val">' + state.organization + '</span></div><div class="meter-bar"><div class="meter-fill organization" style="width:' + state.organization + '%"></div></div></div>\
+  </div>';
+
+  // Flavor
+  var flavorCls = 'flavor-text ' + state.flavorKind;
+  var flavorHtml = '<div class="panel"><div class="panel-title">Current State</div><div class="flavor-area"><p class="' + flavorCls + '">' + state.flavorText + '</p></div></div>';
+
+  // Interventions
+  var intHtml = '<div class="panel"><div class="panel-title">Interventions</div>';
+  if (state.selectMode) {
+    intHtml += '<p style="font-size:11px;color:var(--dewey);font-style:italic;">Select a target on the web above.</p>';
+  } else {
+    INTERVENTIONS.forEach(function(inv) {
+      var gated = !inv.gateCheck();
+      var cls = 'intervention-item' + (gated ? ' gated' : '');
+      var title = gated && inv.gateHint ? ' title="' + inv.gateHint + '"' : '';
+      intHtml += '<button class="' + cls + '" data-inv="' + inv.id + '"' + title + (gated ? ' disabled' : '') + '><span class="intervention-num">' + inv.num + '.</span> ' + inv.name + '</button>';
+    });
+  }
+  intHtml += '</div>';
+
+  var bottomHtml = '<div class="bottom-panels">' + metersHtml + flavorHtml + intHtml + '</div>';
+
+  var el = div('fade-in', barHtml + webHtml + bottomHtml);
+  content.appendChild(el);
+
+  // Wire up
+  el.querySelector('#log-btn').addEventListener('click', openLog);
+  var closeBtn = el.querySelector('#close-case-btn');
+  if (closeBtn) closeBtn.addEventListener('click', function() {
+    markScenarioDone(state.scenarioId);
+    state.screen = 'debrief';
+    render();
+  });
+  var cancelBtn = el.querySelector('#cancel-select');
+  if (cancelBtn) cancelBtn.addEventListener('click', function() {
+    state.selectMode = null;
+    state.selectedNode = null;
+    state.selectAction = null;
+    render();
+  });
+
+  // Web node clicks
+  el.querySelectorAll('.web-node').forEach(function(node) {
+    node.addEventListener('click', function(e) {
+      var cid = node.dataset.char;
+      handleNodeClick(cid, e);
+    });
+  });
+
+  // Intervention clicks
+  el.querySelectorAll('.intervention-item').forEach(function(btn) {
+    if (btn.disabled) return;
+    btn.addEventListener('click', function() {
+      handleIntervention(btn.dataset.inv);
+    });
+  });
+}
+
+function handleNodeClick(charId, evt) {
+  if (state.selectMode === 'pair') {
+    var cs = charState(charId);
+    if (cs !== 'aware' && cs !== 'connected') return;
+    if (!state.selectedNode) {
+      state.selectedNode = charId;
+      render();
+    } else if (state.selectedNode !== charId) {
+      resolveTargeted(state.selectAction, [state.selectedNode, charId]);
+    }
+  } else if (state.selectMode === 'single') {
+    var cs2 = charState(charId);
+    if (state.selectAction === 'organizer') {
+      var ch = charById(charId);
+      if (!ch.organizer || cs2 !== 'aware') return;
+    } else if (state.selectAction === 'testimony') {
+      if (cs2 !== 'connected') return;
+    }
+    resolveTargeted(state.selectAction, [charId]);
+  } else {
+    showCharPopup(charId, evt);
+  }
+}
+
+function showCharPopup(charId, evt) {
+  var existing = document.querySelector('.char-popup');
+  if (existing) existing.remove();
+  var c = charById(charId);
+  var st = charState(charId);
+  var popup = document.createElement('div');
+  popup.className = 'char-popup';
+  popup.innerHTML = '<span class="char-popup-close">&times;</span>\
+    <div class="char-popup-name">' + c.name + '</div>\
+    <div class="char-popup-state ' + st + '">' + st + '</div>\
+    <div class="char-popup-desc">' + c.desc + '</div>\
+    <div class="char-popup-stake">' + c.stake + '</div>';
+  popup.style.left = Math.min(evt.clientX, window.innerWidth - 280) + 'px';
+  popup.style.top = (evt.clientY + 10) + 'px';
+  popup.style.position = 'fixed';
+  document.body.appendChild(popup);
+  popup.querySelector('.char-popup-close').addEventListener('click', function() { popup.remove(); });
+  setTimeout(function() { document.addEventListener('click', function rm() { popup.remove(); document.removeEventListener('click', rm); }); }, 100);
+}
+// ─── Intervention Resolver ─────────────────────────────────────────────────
+
+function handleIntervention(invId) {
+  var inv = INTERVENTIONS.find(function(i) { return i.id === invId; });
+  if (!inv || !inv.gateCheck()) return;
+
+  if (inv.targetMode === 'pair') {
+    state.selectMode = 'pair';
+    state.selectAction = invId;
+    state.selectedNode = null;
+    render();
+    return;
+  }
+  if (inv.targetMode === 'single') {
+    state.selectMode = 'single';
+    state.selectAction = invId;
+    render();
+    return;
+  }
+
+  resolveIntervention(invId, []);
+}
+
+function resolveTargeted(invId, targets) {
+  state.selectMode = null;
+  state.selectedNode = null;
+  state.selectAction = null;
+  resolveIntervention(invId, targets);
+}
+
+function resolveIntervention(invId, targets) {
+  state.round++;
+  var sc = scenario();
+  var flavor = sc.interventionFlavor[invId] ? sc.interventionFlavor[invId].flavor : '';
+  var suppression = state.expertSuppression > 0 ? 0.5 : 1;
+
+  switch (invId) {
+    case 'newspaper':
+      addAwareness(15);
+      addRecognition(Math.round(2 * suppression));
+      makeRandomUnaware(3);
+      break;
+    case 'townmeeting':
+      addAwareness(8);
+      addRecognition(Math.round(12 * suppression));
+      addOrganization(3);
+      connectAwarePair();
+      connectAwarePair();
+      break;
+    case 'expert':
+      addAwareness(20);
+      addRecognition(-5);
+      addOrganization(2);
+      makeRandomUnaware(4);
+      state.expertSuppression = 3;
+      checkDeweyTrigger('expertWarning');
+      break;
+    case 'connect':
+      if (targets.length === 2) {
+        connectChars(targets[0], targets[1]);
+        addAwareness(2);
+        addRecognition(Math.round(10 * suppression));
+      }
+      break;
+    case 'values':
+      addAwareness(3);
+      addRecognition(Math.round(8 * suppression));
+      addOrganization(10);
+      break;
+    case 'constudy':
+      addAwareness(12);
+      addRecognition(Math.round(3 * suppression));
+      addOrganization(2);
+      makeRandomUnaware(2, 'aquifer');
+      break;
+    case 'organizer':
+      if (targets.length === 1) {
+        addAwareness(3);
+        addRecognition(Math.round(8 * suppression));
+        addOrganization(8);
+        makeAware(targets[0]);
+        // Queue cascade: organizer reaches 2 people over next 2 rounds
+        var nearby = findNearbyUnaware(targets[0], 2);
+        nearby.forEach(function(tid, idx) {
+          state.pendingCascades.push({
+            target: tid, delay: idx + 1,
+            flavor: charById(targets[0]).name + ' reached out to ' + charById(tid).name + '.',
+            roundTriggered: state.round
+          });
+        });
+        flavor = sc.interventionFlavor.organizer.flavor + ' ' + charById(targets[0]).name + ' begins reaching out.';
+      }
+      break;
+    case 'publicbody':
+      addAwareness(5);
+      addRecognition(Math.round(2 * suppression));
+      addOrganization(3);
+      // Make the official character aware
+      var official = sc.characters.find(function(c) { return c.group === 'peripheral' && c.id !== 'evelyn' && c.id !== 'nora' && c.id !== 'marcus'; });
+      if (official) makeAware(official.id);
+      break;
+    case 'testimony':
+      if (targets.length === 1) {
+        addAwareness(5);
+        addRecognition(Math.round(15 * suppression));
+        addOrganization(2);
+        flavor = charById(targets[0]).name + ' told a room what happened. ' + sc.interventionFlavor.testimony.flavor;
+      }
+      break;
+    case 'crossgroup':
+      addAwareness(5);
+      addRecognition(Math.round(15 * suppression));
+      addOrganization(12);
+      // Connect one pair across groups
+      connectCrossGroup();
+      break;
+  }
+
+  if (state.expertSuppression > 0 && invId !== 'expert') state.expertSuppression--;
+
+  // Check for cascade triggers
+  checkCascadeTriggers();
+
+  state.flavorText = flavor;
+  state.flavorKind = 'facilitator';
+  state.log.push({ round: state.round, action: invId, flavor: flavor });
+
+  // Process pending cascades from previous rounds
+  processPendingCascades();
+
+  // Check dewey triggers
+  checkAllDeweyTriggers();
+
+  render();
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function addAwareness(n) { state.awareness = Math.min(100, Math.max(0, state.awareness + n)); }
+function addRecognition(n) { state.recognition = Math.min(100, Math.max(0, state.recognition + n)); }
+function addOrganization(n) { state.organization = Math.min(100, Math.max(0, state.organization + n)); }
+
+function makeAware(charId) {
+  if (charState(charId) === 'unaware') {
+    state.charStates[charId] = 'aware';
+  }
+}
+
+function makeRandomUnaware(count, groupFilter) {
+  var candidates = allChars().filter(function(c) {
+    if (charState(c.id) !== 'unaware') return false;
+    if (groupFilter && c.group !== groupFilter) return false;
+    return true;
+  });
+  shuffle(candidates);
+  for (var i = 0; i < Math.min(count, candidates.length); i++) {
+    state.charStates[candidates[i].id] = 'aware';
+  }
+}
+
+function connectChars(a, b) {
+  if (areConnected(a, b)) return;
+  makeAware(a);
+  makeAware(b);
+  state.charStates[a] = 'connected';
+  state.charStates[b] = 'connected';
+  state.connections.push({ a: a, b: b });
+  if (state.connections.length === 1) checkDeweyTrigger('firstConnection');
+  if (countByState('connected') >= 3) checkDeweyTrigger('threeConnected');
+}
+
+function connectAwarePair() {
+  var aware = allChars().filter(function(c) {
+    var s = charState(c.id);
+    return s === 'aware' || s === 'connected';
+  });
+  if (aware.length < 2) return;
+  shuffle(aware);
+  for (var i = 0; i < aware.length; i++) {
+    for (var j = i + 1; j < aware.length; j++) {
+      if (!areConnected(aware[i].id, aware[j].id)) {
+        connectChars(aware[i].id, aware[j].id);
+        return;
+      }
+    }
+  }
+}
+
+function connectCrossGroup() {
+  var groups = {};
+  allChars().forEach(function(c) {
+    var s = charState(c.id);
+    if (s === 'aware' || s === 'connected') {
+      if (!groups[c.group]) groups[c.group] = [];
+      groups[c.group].push(c.id);
+    }
+  });
+  var gkeys = Object.keys(groups);
+  if (gkeys.length < 2) return;
+  for (var i = 0; i < gkeys.length; i++) {
+    for (var j = i + 1; j < gkeys.length; j++) {
+      var a = groups[gkeys[i]], b = groups[gkeys[j]];
+      for (var ai = 0; ai < a.length; ai++) {
+        for (var bi = 0; bi < b.length; bi++) {
+          if (!areConnected(a[ai], b[bi])) {
+            connectChars(a[ai], b[bi]);
+            return;
+          }
+        }
+      }
+    }
+  }
+}
+
+function findNearbyUnaware(charId, count) {
+  var ch = charById(charId);
+  var candidates = allChars().filter(function(c) {
+    return c.id !== charId && c.group === ch.group && charState(c.id) === 'unaware';
+  });
+  shuffle(candidates);
+  return candidates.slice(0, count).map(function(c) { return c.id; });
+}
+
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+}
+// ─── Cascade Logic ─────────────────────────────────────────────────────────
+
+function checkCascadeTriggers() {
+  var sc = scenario();
+  if (!sc.cascades) return;
+  sc.cascades.forEach(function(cascade) {
+    // Check if all trigger chars are connected
+    var allConnected = cascade.trigger.every(function(cid) {
+      return charState(cid) === 'connected';
+    });
+    // Also check trigger pair are connected to each other
+    var pairConnected = cascade.trigger.length >= 2
+      ? areConnected(cascade.trigger[0], cascade.trigger[1])
+      : allConnected;
+    if (allConnected && pairConnected && charState(cascade.target) !== 'connected') {
+      // Check if already queued
+      var already = state.pendingCascades.some(function(p) { return p.target === cascade.target; });
+      if (!already) {
+        state.pendingCascades.push({
+          target: cascade.target,
+          delay: cascade.delay,
+          flavor: cascade.flavor,
+          roundTriggered: state.round
+        });
+      }
+    }
+  });
+}
+
+function processPendingCascades() {
+  var resolved = [];
+  state.pendingCascades.forEach(function(p) {
+    if (state.round >= p.roundTriggered + p.delay) {
+      makeAware(p.target);
+      // Connect the cascade target to one of the triggering chars
+      var sc = scenario();
+      var matchingCascade = sc.cascades ? sc.cascades.find(function(c) { return c.target === p.target; }) : null;
+      if (matchingCascade && matchingCascade.trigger.length > 0) {
+        connectChars(matchingCascade.trigger[0], p.target);
+      }
+      addRecognition(5);
+      state.log.push({ round: state.round, action: 'cascade', flavor: p.flavor });
+      state.flavorText = p.flavor;
+      state.flavorKind = 'character';
+      resolved.push(p);
+    }
+  });
+  resolved.forEach(function(r) {
+    var idx = state.pendingCascades.indexOf(r);
+    if (idx >= 0) state.pendingCascades.splice(idx, 1);
+  });
+}
+
+// ─── Dewey Triggers ────────────────────────────────────────────────────────
+
+function checkDeweyTrigger(key) {
+  if (state.deweyTriggered.indexOf(key) >= 0) return;
+  state.deweyTriggered.push(key);
+}
+
+function checkAllDeweyTriggers() {
+  if (state.recognition >= 35) checkDeweyTrigger('recognitionThreshold');
+  if (state.organization >= 25) checkDeweyTrigger('organizationThreshold');
+}
+
+function getDeweyForRound() {
+  // Return the most recently triggered but not-yet-shown Dewey line
+  for (var i = DEWEY_LINES.length - 1; i >= 0; i--) {
+    var d = DEWEY_LINES[i];
+    if (state.deweyTriggered.indexOf(d.trigger) >= 0) {
+      // Check if we've already shown it
+      var shown = state.log.some(function(l) { return l.action === 'dewey_' + d.trigger; });
+      if (!shown) {
+        state.log.push({ round: state.round, action: 'dewey_' + d.trigger, flavor: d.lines[0] });
+        return d;
+      }
+    }
+  }
+  return null;
+}
+
+// ─── Log Overlay ───────────────────────────────────────────────────────────
+
+function openLog() {
+  var entriesHtml = state.log.length === 0
+    ? '<p style="color:var(--dim);font-style:italic;">No actions taken yet.</p>'
+    : state.log.map(function(entry) {
+        return '<div class="log-entry"><span class="log-round">Round ' + entry.round + '</span> &#8212; ' + entry.action + '<br>' + entry.flavor + '</div>';
+      }).join('');
+  logOverlay.innerHTML = '<div class="log-inner">\
+    <div class="log-header">\
+      <div class="log-title">Facilitator\'s Log</div>\
+      <button class="log-close">Close</button>\
+    </div>\
+    ' + entriesHtml + '\
+  </div>';
+  logOverlay.classList.add('open');
+  logOverlay.querySelector('.log-close').addEventListener('click', function() {
+    logOverlay.classList.remove('open');
+  });
+  logOverlay.scrollTop = 0;
+}
+// ─── Debrief / Ending ──────────────────────────────────────────────────────
+
+function determineEnding() {
+  if (ENDINGS.fullPublic.threshold()) return ENDINGS.fullPublic;
+  if (ENDINGS.partialPublic.threshold()) return ENDINGS.partialPublic;
+  return ENDINGS.eclipse;
+}
+
+function renderDebrief() {
+  scrollTop();
+  content.innerHTML = '';
+  var sc = scenario();
+  var ending = determineEnding();
+  var passages = ending.passage[state.scenarioId] || ending.passage.watershed;
+  var passageHtml = passages.map(function(p) { return '<p>' + p + '</p>'; }).join('');
+
+  // Roster
+  var rosterHtml = allChars().map(function(c) {
+    var st = charState(c.id);
+    var stCls = 'debrief-roster-state ' + st;
+    return '<div class="debrief-roster-item"><span class="' + stCls + '">' + st + '</span> <strong>' + c.name + '</strong> &#8212; ' + c.desc + '</div>';
+  }).join('');
+
+  // Web
+  var webSvg = buildWebSvg();
+
+  // Report
+  var report = buildReport(ending);
+
+  // Dewey line
+  var deweyHtml = '<div class="dewey-wrap">\
+    <div class="dewey-speaker">Dewey</div>\
+    <p class="dewey-line">' + ending.dewey + '</p>\
+    <p class="dewey-source">&#8212; cf. <em>The Public and Its Problems</em>, 1927</p>\
+  </div>';
+
+  var el = div('fade-in', '\
+    <div style="padding-top:30px;">\
+      <div style="text-align:center;margin-bottom:32px;">\
+        <div style="font-size:18px;letter-spacing:4px;text-transform:uppercase;color:var(--bright);font-weight:bold;">' + ending.label + '</div>\
+        <div style="font-size:12px;letter-spacing:2px;color:var(--dim);font-style:italic;margin-top:6px;">' + sc.name + ' &#8212; ' + state.round + ' rounds</div>\
+      </div>\
+      <div class="debrief-passage">' + passageHtml + '</div>\
+      ' + deweyHtml + '\
+      <div class="debrief-section">\
+        <div class="debrief-label">Final Web</div>\
+        <div class="web-area">' + webSvg + '</div>\
+      </div>\
+      <div class="debrief-section">\
+        <div class="debrief-label">Final Meters</div>\
+        <div style="max-width:300px;">\
+          <div class="meter-row"><div class="meter-label"><span>Awareness</span><span class="meter-val">' + state.awareness + '</span></div><div class="meter-bar"><div class="meter-fill awareness" style="width:' + state.awareness + '%"></div></div></div>\
+          <div class="meter-row"><div class="meter-label"><span>Recognition</span><span class="meter-val">' + state.recognition + '</span></div><div class="meter-bar"><div class="meter-fill recognition" style="width:' + state.recognition + '%"></div></div></div>\
+          <div class="meter-row"><div class="meter-label"><span>Organization</span><span class="meter-val">' + state.organization + '</span></div><div class="meter-bar"><div class="meter-fill organization" style="width:' + state.organization + '%"></div></div></div>\
+        </div>\
+      </div>\
+      <div class="debrief-section">\
+        <div class="debrief-label">Character Roster</div>\
+        ' + rosterHtml + '\
+      </div>\
+      <div class="debrief-section">\
+        <div class="debrief-label">Facilitator\'s Final Report</div>\
+        <div class="report-area">' + report + '</div>\
+        <div style="text-align:center;">\
+          <button class="btn" id="copy-btn">Copy Report to Clipboard</button>\
+          <span class="copy-feedback" id="copy-feedback" style="display:none;">Copied.</span>\
+        </div>\
+      </div>\
+      <div class="debrief-close">\
+        <button class="btn" id="home-btn">Return to Philosophy Games</button>\
+        <button class="btn btn-secondary" id="replay-btn">Play Again</button>\
+      </div>\
+    </div>\
+  ');
+  content.appendChild(el);
+
+  el.querySelector('#copy-btn').addEventListener('click', function() {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(report).then(function() {
+        var fb = document.getElementById('copy-feedback');
+        if (fb) { fb.style.display = 'inline'; setTimeout(function() { fb.style.display = 'none'; }, 2200); }
+      });
+    }
+  });
+  el.querySelector('#home-btn').addEventListener('click', function() { window.location.href = '../index.html'; });
+  el.querySelector('#replay-btn').addEventListener('click', function() {
+    state.screen = 'scenarioSelect';
+    render();
+  });
+}
+
+function buildReport(ending) {
+  var sc = scenario();
+  var lines = [];
+  lines.push('FACILITATOR\'S FINAL REPORT');
+  lines.push('Scenario: ' + sc.name);
+  lines.push('Ending: ' + ending.label);
+  lines.push('Rounds: ' + state.round);
+  lines.push('Timestamp: ' + new Date().toLocaleString());
+  lines.push('');
+  lines.push('FINAL METERS');
+  lines.push('  Awareness:    ' + state.awareness + ' / 100');
+  lines.push('  Recognition:  ' + state.recognition + ' / 100');
+  lines.push('  Organization: ' + state.organization + ' / 100');
+  lines.push('');
+  lines.push('CHARACTER STATES');
+  allChars().forEach(function(c) {
+    lines.push('  [' + charState(c.id).toUpperCase() + '] ' + c.name + ' — ' + c.desc);
+  });
+  lines.push('');
+  lines.push('INTERVENTION LOG');
+  state.log.forEach(function(entry) {
+    lines.push('  Round ' + entry.round + ': ' + entry.action + ' — ' + entry.flavor);
+  });
+  lines.push('');
+  lines.push('CONNECTIONS');
+  if (state.connections.length === 0) {
+    lines.push('  (none)');
+  } else {
+    state.connections.forEach(function(c) {
+      lines.push('  ' + charById(c.a).name + ' <-> ' + charById(c.b).name);
+    });
+  }
+  lines.push('');
+  lines.push('—');
+  lines.push('"The public is not given. It emerges." — Dewey');
+  return lines.join('\n');
+}
+
+// ─── Router ────────────────────────────────────────────────────────────────
+
+function render() {
+  // Check for Dewey line to show
+  if (state.screen === 'game') {
+    var dewey = getDeweyForRound();
+    if (dewey) {
+      state.flavorText = dewey.lines[0];
+      state.flavorKind = 'dewey';
+    }
+  }
+  if      (state.screen === 'title')          renderTitle();
+  else if (state.screen === 'opening')        renderOpening();
+  else if (state.screen === 'scenarioSelect') renderScenarioSelect();
+  else if (state.screen === 'game')           renderGame();
+  else if (state.screen === 'debrief')        renderDebrief();
+}
+
+render();
+</script>
+</body>
+</html>
